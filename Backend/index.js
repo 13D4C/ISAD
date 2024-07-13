@@ -9,8 +9,8 @@ app.use(express.json());
 const PORT = 8888
 const SECRET_KEY = "9999"
 const mongoURI = "mongodb+srv://Nettae:nkzhcHd3ZBmOmnoN@cluster0.m4azkwi.mongodb.net/?appName=Cluster0"; 
-
 // เปลี่ยน url mongodb 
+
 mongoose.connect(mongoURI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
