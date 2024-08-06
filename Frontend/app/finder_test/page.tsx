@@ -7,6 +7,7 @@ interface Subject {
     subjectName: string;
 }
 
+
 const SearchBarTest: React.FC = () => {
     const [results, setResults] = useState<Subject[]>([]);
 
@@ -32,9 +33,19 @@ const SearchBarTest: React.FC = () => {
   
     return (
         <div style={containerStyle}>
-            <h1>หารายวิชาที่อยากลงไอสัส</h1>
              <Searchbar onSearch={handleSearch}/>
-            
+            <div className="mt-4 w-full max-w-lg bg-white p-4 rounded shadow-md">
+                {results.length > 0 ? (
+                    results.map((subject, index) => (
+                        <div key={index} className="border-b py-2">
+                            <p className="font-bold text-black">{subject.subjectKey}</p>
+                            <p className="font-bold text-black">{subject.subjectName}</p>
+                        </div>
+                    ))
+                ) : (
+                    <p>No results found.</p>
+                )}
+            </div>
         </div>
     );
 };
