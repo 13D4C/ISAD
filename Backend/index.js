@@ -2,14 +2,16 @@ const mongoose = require('mongoose');
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const cors = require('cors');
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 const PORT = 8888
-const SECRET_KEY = "9999"
-const mongoURI = "mongodb+srv://Nettae:nkzhcHd3ZBmOmnoN@cluster0.m4azkwi.mongodb.net/?appName=Cluster0"; 
-// เปลี่ยน url mongodb 
+const SECRET_KEY = '9999'
+const mongoURI = "mongodb+srv://66070137:server2548@server.wggwl.mongodb.net/?retryWrites=true&w=majority&appName=server";
+// เปลี่ยน url mongodb "mongodb+srv://Nettae:nkzhcHd3ZBmOmnoN@cluster0.m4azkwi.mongodb.net/?appName=Cluster0"; 
 
 mongoose.connect(mongoURI, {
     useNewUrlParser: true,
@@ -19,7 +21,6 @@ mongoose.connect(mongoURI, {
 }).catch((error) => {
     console.error('Error connecting to MongoDB:', error);
 });
-
 
 const userSchema = new mongoose.Schema({
     username: {
