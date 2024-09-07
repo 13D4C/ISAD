@@ -5,13 +5,13 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 
 // Components
-const Container: React.FC = ({ children }) => (
+const Container: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <div className="flex flex-col items-center justify-center min-h-screen bg-blue-600">
     {children}
   </div>
 );
 
-const Form: React.FC = ({ children }) => (
+const Form: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full max-w-lg text-black relative">
     {children}
   </div>
@@ -24,7 +24,7 @@ const Header: React.FC = () => (
   </div>
 );
 
-const InputContainer: React.FC = ({ children }) => (
+const InputContainer: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <div className="flex flex-col bg-white p-4 rounded-lg mb-4 border border-gray-200">
     {children}
   </div>

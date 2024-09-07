@@ -3,7 +3,7 @@ import React from 'react';
 
 const LoginPage: React.FC = () => {
   //กล่อง Container ตรงกลาง(กล่องนอก)
-  const containerStyle = {
+  const containerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -11,7 +11,7 @@ const LoginPage: React.FC = () => {
     height: '100vh',
     backgroundColor: '#1a73e8'
   };
-  const formStyle = {
+  const formStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     backgroundColor: 'white',
@@ -24,24 +24,24 @@ const LoginPage: React.FC = () => {
     position: 'relative'
   };
   //text welcome
-  const welcomeStyle = {
+  const welcomeStyle: React.CSSProperties = {
     margin: 0,
     fontSize: '32px', 
     fontWeight: 'bold' 
   };
   //text or ทำให้มันอยู่ตรงกลาง
-  const or ={
+  const or: React.CSSProperties ={
     textAlign: 'center',
     color: 'gray',
     margin: '5px 0'
   };
   //text header ด้าน บน 2 คำ พวก welcome กับ sign in with kmitl
-  const headerStyle = {
+  const headerStyle: React.CSSProperties = {
     marginBottom: '40px', 
     textAlign: 'left' 
   };
   //กล่องContainer ด้านใน
-  const inputContainerStyle = {
+  const inputContainerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     backgroundColor: 'white', 
@@ -52,12 +52,12 @@ const LoginPage: React.FC = () => {
     
   };
   //text ด้านในกล่องใน
-  const inputLabelStyle = {
+  const inputLabelStyle: React.CSSProperties = {
     marginBottom: '5px',
     fontSize: '14px',
     fontWeight: 'bold'
   };
-  const inputStyle = {
+  const inputStyle: React.CSSProperties = {
     marginBottom: '15px',
     padding: '10px',
     fontSize: '16px',
@@ -66,7 +66,7 @@ const LoginPage: React.FC = () => {
     width: '100%'
   };
   //ปุ่ม
-  const buttonStyle = {
+  const buttonStyle: React.CSSProperties = {
     backgroundColor: '#1a73e8',
     color: 'white',
     padding: '10px',
@@ -77,7 +77,7 @@ const LoginPage: React.FC = () => {
     marginBottom: '10px',
   };
   //google
-  const googleButtonStyle = {
+  const googleButtonStyle: React.CSSProperties = {
     ...buttonStyle,
     backgroundColor: 'white',
     color: 'black',
