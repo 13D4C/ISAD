@@ -10,8 +10,8 @@ app.use(cors());
 
 const PORT = 8888
 const SECRET_KEY = '9999'
-const mongoURI = "mongodb+srv://66070137:server2548@server.wggwl.mongodb.net/?retryWrites=true&w=majority&appName=server";
-// เปลี่ยน url mongodb "mongodb+srv://Nettae:nkzhcHd3ZBmOmnoN@cluster0.m4azkwi.mongodb.net/?appName=Cluster0"; 
+const mongoURI = "mongodb+srv://Nettae:3gqoMaDCSqrNekZA@cluster0.m4azkwi.mongodb.net/"
+// เปลี่ยน url mongodb "mongodb+srv://Nettae:nkzhcHd3ZBmOmnoN@cluster0.m4azkwi.mongodb.net/?appName=Cluster0";  3gqoMaDCSqrNekZA
 
 mongoose.connect(mongoURI, {
     useNewUrlParser: true,
