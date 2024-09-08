@@ -1,30 +1,31 @@
-// app/page.tsx
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 // Components
-const Container: React.FC = ({ children }) => (
+const Container: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="flex flex-col items-center justify-center min-h-screen bg-blue-600">
     {children}
   </div>
 );
 
-const Form: React.FC = ({ children }) => (
-  <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full max-w-lg text-black relative">
+const Form: React.FC<{ children: React.ReactNode; onSubmit: (event: React.FormEvent<HTMLFormElement>) => void }> = ({ children, onSubmit }) => (
+  <form className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full max-w-lg text-black relative"
+        onSubmit={onSubmit}>
     {children}
-  </div>
+  </form>
 );
 
 const Header: React.FC = () => (
   <div className="mb-4 text-left">
     <h1 className="text-3xl font-bold m-0">Welcome</h1>
-    <p>Sign in with KMITL account Or ITKMITL account.</p>
+    <p>Sign in with your account.</p>
   </div>
 );
 
-const InputContainer: React.FC = ({ children }) => (
+const InputContainer: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="flex flex-col bg-white p-4 rounded-lg mb-4 border border-gray-200">
     {children}
   </div>
@@ -34,22 +35,26 @@ const InputLabel: React.FC<{ label: string }> = ({ label }) => (
   <label className="mb-1 text-sm font-bold">{label}</label>
 );
 
-const Input: React.FC<{ type: string; placeholder: string }> = ({ type, placeholder }) => (
+const Input: React.FC<{ type: string; placeholder: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }> = ({ type, placeholder, value, onChange }) => (
   <input
     className="mb-3 p-2 text-base rounded border border-gray-300 w-full"
     type={type}
     placeholder={placeholder}
+    value={value}
+    onChange={onChange}
   />
 );
 
-const Button: React.FC<{ children: React.ReactNode; onClick: () => void }> = ({ children, onClick }) => {
+const Button: React.FC<{ children: React.ReactNode; type: "submit" }> = ({ children, type }) => {
   const router = useRouter();
-  return  <button
-    className="bg-blue-600 text-white p-2 text-base rounded cursor-pointer mb-2"
-    onClick={() =>router.push('/lima')}
-  >
-    {children}
-  </button>
+  return (
+    <button
+      className="bg-blue-600 text-white p-2 text-base rounded cursor-pointer mb-2"
+      type={type}
+    >
+      {children}
+    </button>
+  );
 };
 
 const GoogleButton: React.FC = () => (
@@ -65,24 +70,48 @@ const GoogleButton: React.FC = () => (
 
 // Main LoginPage component
 const LoginPage: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const router = useRouter();
 
-  const handleSignIn = () => {
-    // คุณสามารถใส่ logic การตรวจสอบ username และ password ได้ที่นี่
-    // ถ้าตรวจสอบสำเร็จ สามารถ redirect ไปที่หน้าที่ต้องการได้
-    router.push('3000/lima'); // ตัวอย่างการนำไปยังหน้าที่ชื่อว่า /li
+  const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    try {
+      if (email.slice(-12) == "@kmitl.ac.th")
+      {
+        const response = await axios.post('http://localhost:8888/login', { email, password });
+        if (response.status === 200) {
+          localStorage.setItem('token', response.data.token);
+          router.push('/lima'); // Redirect to a protected route or dashboard
+        }
+      }
+    } catch (error) {
+      console.error('Error logging in', error);
+      // Optionally show an error message to the user
+    }
   };
 
   return (
     <Container>
-      <Form>
+      <Form onSubmit={handleSignIn}>
         <Header />
         <InputContainer>
-          <InputLabel label="Username" />
-          <Input type="text" placeholder="Username" />
+          <InputLabel label="Email" />
+          <Input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
           <InputLabel label="Password" />
-          <Input type="password" placeholder="Password" />
-          <Button onClick={handleSignIn}>Sign In</Button>
+          <Input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button type="submit">Sign In</Button>
         </InputContainer>
         <div className="text-center text-gray-500 my-3">or</div>
         <GoogleButton />
@@ -90,5 +119,4 @@ const LoginPage: React.FC = () => {
     </Container>
   );
 };
-
 export default LoginPage;
