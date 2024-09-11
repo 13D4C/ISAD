@@ -11,7 +11,7 @@ const Container: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </div>
 );
 
-const Form: React.FC<{ children: React.ReactNode; onSubmit: (event: React.FormEvent<HTMLFormElement>) => void }> = ({ children, onSubmit }) => (
+const Form: React.FC<{ children: React.ReactNode; onSubmit: (e: React.FormEvent<HTMLFormElement>) => void }> = ({ children, onSubmit }) => (
   <form className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full max-w-lg text-black relative"
         onSubmit={onSubmit}>
     {children}
@@ -78,15 +78,13 @@ const LoginPage: React.FC = () => {
     event.preventDefault();
 
     try {
-      if (email.slice(-12) == "@kmitl.ac.th")
+      if (email.slice(-12) == "@kmitl.ac.th" && email != "@kmitl.ac.th")
       {
-        const response = await axios.post('http://localhost:8888/api/login', { email, password });
+        const response = await axios.post('http://localhost:8888/login', { email, password });
         if (response.status === 200) {
           localStorage.setItem('token', response.data.token);
           router.push('/lima'); // Redirect to a protected route or dashboard
         }
-      } else {
-        console.error("Error");
       }
     } catch (error) {
       console.error('Error logging in', error);
