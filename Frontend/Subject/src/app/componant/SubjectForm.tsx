@@ -175,7 +175,7 @@ const SubjectForm = ({ onSubmit, onClose }) => {
             </div>
 
             {/* ผู้สอน */}
-            <div className="mb-2 col-span-4">
+            <div className="mb-2 col-span-3">
               <label className="block text-sm font-medium">ผู้สอน</label>
               <input
                 type="text"
@@ -198,7 +198,7 @@ const SubjectForm = ({ onSubmit, onClose }) => {
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="#dc2626"
-                    className="size-5"
+                    className="size-5 mb-2"
                   >
                     <path
                       fillRule="evenodd"
