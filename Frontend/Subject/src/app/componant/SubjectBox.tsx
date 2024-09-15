@@ -37,11 +37,8 @@ const Subject = ({
         <div key={index} className="rounded border shadow-md p-6">
           <div className="flex space-x-2">
             <p className="font-sans text-xl font-bold">
-              {box.subjectID}
+              {box.subjectID} {box.subjectName}
             </p>
-            <button>
-              {box.subjectName}
-            </button>
             <p className="font-sans text-lg font-bold text-gray-500/50">
               [{box.subjectCredit} หน่วยกิต]
             </p>
