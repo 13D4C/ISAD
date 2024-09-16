@@ -80,7 +80,7 @@ const LoginPage: React.FC = () => {
     try {
       if (email.slice(-12) == "@kmitl.ac.th" && email != "@kmitl.ac.th")
       {
-        const response = await axios.post('http://localhost:8888/login', { email, password });
+        const response = await axios.post('http://localhost:8888/api/login', { email, password });
         if (response.status === 200) {
           localStorage.setItem('token', response.data.token);
           router.push('/lima'); // Redirect to a protected route or dashboard
