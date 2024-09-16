@@ -70,7 +70,7 @@ const LoginPage: React.FC = () => {
     try {
       if (email.endsWith("@kmitl.ac.th") && email != "@kmitl.ac.th")
       {
-        const response = await axios.post('http://localhost:8888/register', { username, email, password });
+        const response = await axios.post('http://localhost:8888/api/register', { username, email, password });
         if (response.status === 201) {
           localStorage.setItem('token', response.data.token);
           console.log("redirect...");
