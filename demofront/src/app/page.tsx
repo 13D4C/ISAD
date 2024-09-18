@@ -5,13 +5,24 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 
 // Components
-const Container: React.FC = ({ children }) => (
-  <div className="flex flex-col items-center justify-center min-h-screen bg-blue-600">
-    {children}
-  </div>
-);
+const Container: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const router = useRouter(); // Initialize useRouter to use navigation
 
-const Form: React.FC = ({ children }) => (
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-blue-600 relative">
+      {children}
+      
+      <button
+        className="absolute bottom-4 right-4 bg-gray-800 text-white p-2 rounded text-sm"
+        onClick={() => router.push('/admin')}  // Navigate to the "/user" page
+      >
+        User
+      </button>
+    </div>
+  );
+};
+
+const Form: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full max-w-lg text-black relative">
     {children}
   </div>
@@ -20,11 +31,11 @@ const Form: React.FC = ({ children }) => (
 const Header: React.FC = () => (
   <div className="mb-4 text-left">
     <h1 className="text-3xl font-bold m-0">Welcome</h1>
-    <p>Sign in with KMITL account Or ITKMITL account.</p>
+    <p>Sign in with KMITL account or ITKMITL account.</p>
   </div>
 );
 
-const InputContainer: React.FC = ({ children }) => (
+const InputContainer: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="flex flex-col bg-white p-4 rounded-lg mb-4 border border-gray-200">
     {children}
   </div>
@@ -44,30 +55,37 @@ const Input: React.FC<{ type: string; placeholder: string }> = ({ type, placehol
 
 const Button: React.FC<{ children: React.ReactNode; onClick: () => void }> = ({ children, onClick }) => {
   const router = useRouter();
-  return  <button
-    type='button'
-    className="bg-blue-600 text-center text-white p-2 text-base rounded cursor-pointer mb-2"
-    onClick={() =>router.push('/detail_mfit')}
-  >
-    {children}
-  </button>
+  return (
+    <button
+      type="button"
+      className="bg-blue-600 text-center text-white p-2 text-base rounded cursor-pointer mb-2"
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
 };
 
 const GoogleButton: React.FC<{ children: React.ReactNode; onClick: () => void }> = ({ children, onClick }) => {
   const router = useRouter();
-  return <button className="bg-white text-black p-2 text-base rounded border border-gray-300 flex items-center justify-center"
-  onClick={() =>router.push('/regis')}>
-    {children}
-  </button>};
+  return (
+    <button
+      className="bg-white text-black p-2 text-base rounded border border-gray-300 flex items-center justify-center"
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+};
 
 // Main LoginPage component
 const LoginPage: React.FC = () => {
   const router = useRouter();
 
   const handleSignIn = () => {
-    // คุณสามารถใส่ logic การตรวจสอบ username และ password ได้ที่นี่
-    // ถ้าตรวจสอบสำเร็จ สามารถ redirect ไปที่หน้าที่ต้องการได้
-    router.push(''); // ตัวอย่างการนำไปยังหน้าที่ชื่อว่า /li
+    // Logic for checking username and password can go here
+    // If successful, redirect to the desired page
+    router.push('/li'); // Example of navigation to the /li page
   };
 
   return (
@@ -79,14 +97,10 @@ const LoginPage: React.FC = () => {
           <Input type="text" placeholder="Username" />
           <InputLabel label="Password" />
           <Input type="password" placeholder="Password" />
-          <Button onClick={handleSignIn}>
-  Sign In
-</Button>
-
+          <Button onClick={handleSignIn}>Sign In</Button>
         </InputContainer>
         <div className="text-center text-gray-500 my-3">or</div>
-        <GoogleButton>
-          Register</GoogleButton>
+        <GoogleButton onClick={() => router.push('/regis')}>Register</GoogleButton>
       </Form>
     </Container>
   );
