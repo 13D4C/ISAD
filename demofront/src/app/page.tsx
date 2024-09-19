@@ -19,7 +19,7 @@ const Container: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         User
       </button>
     </div>
-  );
+  );  
 };
 
 const Form: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -55,6 +55,7 @@ const Input: React.FC<{ type: string; placeholder: string }> = ({ type, placehol
 
 const Button: React.FC<{ children: React.ReactNode; onClick: () => void }> = ({ children, onClick }) => {
   const router = useRouter();
+  
   return (
     <button
       type="button"
@@ -81,13 +82,27 @@ const GoogleButton: React.FC<{ children: React.ReactNode; onClick: () => void }>
 // Main LoginPage component
 const LoginPage: React.FC = () => {
   const router = useRouter();
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const handleSignIn = () => {
-    // Logic for checking username and password can go here
-    // If successful, redirect to the desired page
-    router.push('/li'); // Example of navigation to the /li page
+  const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    try {
+      if (email.endsWith("@kmitl.ac.th") && email != "@kmitl.ac.th")
+      {
+        const response = await axios.post('http://localhost:8888/register', { username, email, password });
+        if (response.status === 201) {
+          localStorage.setItem('token', response.data.token);
+          console.log("redirect...");
+          router.push('/lima');
+        } // Redirect to a protected route or dashboard
+      }
+    } catch (error) {
+      console.error('Error logging in', error);
+      // Optionally show an error message to the user
+    }
   };
-
   return (
     <Container>
       <Form>
