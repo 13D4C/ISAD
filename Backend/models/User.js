@@ -1,21 +1,26 @@
-const mongoose = require('mongoose');
+class User {
+    constructor(name, password, email, role) {
+        this.name = name;
+        this.password = password;
+        this.email = email;
+        this.role = role;
+    }
 
-const userSchema = new mongoose.Schema({
-    username: {
-        type: String,
-        required: true,
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    password: {
-        type: String,
-        required: true,
-    },
-    isVerified: { type: Boolean, default: false },
-    subject: [String],
-});
+    getName() {
+        return this.name;
+    }
 
-module.exports = mongoose.model('User', userSchema);
+    getPassword() {
+        return this.password;
+    }
+
+    getEmail() {
+        return this.email;
+    }
+
+    getRole() {
+        return this.role;
+    }
+}
+
+module.exports = User;
