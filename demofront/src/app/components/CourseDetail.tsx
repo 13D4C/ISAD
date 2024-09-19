@@ -7,7 +7,7 @@ type Course = {
   faculty: string;
   department: string;
   type: string;
-  credits: number;
+  credits: string;
   midtermExam: string;
   finalExam: string;
   gradingMethod: string;

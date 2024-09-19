@@ -1,6 +1,32 @@
 import React from "react";
 
-const SelectSubjects = ({
+interface Section {
+  section: string;
+  time: string;
+  professor: string;
+}
+
+interface SubjectData {
+  subjectID: string;
+  subjectName: string;
+  subjectCredit: string;
+  studyDays: string[];
+  classroom: string;
+  instructors: string;
+  description: string;
+  sections: Section[];
+}
+
+
+interface SelectSubjectsProps {
+  isVisible: boolean;
+  onClose: () => void;
+  selectSubjects: number[];
+  boxSubject: SubjectData[];
+  removeSelectedSubject: (index: number) => void;
+}
+
+const SelectSubjects: React.FC<SelectSubjectsProps> = ({
   isVisible,
   onClose,
   selectSubjects,
@@ -9,7 +35,7 @@ const SelectSubjects = ({
 }) => {
   if (!isVisible) return null;
 
-  const renderSelectSubjects = () => {
+const renderSelectSubjects = () => {
     return selectSubjects.map((index) => {
       const subject = boxSubject[index];
       return (

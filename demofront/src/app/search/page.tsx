@@ -1,19 +1,45 @@
-
 "use client";
 import React, { useState, useEffect } from "react";
 import SubjectBox from "../components/SubjectBox";
 import SubjectForm from "../components/SubjectForm";
 import SelectSubjects from "../components/SelectSubject";
 
-function SelectPage() {
-  const [isFilterMenuVisible, setFilterMenuVisible] = useState(true);
-  const [selectSubjects, setSelectSubjects] = useState([]);
-  const [boxSubject, setBoxSubject] = useState([]);
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [isSelectSubjectsVisible, setSelectSubjectsVisible] = useState(false);
+// Define the type for subject data
+interface Section {
+  section: string;
+  time: string;
+  professor: string;
+}
 
-  // ฟังก์ชันเพิ่ม Box วิชา
-  const addSubject = (subjectData) => {
+interface SubjectData {
+  subjectID: string;
+  subjectName: string;
+  subjectCredit: string;
+  studyDays: string[];
+  classroom: string;
+  instructors: string;
+  description: string;
+  sections: Section[];
+}
+
+// Define the type for select page state
+interface SelectPageState {
+  isFilterMenuVisible: boolean;
+  selectSubjects: number[];
+  boxSubject: SubjectData[];
+  isModalVisible: boolean;
+  isSelectSubjectsVisible: boolean;
+}
+
+const SelectPage: React.FC = () => {
+  const [isFilterMenuVisible, setFilterMenuVisible] = useState<boolean>(true);
+  const [selectSubjects, setSelectSubjects] = useState<number[]>([]);
+  const [boxSubject, setBoxSubject] = useState<SubjectData[]>([]);
+  const [isModalVisible, setModalVisible] = useState<boolean>(false);
+  const [isSelectSubjectsVisible, setSelectSubjectsVisible] = useState<boolean>(false);
+
+  // Function to add a subject
+  const addSubject = (subjectData: SubjectData) => {
     setBoxSubject((prevBoxSubject) => {
       const updatedBox = [...prevBoxSubject, subjectData];
       localStorage.setItem("BoxSubject", JSON.stringify(updatedBox));
@@ -21,8 +47,8 @@ function SelectPage() {
     });
   };
 
-  // ฟังก์ชันลบ Box วิชา
-  const deleteSubject = (index) => {
+  // Function to delete a subject
+  const deleteSubject = (index: number) => {
     setBoxSubject((prevBoxSubject) => {
       const updatedBoxSubject = prevBoxSubject.filter((_, i) => i !== index);
       localStorage.setItem("BoxSubject", JSON.stringify(updatedBoxSubject));
@@ -30,8 +56,8 @@ function SelectPage() {
     });
   };
 
-  // ฟังก์ชันเลือกวิชา
-  const toggleSubjectSelection = (index) => {
+  // Function to toggle subject selection
+  const toggleSubjectSelection = (index: number) => {
     setSelectSubjects((prevSelectSubjects) => {
       if (prevSelectSubjects.includes(index)) {
         return prevSelectSubjects.filter((i) => i !== index);
@@ -41,36 +67,36 @@ function SelectPage() {
     });
   };
 
-  // โหลดวิชาที่เก็บไว้จาก localstorage 
+  // Load subjects from local storage
   useEffect(() => {
-    const savedBoxSubject = JSON.parse(localStorage.getItem("BoxSubject")) || [];
+    const savedBoxSubject = JSON.parse(localStorage.getItem("BoxSubject") || '[]') as SubjectData[];
     setBoxSubject(savedBoxSubject);
   }, []);
 
-  // ควบคุมการเปิด-ปิด FilterMenu
+  // Toggle filter menu visibility
   const toggleFilterMenu = () => {
     setFilterMenuVisible(!isFilterMenuVisible);
   };
 
-  // ควบคุมการมองเห็นของ Box เวลากดเปิด-ปิด
+  // Handle add box subject
   const handleAddBoxSubject = () => {
     setModalVisible(true);
   };
 
-  // เก็บข้อมูลไว้หากกดปุ่ม submit
-  const handleSubmit = (subjectData) => {
+  // Handle form submission
+  const handleSubmit = (subjectData: SubjectData) => {
     addSubject(subjectData);
     setModalVisible(false);
   };
 
-  // ฟังก์ชันเปิด-ปิด pop-up
+  // Toggle select subjects visibility
   const handleToggleSelectSubjects = () => {
     setSelectSubjectsVisible(!isSelectSubjectsVisible);
   };
 
-  // ฟังก์ชันลบวิชาจาก selectSubjects
-  const removeSelectedSubject = (index) => {
-    setSelectSubjects((prevSelectSubjects) => 
+  // Remove selected subject
+  const removeSelectedSubject = (index: number) => {
+    setSelectSubjects((prevSelectSubjects) =>
       prevSelectSubjects.filter((i) => i !== index)
     );
   };
@@ -86,17 +112,15 @@ function SelectPage() {
           <input className="w-full outline-none" type="search" id="search" placeholder="ค้นหารหัสวิชา / ชื่อวิชา" />
         </div>
 
-        {/* ปุ่ม Fliter */}
+        {/* Filter Button */}
         <button className="rounded border shadow-md px-3" onClick={toggleFilterMenu}>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
             <path d="M7 11h10v2H7zM4 7h16v2H4zm6 8h4v2h-4z"></path>
           </svg>
         </button>
 
-        {/* ปุ่มกดดูวิชาที่เลือก */}
-        <button className="rounded border shadow-md px-4 pt-2 gap-2 flex"
-          onClick={handleToggleSelectSubjects}
-        >
+        {/* Selected Subjects Button */}
+        <button className="rounded border shadow-md px-4 pt-2 gap-2 flex" onClick={handleToggleSelectSubjects}>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
             <path d="M3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7v2H5a2 2 0 0 0-2 2zm16 14H5V8h14z"></path>
           </svg>
@@ -134,7 +158,7 @@ function SelectPage() {
                 </div>
               )}
 
-              {/* แสดงกล่อง */}
+              {/* Show Subjects */}
               <SubjectBox
                 BoxSubject={boxSubject}
                 DeleteSubject={deleteSubject}
@@ -170,7 +194,7 @@ function SelectPage() {
         </div>
       </div>
 
-      {/* แสดงวิชาที่เลือก */}
+      {/* Show Selected Subjects */}
       <SelectSubjects
         isVisible={isSelectSubjectsVisible}
         onClose={handleToggleSelectSubjects}

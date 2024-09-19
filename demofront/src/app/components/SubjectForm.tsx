@@ -1,17 +1,40 @@
 import React, { useState } from "react";
 
-const SubjectForm = ({ onSubmit, onClose }) => {
-  const [subjectID, setSubjectID] = useState("");
-  const [subjectName, setSubjectName] = useState("");
-  const [subjectCredit, setSubjectCredit] = useState("");
-  const [studyDays, setStudyDays] = useState([]);
-  const [classroom, setClassroom] = useState("");
-  const [instructors, setInstructors] = useState("");
-  const [description, setDescription] = useState("");
-  const [sections, setSections] = useState([{ section: "", time: "", professor: "" }]);
+// Define types for the section object and form props
+interface Section {
+  section: string;
+  time: string;
+  professor: string;
+}
+
+interface SubjectFormProps {
+  onSubmit: (subjectData: SubjectData) => void;
+  onClose: () => void;
+}
+
+interface SubjectData {
+  subjectID: string;
+  subjectName: string;
+  subjectCredit: string;
+  studyDays: string[];
+  classroom: string;
+  instructors: string;
+  description: string;
+  sections: Section[];
+}
+
+const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
+  const [subjectID, setSubjectID] = useState<string>("");
+  const [subjectName, setSubjectName] = useState<string>("");
+  const [subjectCredit, setSubjectCredit] = useState<string>("");
+  const [studyDays, setStudyDays] = useState<string[]>([]);
+  const [classroom, setClassroom] = useState<string>("");
+  const [instructors, setInstructors] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [sections, setSections] = useState<Section[]>([{ section: "", time: "", professor: "" }]);
   const days = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์"];
 
-  const handleDaySelection = (day) => {
+  const handleDaySelection = (day: string) => {
     setStudyDays((prevStudyDays) => {
       if (prevStudyDays.includes(day)) {
         return prevStudyDays.filter((d) => d !== day);
@@ -21,24 +44,24 @@ const SubjectForm = ({ onSubmit, onClose }) => {
     });
   };
 
-  const handleSectionChange = (index, field, value) => {
+  const handleSectionChange = (index: number, field: keyof Section, value: string) => {
     const updatedSections = [...sections];
     updatedSections[index][field] = value;
     setSections(updatedSections);
   };
 
   const handleAddSection = () => {
-    setSections([...sections, { section: "", time: "" }]);
+    setSections([...sections, { section: "", time: "", professor: "" }]);
   };
 
-  const handleRemoveSection = (index) => {
+  const handleRemoveSection = (index: number) => {
     const updatedSections = sections.filter((_, i) => i !== index);
     setSections(updatedSections);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const subjectData = {
+    const subjectData: SubjectData = {
       subjectID,
       subjectName,
       subjectCredit,
@@ -107,9 +130,7 @@ const SubjectForm = ({ onSubmit, onClose }) => {
                 />
                 <label
                   htmlFor={day}
-                  className={`text-sm ${
-                    studyDays.includes(day) ? "text-black" : "text-gray-500"
-                  }`}
+                  className={`text-sm ${studyDays.includes(day) ? "text-black" : "text-gray-500"}`}
                 >
                   วัน{day}
                 </label>
@@ -150,9 +171,7 @@ const SubjectForm = ({ onSubmit, onClose }) => {
               <input
                 type="text"
                 value={sec.section}
-                onChange={(e) =>
-                  handleSectionChange(index, "section", e.target.value)
-                }
+                onChange={(e) => handleSectionChange(index, "section", e.target.value)}
                 placeholder="1"
                 className="border rounded p-2 w-full text-sm"
                 required
@@ -165,9 +184,7 @@ const SubjectForm = ({ onSubmit, onClose }) => {
               <input
                 type="text"
                 value={sec.time}
-                onChange={(e) =>
-                  handleSectionChange(index, "time", e.target.value)
-                }
+                onChange={(e) => handleSectionChange(index, "time", e.target.value)}
                 placeholder="Tue xx:xx - xx:xx"
                 className="border rounded p-2 w-full text-sm"
                 required
@@ -180,9 +197,7 @@ const SubjectForm = ({ onSubmit, onClose }) => {
               <input
                 type="text"
                 value={sec.professor}
-                onChange={(e) =>
-                  handleSectionChange(index, "professor", e.target.value)
-                }
+                onChange={(e) => handleSectionChange(index, "professor", e.target.value)}
                 className="border rounded p-2 w-full text-sm"
                 required
               />

@@ -1,8 +1,9 @@
 // app/page.tsx
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 // Components
 const Container: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -53,19 +54,14 @@ const Input: React.FC<{ type: string; placeholder: string }> = ({ type, placehol
   />
 );
 
-const Button: React.FC<{ children: React.ReactNode; onClick: () => void }> = ({ children, onClick }) => {
-  const router = useRouter();
-  
-  return (
-    <button
-      type="button"
-      className="bg-blue-600 text-center text-white p-2 text-base rounded cursor-pointer mb-2"
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  );
-};
+const Button: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <button
+    type="submit" // Changed to "submit" for form submission
+    className="bg-blue-600 text-center text-white p-2 text-base rounded cursor-pointer mb-2"
+  >
+    {children}
+  </button>
+);
 
 const GoogleButton: React.FC<{ children: React.ReactNode; onClick: () => void }> = ({ children, onClick }) => {
   const router = useRouter();
@@ -112,7 +108,7 @@ const LoginPage: React.FC = () => {
           <Input type="text" placeholder="Username" />
           <InputLabel label="Password" />
           <Input type="password" placeholder="Password" />
-          <Button onClick={handleSignIn}>Sign In</Button>
+          <Button>Sign In</Button>
         </InputContainer>
         <div className="text-center text-gray-500 my-3">or</div>
         <GoogleButton onClick={() => router.push('/regis')}>Register</GoogleButton>

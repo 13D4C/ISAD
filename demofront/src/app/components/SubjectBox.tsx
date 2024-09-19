@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 
-const bgColor = {
+type Day = "จันทร์" | "อังคาร" | "พุธ" | "พฤหัสบดี" | "ศุกร์";
+
+const bgColor: Record<Day, string> = {
   จันทร์: "bg-yellow-100",
   อังคาร: "bg-rose-100",
   พุธ: "bg-lime-200",
@@ -8,23 +10,47 @@ const bgColor = {
   ศุกร์: "bg-cyan-100",
 };
 
-const textColor = {
+const textColor: Record<Day, string> = {
   จันทร์: "text-yellow-500",
   อังคาร: "text-pink-500",
   พุธ: "text-lime-700",
   พฤหัสบดี: "text-orange-500",
   ศุกร์: "text-cyan-500",
 };
+interface Section {
+  section: string;
+  time: string;
+  professor: string;
+}
 
-const Subject = ({
+
+interface SubjectData {
+  subjectID: string;
+  subjectName: string;
+  subjectCredit: string;
+  studyDays: string[];
+  classroom: string;
+  instructors: string;
+  description: string;
+  sections: Section[];
+}
+
+
+interface SubjectProps {
+  BoxSubject: SubjectData[];
+  DeleteSubject: (subjectIndex: number) => void;
+  toggleSubjectSelection: (subjectIndex: number) => void;
+  selectSubjects: number[];
+}
+const Subject: React.FC<SubjectProps> = ({
   BoxSubject,
   DeleteSubject,
   toggleSubjectSelection,
   selectSubjects,
 }) => {
-  const [selectedSections, setSelectedSections] = useState({});
+  const [selectedSections, setSelectedSections] = useState<{ [key: number]: string } > ({});
 
-  const handleSectionChange = (index, event) => {
+  const handleSectionChange = (index: number, event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedSections((prev) => ({
       ...prev,
       [index]: event.target.value,
@@ -71,8 +97,8 @@ const Subject = ({
                 {box.studyDays.map((day, idx) => (
                   <p
                     key={idx}
-                    className={`text-sm ${textColor[day] || "text-gray-500"} ${
-                      bgColor[day] || "bg-gray-100"
+                    className={`text-sm ${textColor[day as Day] || "text-gray-500"} ${
+                      bgColor[day as Day] || "bg-gray-100"
                     } rounded-full max-w-fit px-3 py-1`}
                   >
                     วัน{day}
