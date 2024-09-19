@@ -11,7 +11,7 @@ const ScheduleTable = () => {
         {/* Flex container to align title and buttons on opposite sides */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-bold text-blue-900 dark:text-white">จัดตารางเรียน</h2>
-
+          
           {/* Buttons aligned to the right */}
           <div className="flex space-x-4">
             <button className="mr-2 bg-gray-200 text-black py-2 px-6 rounded-lg border border-gray-300 shadow-sm hover:bg-gray-300 transition-all">ตารางเรียน</button>
