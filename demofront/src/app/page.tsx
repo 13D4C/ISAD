@@ -108,7 +108,7 @@ const LoginPage: React.FC = () => {
       <Form>
         <Header />
         <InputContainer>
-          <InputLabel label="Username" />
+          <InputLabel label="Email" />
           <Input type="text" placeholder="Username" />
           <InputLabel label="Password" />
           <Input type="password" placeholder="Password" />
