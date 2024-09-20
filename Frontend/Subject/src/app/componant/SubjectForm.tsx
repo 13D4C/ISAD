@@ -18,7 +18,7 @@ interface SubjectData {
   studyDays: string[];
   classroom: string;
   description: string;
-  sections: { section: string; time: string; professor: string }[];
+  sections: Section[];
 }
 
 const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
