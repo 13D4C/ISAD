@@ -67,7 +67,18 @@ const Button: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   </button>
 };
 
-const GoogleButton: React.FC<{ children: React.ReactNode; onClick: () => void }> = ({ children, onClick }) => {
+const Register: React.FC<{ children: React.ReactNode; onClick: () => void }> = ({ children, onClick }) => {
+  const router = useRouter();
+  return (
+    <button
+      className="bg-white text-black p-2 text-base rounded border border-gray-300 flex items-center justify-center"
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+};
+const AdminLogin: React.FC<{ children: React.ReactNode; onClick: () => void }> = ({ children, onClick }) => {
   const router = useRouter();
   return (
     <button
@@ -92,12 +103,13 @@ const LoginPage: React.FC = () => {
         const response = await axios.post('http://localhost:8888/api/login', { email, password });
         if (response.status === 201 || response.status === 200) {
           localStorage.setItem('token', response.data.token);
+          localStorage.setItem('role', response.data.role);
           console.log("created token");
           setTimeout(() => {
-            router.push('/search'); // Refresh the page after a delay
+            router.push('/search');
             setTimeout(() => {
               window.location.reload();
-            }, 50);
+            }, 300);
           }, 500);
           
 
@@ -130,7 +142,8 @@ const LoginPage: React.FC = () => {
           <Button>Sign In</Button>
         </InputContainer>
         <div className="text-center text-gray-500 my-3">or</div>
-        <GoogleButton onClick={() => router.push('/regis')}>Register</GoogleButton>
+        <Register onClick={() => router.push('/regis')}>Register</Register>
+        <AdminLogin onClick={() => router.push('/adminLogin')}>Admin Login</AdminLogin>
       </Form>
     </Container>
   );

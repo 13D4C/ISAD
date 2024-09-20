@@ -37,6 +37,7 @@ const SelectPage: React.FC = () => {
   const [boxSubject, setBoxSubject] = useState<SubjectData[]>([]);
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const [isSelectSubjectsVisible, setSelectSubjectsVisible] = useState<boolean>(false);
+  const roleChecker = localStorage.getItem('role');
   // Function to add a subject
   const addSubject = (subjectData: SubjectData) => {
     setBoxSubject((prevBoxSubject) => {
@@ -133,40 +134,38 @@ const SelectPage: React.FC = () => {
         </button>
       </div>
 
-      <div className="pt-5">
-        <div className="flex space-x-4">
-          <div className="w-full">
-            <div className="space-y-4">
-              <div className="justify-items-center">
-                <button
-                  onClick={handleAddBoxSubject}
-                  className="rounded border shadow-md w-full p-4 flex justify-center"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#9ca3af" className="size-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Subject Form */}
-              {isModalVisible && (
-                <div className="fixed -inset-10 bg-black bg-opacity-50 flex items-center justify-center z-10">
-                  <div className="bg-white p-8 rounded shadow-md w-4/12">
-                    <h2 className="text-xl mb-4 font-bold text-black">เพิ่มวิชาใหม่</h2>
-                    <SubjectForm onSubmit={handleSubmit} onClose={() => setModalVisible(false)} />
-                  </div>
+        
+          <div className="pt-5">
+          <div className="flex space-x-4">
+            <div className="w-full">
+              <div className="space-y-4">
+                <div className="justify-items-center">
+                  {roleChecker === 'admin' && ( 
+                  <button onClick={handleAddBoxSubject} className="rounded border shadow-md w-full p-4 flex justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#9ca3af" className="size-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                  </button>)}
                 </div>
-              )}
 
-              {/* Show Subjects */}
-              <SubjectBox
-                BoxSubject={boxSubject}
-                DeleteSubject={deleteSubject}
-                toggleSubjectSelection={toggleSubjectSelection}
-                selectSubjects={selectSubjects}
-              />
+                {isModalVisible && (
+                  <div className="fixed -inset-10 bg-black bg-opacity-50 flex items-center justify-center z-10">
+                    <div className="bg-white p-8 rounded shadow-md w-4/12">
+                      <h2 className="text-xl mb-4 font-bold text-black">เพิ่มวิชาใหม่</h2>
+                      <SubjectForm onSubmit={handleSubmit} onClose={() => setModalVisible(false)} />
+                    </div>
+                  </div>
+                )}
+
+                <SubjectBox
+                  BoxSubject={boxSubject}
+                  DeleteSubject={deleteSubject}
+                  toggleSubjectSelection={toggleSubjectSelection}
+                  selectSubjects={selectSubjects}
+                />
+              </div>
             </div>
-          </div>
+      
 
           {/* Filter Menu */}
           {isFilterMenuVisible && (

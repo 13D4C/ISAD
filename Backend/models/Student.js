@@ -1,8 +1,8 @@
 const User = require('./User');
 
 class Student extends User {
-    constructor(name, password, email) {
-        super(name, password, email, 'student');  
+    constructor(username, password, email) {
+        super(username, password, email, 'student');  
         this.isAdmin = false;
     }
 

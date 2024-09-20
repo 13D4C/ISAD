@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 export default function AuthProvider({ children }: { children: ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); 
     const router = useRouter();
+    
 
     useEffect(() => {
         const token = localStorage.getItem("token");
