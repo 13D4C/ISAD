@@ -7,7 +7,7 @@ const searchRoutes = require('./routes/searchRoutes');
 require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8888;
 
 const mongoURI = process.env.MONGO_URI;
 const db = new Database(mongoURI);

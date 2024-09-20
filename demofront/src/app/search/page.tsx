@@ -37,7 +37,6 @@ const SelectPage: React.FC = () => {
   const [boxSubject, setBoxSubject] = useState<SubjectData[]>([]);
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const [isSelectSubjectsVisible, setSelectSubjectsVisible] = useState<boolean>(false);
-
   // Function to add a subject
   const addSubject = (subjectData: SubjectData) => {
     setBoxSubject((prevBoxSubject) => {

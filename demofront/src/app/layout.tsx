@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
+import { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Link from "next/link";
-import Image from "next/image";
+import Navbar from "./navbar";
+import AuthProvider from "./AuthProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,54 +16,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
+    <AuthProvider>
     <html lang="en">
       <body className={inter.className}>
         {/* Blue Bar */}
         <div className="bg-blue-700 h-10 w-full fixed top-0 left-0 z-10"></div>
-        {/* End Blue Bar */}
-
         {/* Navigation Bar */}
-        <nav className="bg-white dark:bg-gray-900 fixed w-full z-20 top-2 start-0 border-b border-gray-200 dark:border-gray-600">
-          {/* Box NavBar */}
-          <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-            {/* logo IT kmitl*/}
-            <Link href="#" className="flex items-center space-x-3 rtl:space-x-reverse">
-             
-            </Link>
-            {/* Middle of Nav Bar */}
-            <ul className="flex flex-col p-4 md:p-0 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
-              <li>
-                <Link href="#" className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-500 md:p-0 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700 transition-colors" aria-current="page">
-                  ค้นหาวิชาเรียน
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-500 md:p-0 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700 transition-colors">
-                  จัดตารางเรียน
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-500 md:p-0 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700 transition-colors">
-                  เกี่ยวกับเรา
-                </Link>
-              </li>
-            </ul>
-            {/* Right Side (Login) */}
-            <div className="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
-              <ul className="flex flex-col p-4 md:p-0 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
-                <li>
-                  <Link href="http://localhost:3000/" className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-500 md:p-0 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700 transition-colors">
-                    เข้าสู่ระบบ
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </nav>
-        {/* End Navigation Bar */}
-        
-        {/* Apply padding to push the content down */}
+        <Navbar/>
         <main className="pt-24">
           {children}
         </main>
@@ -80,5 +41,7 @@ export default function RootLayout({
         {/* End Footer of page */}
       </body>
     </html>
+    </AuthProvider>
   );
 }
+

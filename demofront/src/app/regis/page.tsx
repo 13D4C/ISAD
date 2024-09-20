@@ -1,20 +1,22 @@
 // app/page.tsx
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 // Components
-const Container: React.FC = ({ children }) => (
+const Container: React.FC<{ children: React.ReactNode; }> = ({ children }) => (
   <div className="flex flex-col items-center justify-center min-h-screen bg-blue-600">
     {children}
   </div>
 );
 
-const Form: React.FC = ({ children }) => (
-  <div className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full max-w-lg text-black relative">
+const Form: React.FC<{ children: React.ReactNode; onSubmit: (event: React.FormEvent<HTMLFormElement>) => void }> = ({ children, onSubmit }) => (
+  <form className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full max-w-lg text-black relative"
+    onSubmit={onSubmit}>
     {children}
-  </div>
+  </form>
 );
 
 const Header: React.FC = () => (
@@ -24,7 +26,7 @@ const Header: React.FC = () => (
   </div>
 );
 
-const InputContainer: React.FC = ({ children }) => (
+const InputContainer: React.FC<{ children: React.ReactNode; }> = ({ children }) => (
   <div className="flex flex-col bg-white p-4 rounded-lg mb-4 border border-gray-200">
     {children}
   </div>
@@ -34,50 +36,67 @@ const InputLabel: React.FC<{ label: string }> = ({ label }) => (
   <label className="mb-1 text-sm font-bold">{label}</label>
 );
 
-const Input: React.FC<{ type: string; placeholder: string }> = ({ type, placeholder }) => (
+const Input: React.FC<{ type: string; placeholder: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }> = ({ type, placeholder, value, onChange }) => (
   <input
     className="mb-3 p-2 text-base rounded border border-gray-300 w-full"
     type={type}
     placeholder={placeholder}
+    value={value}
+    onChange={onChange}
   />
 );
 
-const Button: React.FC<{ children: React.ReactNode; onClick: () => void }> = ({ children, onClick }) => {
+const Button: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const router = useRouter();
-  return  <button
-    type='button'
+  return <button
     className="bg-blue-600 text-center text-white p-2 text-base rounded cursor-pointer mb-2"
-    onClick={() =>router.push('/')}
+    type="submit"
   >
     {children}
   </button>
 };
 
 
-// Main LoginPage component
-const LoginPage: React.FC = () => {
+const RegisPage: React.FC = () => {
+  const [name, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const router = useRouter();
 
-  const handleSignIn = () => {
-    // คุณสามารถใส่ logic การตรวจสอบ username และ password ได้ที่นี่
-    // ถ้าตรวจสอบสำเร็จ สามารถ redirect ไปที่หน้าที่ต้องการได้
-    router.push('/page'); // ตัวอย่างการนำไปยังหน้าที่ชื่อว่า /li
+  const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    try {
+      if (email.endsWith("@kmitl.ac.th") && email != "@kmitl.ac.th") {
+        const response = await axios.post('http://localhost:8888/api/register', { name, email, password }); // ถ้า deploy ต้องแก้ path
+        if (response.status === 201) {
+          localStorage.setItem('token', response.data.token);
+          console.log("redirect...");
+          router.push('/');
+        } 
+      } else {
+        console.log("Error");
+      }
+    } catch (error) {
+      console.error('Error logging in', error);
+    }
   };
 
   return (
     <Container>
-      <Form>
+      <Form onSubmit={handleSignIn}>
         <Header />
         <InputContainer>
           <InputLabel label="Name" />
-          <Input type="text" placeholder="Name" />
+          <Input type="text" placeholder="Username"
+            value={name} onChange={(e) => setUsername(e.target.value)} />
           <InputLabel label="Email" />
-          <Input type="text" placeholder="Username" />
+          <Input type="text" placeholder="email"
+            value={email} onChange={(e) => setEmail(e.target.value)} />
           <InputLabel label="Password" />
-          <Input type="password" placeholder="Password" />
-          <Button onClick={handleSignIn}>
-  Register
-</Button>
+          <Input type="password" placeholder="Password"
+            value={password} onChange={(e) => setPassword(e.target.value)} />
+          <Button>Register</Button>
 
         </InputContainer>
       </Form>
@@ -85,4 +104,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
+export default RegisPage;

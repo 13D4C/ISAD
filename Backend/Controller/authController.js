@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const UserModel = require('../models/UserModel'); // Ensure correct path to UserModel
+const User = require('../models/User');
 require('dotenv').config();
 
 class AuthController {
@@ -20,13 +21,14 @@ class AuthController {
 
             const hashedPassword = await bcrypt.hash(password, 10); // hash password
             const user = new UserModel({
-                name, // Use 'username' and map it to 'name'
+                name, 
                 email,
                 password: hashedPassword,
             });
 
             await user.save(); // save user
-            res.status(201).json({ message: 'User created successfully', user });
+            const userInstance = new User(user.name, user.password, user.email, user.role);
+            res.status(201).json({ message: 'User created successfully', user: userInstance.getName(), additionalInfo: '!!!'});
         } catch (error) {
             console.error('Error creating user:', error);
             res.status(500).json({ message: 'Internal server error' });
