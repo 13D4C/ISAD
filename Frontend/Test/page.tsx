@@ -9,16 +9,16 @@ const ScheduleTable = () => {
       <div className="container mx-auto p-4 md:p-8 bg-white dark:bg-gray-800 shadow-xl rounded-2xl w-full md:w-auto">
         {/* Flex container to align title and buttons on opposite sides */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-          <h2 className="text-2xl md:text-4xl font-bold text-black dark:text-white mb-4 md:mb-0">
+          <h2 className="text-xl md:text-3xl font-medium text-black dark:text-white mb-4 md:mb-0">
             จัดตารางเรียน
           </h2>
           
           {/* Buttons aligned to the right */}
           <div className="flex space-x-2 md:space-x-4">
-            <button className="bg-gray-200 text-black py-2 md:py-3 px-4 md:px-8 rounded-lg border border-gray-300 shadow-md hover:bg-blue-700 hover:text-white transition-all">
+            <button className="bg-white text-black py-2 md:py-3 px-4 md:px-8 rounded-lg border border-gray-300 shadow-md hover:bg-blue-700 hover:text-white transition-all">
               ตารางเรียน
             </button>
-            <button className="bg-gray-200 text-black py-2 md:py-3 px-4 md:px-8 rounded-lg border border-gray-300 shadow-md hover:bg-blue-700 hover:text-white transition-all">
+            <button className="bg-white text-black py-2 md:py-3 px-4 md:px-8 rounded-lg border border-gray-300 shadow-md hover:bg-blue-700 hover:text-white transition-all">
               ตารางสอบ
             </button>
           </div>
@@ -56,7 +56,7 @@ const ScheduleTable = () => {
 
         {/* Bottom section with export button and summary */}
         <div className="mt-8 flex flex-col md:flex-row justify-between items-center">
-          <button className="bg-blue-700 text-white border border-blue-700 py-2 px-6 rounded-lg shadow-md text-sm hover:bg-blue-600 transition-all mb-4 md:mb-0">
+          <button className="bg-blue-700 text-white border border-blue-00 py-2 px-6 rounded-lg shadow-md text-sm hover:bg-blue-600 transition-all mb-4 md:mb-0">
             Export PNG
           </button>
           <span className="text-sm text-gray-600">หน่วยกิตรวมในตาราง 0 หน่วยกิต</span>
