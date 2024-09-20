@@ -1,19 +1,28 @@
-
 "use client";
 import React, { useState, useEffect } from "react";
 import SubjectBox from "./componant/SubjectBox";
 import SubjectForm from "./componant/SubjectForm";
 import SelectSubjects from "./componant/SelectSubject";
 
+interface SubjectData {
+  subjectID: string;
+  subjectName: string;
+  subjectCredit: number;
+  studyDays: string[];
+  classroom: string;
+  description: string;
+  sections: { section: string; time: string; professor: string }[];
+}
+
 function SelectPage() {
   const [isFilterMenuVisible, setFilterMenuVisible] = useState(true);
-  const [selectSubjects, setSelectSubjects] = useState([]);
-  const [boxSubject, setBoxSubject] = useState([]);
+  const [selectSubjects, setSelectSubjects] = useState<number[]>([]);
+  const [boxSubject, setBoxSubject] = useState<SubjectData[]>([]);
   const [isModalVisible, setModalVisible] = useState(false);
   const [isSelectSubjectsVisible, setSelectSubjectsVisible] = useState(false);
 
   // ฟังก์ชันเพิ่ม Box วิชา
-  const addSubject = (subjectData) => {
+  const addSubject = (subjectData: SubjectData) => {
     setBoxSubject((prevBoxSubject) => {
       const updatedBox = [...prevBoxSubject, subjectData];
       localStorage.setItem("BoxSubject", JSON.stringify(updatedBox));
@@ -22,7 +31,7 @@ function SelectPage() {
   };
 
   // ฟังก์ชันลบ Box วิชา
-  const deleteSubject = (index) => {
+  const deleteSubject = (index: number) => {
     setBoxSubject((prevBoxSubject) => {
       const updatedBoxSubject = prevBoxSubject.filter((_, i) => i !== index);
       localStorage.setItem("BoxSubject", JSON.stringify(updatedBoxSubject));
@@ -31,7 +40,7 @@ function SelectPage() {
   };
 
   // ฟังก์ชันเลือกวิชา
-  const toggleSubjectSelection = (index) => {
+  const toggleSubjectSelection = (index: number) => {
     setSelectSubjects((prevSelectSubjects) => {
       if (prevSelectSubjects.includes(index)) {
         return prevSelectSubjects.filter((i) => i !== index);
@@ -43,7 +52,7 @@ function SelectPage() {
 
   // โหลดวิชาที่เก็บไว้จาก localstorage 
   useEffect(() => {
-    const savedBoxSubject = JSON.parse(localStorage.getItem("BoxSubject")) || [];
+    const savedBoxSubject = JSON.parse(localStorage.getItem("BoxSubject") || "[]");
     setBoxSubject(savedBoxSubject);
   }, []);
 
@@ -58,7 +67,7 @@ function SelectPage() {
   };
 
   // เก็บข้อมูลไว้หากกดปุ่ม submit
-  const handleSubmit = (subjectData) => {
+  const handleSubmit = (subjectData: SubjectData) => {
     addSubject(subjectData);
     setModalVisible(false);
   };
@@ -69,7 +78,7 @@ function SelectPage() {
   };
 
   // ฟังก์ชันลบวิชาจาก selectSubjects
-  const removeSelectedSubject = (index) => {
+  const removeSelectedSubject = (index: number) => {
     setSelectSubjects((prevSelectSubjects) => 
       prevSelectSubjects.filter((i) => i !== index)
     );

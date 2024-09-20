@@ -1,17 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, ChangeEvent, FormEvent } from "react";
 
-const SubjectForm = ({ onSubmit, onClose }) => {
-  const [subjectID, setSubjectID] = useState("");
-  const [subjectName, setSubjectName] = useState("");
-  const [subjectCredit, setSubjectCredit] = useState("");
-  const [studyDays, setStudyDays] = useState([]);
-  const [classroom, setClassroom] = useState("");
-  const [instructors, setInstructors] = useState("");
-  const [description, setDescription] = useState("");
-  const [sections, setSections] = useState([{ section: "", time: "", professor: "" }]);
+interface Section {
+  section: string;
+  time: string;
+  professor: string;
+}
+
+interface SubjectFormProps {
+  onSubmit: (subjectData: SubjectData) => void;
+  onClose: () => void;
+}
+
+interface SubjectData {
+  subjectID: string;
+  subjectName: string;
+  subjectCredit: number;
+  studyDays: string[];
+  classroom: string;
+  description: string;
+  sections: { section: string; time: string; professor: string }[];
+}
+
+const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
+  const [subjectID, setSubjectID] = useState<string>("");
+  const [subjectName, setSubjectName] = useState<string>("");
+  const [subjectCredit, setSubjectCredit] = useState<number>(0);
+  const [studyDays, setStudyDays] = useState<string[]>([]);
+  const [classroom, setClassroom] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [sections, setSections] = useState<Section[]>([
+    { section: "", time: "", professor: "" },
+  ]);
+
   const days = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์"];
 
-  const handleDaySelection = (day) => {
+  const handleDaySelection = (day: string) => {
     setStudyDays((prevStudyDays) => {
       if (prevStudyDays.includes(day)) {
         return prevStudyDays.filter((d) => d !== day);
@@ -21,32 +44,35 @@ const SubjectForm = ({ onSubmit, onClose }) => {
     });
   };
 
-  const handleSectionChange = (index, field, value) => {
+  const handleSectionChange = (
+    index: number,
+    field: keyof Section,
+    value: string
+  ) => {
     const updatedSections = [...sections];
     updatedSections[index][field] = value;
     setSections(updatedSections);
   };
 
   const handleAddSection = () => {
-    setSections([...sections, { section: "", time: "" }]);
+    setSections([...sections, { section: "", time: "", professor: "" }]);
   };
 
-  const handleRemoveSection = (index) => {
+  const handleRemoveSection = (index: number) => {
     const updatedSections = sections.filter((_, i) => i !== index);
     setSections(updatedSections);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    const subjectData = {
+    const subjectData: SubjectData = {
       subjectID,
       subjectName,
       subjectCredit,
       studyDays,
       classroom,
-      instructors,
       description,
-      sections
+      sections,
     };
     onSubmit(subjectData);
   };
@@ -60,7 +86,9 @@ const SubjectForm = ({ onSubmit, onClose }) => {
           <input
             type="text"
             value={subjectID}
-            onChange={(e) => setSubjectID(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setSubjectID(e.target.value)
+            }
             placeholder="06xxxx"
             className="border rounded p-2 w-full text-sm"
             required
@@ -73,7 +101,9 @@ const SubjectForm = ({ onSubmit, onClose }) => {
           <input
             type="text"
             value={subjectName}
-            onChange={(e) => setSubjectName(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setSubjectName(e.target.value)
+            }
             className="border rounded p-2 w-full text-sm"
             required
           />
@@ -85,7 +115,9 @@ const SubjectForm = ({ onSubmit, onClose }) => {
           <input
             type="number"
             value={subjectCredit}
-            onChange={(e) => setSubjectCredit(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setSubjectCredit(parseInt(e.target.value))
+            }
             placeholder="1"
             className="border rounded p-2 w-full text-sm"
             required
@@ -124,7 +156,9 @@ const SubjectForm = ({ onSubmit, onClose }) => {
           <input
             type="text"
             value={classroom}
-            onChange={(e) => setClassroom(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setClassroom(e.target.value)
+            }
             className="border rounded p-2 w-full text-sm"
             required
           />
@@ -135,7 +169,9 @@ const SubjectForm = ({ onSubmit, onClose }) => {
           <label className="block text-sm font-medium">Description</label>
           <textarea
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+              setDescription(e.target.value)
+            }
             className="border rounded p-2 w-full resize-none text-sm"
             rows={4}
           ></textarea>
@@ -150,7 +186,7 @@ const SubjectForm = ({ onSubmit, onClose }) => {
               <input
                 type="text"
                 value={sec.section}
-                onChange={(e) =>
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   handleSectionChange(index, "section", e.target.value)
                 }
                 placeholder="1"
@@ -165,7 +201,7 @@ const SubjectForm = ({ onSubmit, onClose }) => {
               <input
                 type="text"
                 value={sec.time}
-                onChange={(e) =>
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   handleSectionChange(index, "time", e.target.value)
                 }
                 placeholder="Tue xx:xx - xx:xx"
@@ -180,7 +216,7 @@ const SubjectForm = ({ onSubmit, onClose }) => {
               <input
                 type="text"
                 value={sec.professor}
-                onChange={(e) =>
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   handleSectionChange(index, "professor", e.target.value)
                 }
                 className="border rounded p-2 w-full text-sm"

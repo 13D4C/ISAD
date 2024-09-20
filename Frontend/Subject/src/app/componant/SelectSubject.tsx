@@ -1,6 +1,20 @@
 import React from "react";
 
-const SelectSubjects = ({
+type Subject = {
+  subjectID: string;
+  subjectName: string;
+  subjectCredit: number;
+};
+
+interface SelectSubjectsProps {
+  isVisible: boolean;
+  onClose: () => void;
+  selectSubjects: number[];
+  boxSubject: Subject[];
+  removeSelectedSubject: (index: number) => void;
+}
+
+const SelectSubjects: React.FC<SelectSubjectsProps> = ({
   isVisible,
   onClose,
   selectSubjects,

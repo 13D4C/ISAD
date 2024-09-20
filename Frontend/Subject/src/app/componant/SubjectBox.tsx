@@ -1,6 +1,28 @@
 import React, { useState } from "react";
 
-const bgColor = {
+interface Section {
+  section: string;
+  time: string;
+  professor: string;
+}
+
+interface SubjectBox {
+  subjectID: string;
+  subjectName: string;
+  subjectCredit: number;
+  studyDays: string[];
+  classroom: string;
+  sections: Section[];
+}
+
+interface SubjectProps {
+  BoxSubject: SubjectBox[];
+  DeleteSubject: (index: number) => void;
+  toggleSubjectSelection: (index: number) => void;
+  selectSubjects: number[];
+}
+
+const bgColor: { [key: string]: string } = {
   จันทร์: "bg-yellow-100",
   อังคาร: "bg-rose-100",
   พุธ: "bg-lime-200",
@@ -8,7 +30,7 @@ const bgColor = {
   ศุกร์: "bg-cyan-100",
 };
 
-const textColor = {
+const textColor: { [key: string]: string } = {
   จันทร์: "text-yellow-500",
   อังคาร: "text-pink-500",
   พุธ: "text-lime-700",
@@ -16,15 +38,15 @@ const textColor = {
   ศุกร์: "text-cyan-500",
 };
 
-const Subject = ({
+const Subject: React.FC<SubjectProps> = ({
   BoxSubject,
   DeleteSubject,
   toggleSubjectSelection,
   selectSubjects,
 }) => {
-  const [selectedSections, setSelectedSections] = useState({});
+  const [selectedSections, setSelectedSections] = useState<{ [index: number]: string }>({});
 
-  const handleSectionChange = (index, event) => {
+  const handleSectionChange = (index: number, event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedSections((prev) => ({
       ...prev,
       [index]: event.target.value,
@@ -37,8 +59,9 @@ const Subject = ({
         <div key={index} className="rounded border shadow-md p-6">
           <div className="flex space-x-2">
             <p className="font-sans text-xl font-bold">
-              {box.subjectID} {box.subjectName}
+              {box.subjectID}
             </p>
+            <button>{box.subjectName}</button>
             <p className="font-sans text-lg font-bold text-gray-500/50">
               [{box.subjectCredit} หน่วยกิต]
             </p>
@@ -85,9 +108,7 @@ const Subject = ({
               <p className="text-sm text-gray-500/50">เวลา</p>
               <p className="text-base">
                 {selectedSections[index] !== "" &&
-                  box.sections.find(
-                    (sec) => sec.section === selectedSections[index]
-                  )?.time}
+                  box.sections.find((sec) => sec.section === selectedSections[index])?.time}
               </p>
             </div>
 
@@ -100,9 +121,7 @@ const Subject = ({
               <p className="text-sm text-gray-500/50">ผู้สอน</p>
               <p className="text-base">
                 {selectedSections[index] !== "" &&
-                  box.sections.find(
-                    (sec) => sec.section === selectedSections[index]
-                  )?.professor}
+                  box.sections.find((sec) => sec.section === selectedSections[index])?.professor}
               </p>
             </div>
           </div>
