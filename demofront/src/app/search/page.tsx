@@ -102,14 +102,15 @@ const SelectPage: React.FC = () => {
   };
 
   return (
-    <div className="mx-36 pb-10">
+    <div className="bg-gray-300">
+    <div className="mx-36 pb-10 bg-gray-300">
       <h1 className="text-4xl py-5">ค้นหาวิชาเรียน</h1>
       <div className="flex flex-row gap-4">
 
         {/* Search */}
         <div className="rounded border shadow-md p-2 px-4 grow">
           <label className="text-sm" htmlFor="search"></label>
-          <input className="w-full outline-none" type="search" id="search" placeholder="ค้นหารหัสวิชา / ชื่อวิชา" />
+          <input className="w-full outline-none text-black" type="search" id="search" placeholder="ค้นหารหัสวิชา / ชื่อวิชา" />
         </div>
 
         {/* Filter Button */}
@@ -152,7 +153,7 @@ const SelectPage: React.FC = () => {
               {isModalVisible && (
                 <div className="fixed -inset-10 bg-black bg-opacity-50 flex items-center justify-center z-10">
                   <div className="bg-white p-8 rounded shadow-md w-4/12">
-                    <h2 className="text-xl mb-4 font-bold">เพิ่มวิชาใหม่</h2>
+                    <h2 className="text-xl mb-4 font-bold text-black">เพิ่มวิชาใหม่</h2>
                     <SubjectForm onSubmit={handleSubmit} onClose={() => setModalVisible(false)} />
                   </div>
                 </div>
@@ -172,11 +173,11 @@ const SelectPage: React.FC = () => {
           {isFilterMenuVisible && (
             <div className="rounded-md border border-gray-300 w-1/5 h-max">
               <div className="m-4 p-4 space-y-4">
-                <h1 className="text-gray-500/50">วันที่เรียน</h1>
+                <h1 className="text-black">วันที่เรียน</h1>
                 {["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์", "อาทิตย์"].map((day) => (
                   <div key={day}>
                     <input type="checkbox" id={day} />
-                    <label htmlFor={day}> วัน{day}</label>
+                    <label className="text-black" htmlFor={day}> วัน{day}</label>
                   </div>
                 ))}
               </div>
@@ -185,7 +186,7 @@ const SelectPage: React.FC = () => {
                 {[1, 2, 3].map((sec) => (
                   <div key={sec}>
                     <input type="checkbox" id={`sec${sec}`} />
-                    <label htmlFor={`sec${sec}`}> sec {sec}</label>
+                    <label className="text-black" htmlFor={`sec${sec}`}> sec {sec}</label>
                   </div>
                 ))}
               </div>
@@ -202,6 +203,7 @@ const SelectPage: React.FC = () => {
         boxSubject={boxSubject}
         removeSelectedSubject={removeSelectedSubject}
       />
+    </div>
     </div>
   );
 }
