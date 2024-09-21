@@ -17,22 +17,29 @@ const textColor: Record<Day, string> = {
   พฤหัสบดี: "text-orange-500",
   ศุกร์: "text-cyan-500",
 };
+
 interface Section {
   section: string;
-  time: string;
+  time: string;   
+  room: string;
   professor: string;
+  day: string;
 }
 
-
 interface SubjectData {
-  subjectID: string;
-  subjectName: string;
-  subjectCredit: string;
-  studyDays: string[];
-  classroom: string;
-  instructors: string;
-  description: string;
-  sections: Section[];
+  name: String;
+  day: String[];
+  subject_id: String;
+  section: Section[];
+  Time: String;
+  teacher: String;
+  detail: String;
+  credit: number;
+  style: String;
+  midterm: Date;
+  final: Date;
+  midtermTime: String;
+  finalTime: String;
 }
 
 
@@ -63,10 +70,10 @@ const Subject: React.FC<SubjectProps> = ({
         <div key={index} className="rounded border shadow-md p-6">
           <div className="flex space-x-2">
             <p className="font-sans text-xl font-bold">
-              {box.subjectID} {box.subjectName}
+              {box.subject_id} {box.name}
             </p>
             <p className="font-sans text-lg font-bold text-gray-500/50">
-              [{box.subjectCredit} หน่วยกิต]
+              [{box.credit} หน่วยกิต]
             </p>
 
             {/* Delete Button */}
@@ -94,7 +101,7 @@ const Subject: React.FC<SubjectProps> = ({
               <p className="text-sm text-gray-500/50">วันที่เรียน</p>
               <div className="flex space-x-2">
                 {/* แสดงวันที่เรียนของวิชานั้นๆ */}
-                {box.studyDays.map((day, idx) => (
+                {box.day.map((day, idx) => (
                   <p
                     key={idx}
                     className={`text-sm ${textColor[day as Day] || "text-gray-500"} ${
@@ -111,7 +118,7 @@ const Subject: React.FC<SubjectProps> = ({
               <p className="text-sm text-gray-500/50">เวลา</p>
               <p className="text-base">
                 {selectedSections[index] !== "" &&
-                  box.sections.find(
+                  box.section.find(
                     (sec) => sec.section === selectedSections[index]
                   )?.time}
               </p>
@@ -119,14 +126,17 @@ const Subject: React.FC<SubjectProps> = ({
 
             <div className="space-y-2">
               <p className="text-sm text-gray-500/50">ห้องเรียน</p>
-              <p className="text-base">{box.classroom}</p>
+              <p className="text-base"> {selectedSections[index] !== "" &&
+                box.section.find(
+                  (sec) => sec.section === selectedSections[index]
+                )?.room}</p>
             </div>
 
             <div className="space-y-2">
               <p className="text-sm text-gray-500/50">ผู้สอน</p>
               <p className="text-base">
                 {selectedSections[index] !== "" &&
-                  box.sections.find(
+                  box.section.find(
                     (sec) => sec.section === selectedSections[index]
                   )?.professor}
               </p>
@@ -141,7 +151,7 @@ const Subject: React.FC<SubjectProps> = ({
                 onChange={(e) => handleSectionChange(index, e)}
                 className="shadow-md rounded border gap-2 w-20 h-10 flex justify-center items-center p-2 border-blue-900 text-sm"
               >
-                {box.sections.map((sec, secIndex) => (
+                {box.section.map((sec, secIndex) => (
                   <option key={secIndex} value={sec.section}>
                     {sec.section}
                   </option>

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Section = require('./Section');
 
 class Subject {
     constructor() {
@@ -8,20 +9,21 @@ class Subject {
                 required: true,
             },
             day: {
-                type: String,
+                type: [String],
             },
             subject_id: {
                 type: String,
                 required: true,
             },
-            section: {
-                type: String,
-            },
+            sections: [{
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Section'
+            }],
             Time: {  //(เวลาในการเรียนของคาบ)
                 type: String,
             },
-            teacher: {
-                type: String,
+            professors: {
+                type: [String],
             },
             detail: { //(description ของวิชา)
                 type: String,
@@ -48,6 +50,8 @@ class Subject {
         });
         this.model = mongoose.model('Subject', subjectSchema);
     }
+
+    //+ addSection()     |+ getProfessors()
 }
 
 module.exports = Subject;
