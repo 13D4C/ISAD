@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const Section = require('./Section');
 
+
+//// อันนี้ใช้บ่ได้ ตั้งทิ้งไว้ก่อน (mongoose แม่งใช้กับ class ไม่ได้ ต้องทำเป็น model)
 class Subject {
     constructor() {
         const subjectSchema = new mongoose.Schema({

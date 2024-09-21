@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+//// อันนี้ใช้บ่ได้ ตั้งทิ้งไว้ก่อนรอแก้ (mongoose แม่งใช้กับ class ไม่ได้ ต้องทำเป็น model)
+
 class Section {
     constructor() {
         const sectionSchema = new mongoose.Schema({
