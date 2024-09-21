@@ -32,9 +32,11 @@ const ScheduleTable = () => {
       section: "903",
       code: "90642999",
       location: "IT",
-      hidden: false, // Add a hidden state to each subject
+      hidden: false,
     },
   ]);
+
+  const [popupSubject, setPopupSubject] = useState(null); // State to manage the pop-up subject details
 
   const totalCredits = subjects.reduce(
     (total, subject) => total + (subject.hidden ? 0 : subject.duration),
@@ -81,6 +83,16 @@ const ScheduleTable = () => {
     setSubjects((prevSubjects) =>
       prevSubjects.filter((subject) => subject.code !== subjectCode)
     );
+  };
+
+  // Function to handle the subject click and show a pop-up
+  const handleSubjectClick = (subject) => {
+    setPopupSubject(subject); // Set the subject for the pop-up
+  };
+
+  // Function to close the pop-up
+  const closePopup = () => {
+    setPopupSubject(null); // Clear the subject to hide the pop-up
   };
 
   return (
@@ -159,7 +171,8 @@ const ScheduleTable = () => {
                               section={subject.section}
                               code={subject.code}
                               location={subject.location}
-                              onClick={() => toggleVisibility(subject.code)}
+                              // Trigger pop-up on subject click
+                              onClick={() => handleSubjectClick(subject)}
                             />
                           );
                         }
@@ -209,6 +222,27 @@ const ScheduleTable = () => {
           ))}
         </div>
       </div>
+
+      {/* Pop-up for subject details */}
+      {popupSubject && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h3 className="text-lg font-semibold mb-4">{popupSubject.subject}</h3>
+            <p>Code: {popupSubject.code}</p>
+            <p>Room: {popupSubject.room}</p>
+            <p>Section: {popupSubject.section}</p>
+            <p>Location: {popupSubject.location}</p>
+            <p>Time: {popupSubject.startTime}</p>
+            <p>Duration: {popupSubject.duration} hours</p>
+            <button
+              onClick={closePopup}
+              className="mt-4 bg-blue-600 text-white py-2 px-4 rounded-lg"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
