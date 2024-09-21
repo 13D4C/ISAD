@@ -89,11 +89,12 @@ const SubjectDetailBox = ({ subject, onDelete, onToggleVisibility }) => {
       <div className="flex items-center space-x-2">
         {/* Timetable color button */}
         <button
-          className="flex items-center px-4 py-1 rounded-full border bg-pink-100 text-pink-700 hover:bg-pink-200 transition-all"
+          className="flex items-center px-4 py-1 rounded-full border bg-white text-black hover:bg-gray-50 transition-all"
         >
+          {/* Circle with fixed color next to "สีในตาราง" */}
           <span
             className="w-3 h-3 rounded-full mr-2"
-            style={{ backgroundColor: subject.color }}
+            style={{ backgroundColor: "#48A4FF" }} // Fixed blue color #48A4FF
           ></span>
           สีในตาราง
         </button>
