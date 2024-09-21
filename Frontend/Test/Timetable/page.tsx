@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef } from "react";
+import React, { useState, useRef } from "react";
 import SubjectBox from "./SubjectBox";
 import { toPng } from "html-to-image";
 import SubjectDetailBox from "./SubjectDetailBox"; // Import the SubjectDetailBox
@@ -7,26 +7,22 @@ import SubjectDetailBox from "./SubjectDetailBox"; // Import the SubjectDetailBo
 const ScheduleTable = () => {
   const days = ["MON", "TUE", "WED", "THU", "FRI"];
   const hours = [
-    "08:00","09:00","10:00","11:00","12:00",
-    "13:00","14:00","15:00","16:00","18:00",
+    "08:00", "09:00", "10:00", "11:00", "12:00",
+    "13:00", "14:00", "15:00", "16:00", "18:00",
   ];
 
   const hourMap = hours.reduce((acc, hour, index, array) => {
-    // Ensure there is a next hour to map to
     if (index < array.length - 1) {
       const nextHour = array[index + 1];
       acc[hour] = `${hour}-${nextHour}`;
     } else {
-      // If it's the last hour, assume it ends at the next full hour
       acc[hour] = `${hour}-${parseInt(hour.slice(0, 2)) + 1}:00`;
     }
     return acc;
   }, {});
 
-
-
-  // ข้อมูล subjects (แต่ละวิชาที่มีหน่วยกิต)
-  const subjects = [
+  // Initialize subjects with a hidden state for each subject
+  const [subjects, setSubjects] = useState([
     {
       subject: "CHARM SCHOOL",
       day: "WED",
@@ -35,14 +31,13 @@ const ScheduleTable = () => {
       room: "M23",
       section: "903",
       code: "90642999",
-      location: "IT"
+      location: "IT",
+      hidden: false, // Add a hidden state to each subject
     },
-  ];
-  
+  ]);
 
-  // ฟังก์ชันคำนวณหน่วยกิตรวม
   const totalCredits = subjects.reduce(
-    (total, subject) => total + subject.duration,
+    (total, subject) => total + (subject.hidden ? 0 : subject.duration),
     0
   );
 
@@ -67,24 +62,35 @@ const ScheduleTable = () => {
 
   const getSubjectAt = (day, hour) => {
     return subjects.find(
-      (subject) => subject.day === day && subject.startTime === hour
+      (subject) => subject.day === day && subject.startTime === hour && !subject.hidden
     );
   };
 
-  const showCard = (code) => {
-    return alert(code)
-  }
+  const toggleVisibility = (subjectCode) => {
+    setSubjects((prevSubjects) =>
+      prevSubjects.map((subject) =>
+        subject.code === subjectCode
+          ? { ...subject, hidden: !subject.hidden }
+          : subject
+      )
+    );
+  };
+
+  // Function to delete a subject from the state
+  const deleteSubject = (subjectCode) => {
+    setSubjects((prevSubjects) =>
+      prevSubjects.filter((subject) => subject.code !== subjectCode)
+    );
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-white dark:bg-gray-900 mt-5 px-4 md:px-6 lg:px-8 xl:px-0 relative">
       <div className="container mx-auto p-4 sm:p-6 md:p-8 lg:p-10 bg-white dark:bg-gray-800 shadow-xl rounded-2xl w-full md:w-auto">
-        {/* Flex container to align title and buttons on opposite sides */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8">
           <h2 className="text-lg sm:text-xl md:text-3xl font-medium text-black dark:text-white mb-4 md:mb-0">
             จัดตารางเรียน
           </h2>
 
-          {/* Buttons aligned to the right */}
           <div className="flex space-x-2 sm:space-x-3 md:space-x-4">
             <button className="bg-white text-black py-2 sm:py-2.5 md:py-3 px-4 sm:px-6 md:px-8 rounded-lg border border-gray-300 shadow-md hover:bg-blue-700 hover:text-white transition-all">
               ตารางเรียน
@@ -95,7 +101,6 @@ const ScheduleTable = () => {
           </div>
         </div>
 
-        {/* Schedule Table */}
         <div className="overflow-x-auto max-h-[400px] sm:max-h-[500px] border border-gray-200 rounded-lg shadow-lg dark:border-none relative">
           <table
             className="min-w-[1200px] table-fixed border-collapse bg-white dark:bg-gray-200 text-xs sm:text-sm md:text-base"
@@ -119,11 +124,10 @@ const ScheduleTable = () => {
             </thead>
             <tbody>
               {days.map((day) => {
-                let totalColumns = 1; // Start with 1 because the first column is the day column
+                let totalColumns = 1;
 
                 return (
                   <tr key={day}>
-                    {/* Day Column */}
                     <td
                       className="border-b border-r border-gray-300 p-2 sm:p-4 md:p-6 font-semibold text-black text-center dark:border-black"
                       style={{ width: "120px", height: "40px" }}
@@ -134,36 +138,35 @@ const ScheduleTable = () => {
                     {hours.map((hour, hourIndex) => {
                       const subject = getSubjectAt(day, hour);
 
-                      // Calculate available columns left in the row
                       const columnsLeft = 11 - totalColumns;
 
                       if (subject) {
                         const duration = Math.min(
                           subject.duration,
                           columnsLeft
-                        ); // Ensure duration doesn't exceed available columns
+                        );
 
                         if (duration > 0) {
-                          totalColumns += duration; // Increment total columns based on duration
+                          totalColumns += duration;
                           return (
                             <SubjectBox
                               key={`${day}-${hour}`}
                               subject={subject.subject}
                               day={subject.day}
                               startTime={subject.startTime}
-                              duration={duration} // Limit duration to columns left
+                              duration={duration}
                               room={subject.room}
                               section={subject.section}
                               code={subject.code}
                               location={subject.location}
-                              onClick={() => showCard(subject.code)}
+                              onClick={() => toggleVisibility(subject.code)}
                             />
                           );
                         }
                       }
 
                       if (totalColumns < 11) {
-                        totalColumns++; // Increment total columns for empty cell
+                        totalColumns++;
                         return (
                           <td
                             key={`${day}-${hour}`}
@@ -172,7 +175,6 @@ const ScheduleTable = () => {
                         );
                       }
 
-                      // If total columns are 10 or more, stop rendering cells
                       return null;
                     })}
                   </tr>
@@ -182,9 +184,7 @@ const ScheduleTable = () => {
           </table>
         </div>
 
-        {/* Bottom section with export button and subject detail boxes */}
         <div className="mt-8 flex justify-between items-center w-full">
-          {/* Export PNG button aligned to the left */}
           <button
             className="bg-blue-700 text-white border border-blue-700 py-2 px-4 sm:px-6 rounded-lg shadow-md text-xs sm:text-sm md:text-base hover:bg-blue-600 transition-all"
             onClick={exportToPng}
@@ -193,16 +193,19 @@ const ScheduleTable = () => {
             Export PNG
           </button>
 
-          {/* Display total credits aligned to the right */}
           <div className="text-gray-600 dark:text-gray-300">
             หน่วยกิตรวมทั้งหมด: {totalCredits} หน่วยกิต
           </div>
         </div>
 
-        {/* Subject detail boxes */}
         <div className="mt-4">
           {subjects.map((subject) => (
-            <SubjectDetailBox key={subject.code} subject={subject} />
+            <SubjectDetailBox
+              key={subject.code}
+              subject={subject}
+              onToggleVisibility={toggleVisibility}
+              onDelete={deleteSubject} // Pass delete function to the SubjectDetailBox
+            />
           ))}
         </div>
       </div>
