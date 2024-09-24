@@ -332,14 +332,14 @@ function SelectPage() {
                     "เสาร์",
                     "อาทิตย์",
                   ].map((day) => (
-                    <div key={day}>
+                    <div key={day} className="flex gap-2">
                       <input type="checkbox" id={day} />
                       <label htmlFor={day}> {day}</label>
                     </div>
                   ))}
                   <h1 className="text-gray-500/50">Section</h1>
                   {[1, 2, 3].map((sec) => (
-                    <div key={sec}>
+                    <div key={sec} className="flex gap-2">
                       <input type="checkbox" id={`sec${sec}`} />
                       <label htmlFor={`sec${sec}`}> sec {sec}</label>
                     </div>
