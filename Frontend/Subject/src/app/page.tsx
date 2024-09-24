@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import SubjectBox from "./componant/SubjectBox";
-import SubjectForm from "./componant/SubjectForm";
-import SelectSubjects from "./componant/SelectSubject";
+import SubjectBox from "./component/SubjectBox";
+import SubjectForm from "./component/SubjectForm";
+import SelectSubjects from "./component/SelectSubject";
 
 interface SubjectData {
   subjectID: string;
