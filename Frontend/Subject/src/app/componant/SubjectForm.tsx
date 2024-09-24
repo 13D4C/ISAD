@@ -4,6 +4,7 @@ interface Section {
   section: string;
   time: string;
   professor: string;
+  classroom: string;
 }
 
 interface SubjectFormProps {
@@ -16,7 +17,6 @@ interface SubjectData {
   subjectName: string;
   subjectCredit: number;
   studyDays: string[];
-  classroom: string;
   description: string;
   sections: Section[];
 }
@@ -26,10 +26,9 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
   const [subjectName, setSubjectName] = useState<string>("");
   const [subjectCredit, setSubjectCredit] = useState<number>(0);
   const [studyDays, setStudyDays] = useState<string[]>([]);
-  const [classroom, setClassroom] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [sections, setSections] = useState<Section[]>([
-    { section: "", time: "", professor: "" },
+    { section: "", time: "", professor: "", classroom: "" },
   ]);
 
   const days = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์"];
@@ -55,7 +54,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
   };
 
   const handleAddSection = () => {
-    setSections([...sections, { section: "", time: "", professor: "" }]);
+    setSections([...sections, { section: "", time: "", professor: "", classroom: "" }]);
   };
 
   const handleRemoveSection = (index: number) => {
@@ -70,7 +69,6 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
       subjectName,
       subjectCredit,
       studyDays,
-      classroom,
       description,
       sections,
     };
@@ -79,7 +77,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="grid grid-cols-4 gap-2 overflow-y-scroll pr-4 h-96">
+      <div className="grid grid-cols-4 gap-2 overflow-y-scroll pr-2 lg:pr-4 h-80">
         {/* รหัสวิชา */}
         <div className="mb-2">
           <label className="block text-sm font-medium">รหัสวิชา</label>
@@ -125,7 +123,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
         </div>
 
         {/* วันที่เรียน */}
-        <div className="mb-2 col-span-3">
+        <div className="mb-2 col-span-4">
           <label className="block text-sm font-medium">วันที่เรียน</label>
           <div className="grid grid-cols-3 gap-2 pt-2">
             {days.map((day) => (
@@ -143,25 +141,11 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
                     studyDays.includes(day) ? "text-black" : "text-gray-500"
                   }`}
                 >
-                  วัน{day}
+                  {day}
                 </label>
               </div>
             ))}
           </div>
-        </div>
-
-        {/* ห้องเรียน */}
-        <div className="mb-2">
-          <label className="block text-sm font-medium">ห้องเรียน</label>
-          <input
-            type="text"
-            value={classroom}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setClassroom(e.target.value)
-            }
-            className="border rounded p-2 w-full text-sm"
-            required
-          />
         </div>
 
         {/* Description */}
@@ -177,7 +161,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
           ></textarea>
         </div>
 
-        {/* Sections and Times */}
+        {/* Sections, Times, Room, Professor */}
         {sections.map((sec, index) => (
           <div key={index} className="col-span-4 grid grid-cols-4 gap-2 mb-2">
             {/* Section */}
@@ -196,7 +180,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
             </div>
 
             {/* Time */}
-            <div className="col-span-3">
+            <div className="col-span-2">
               <label className="block text-sm font-medium">Time</label>
               <input
                 type="text"
@@ -210,8 +194,22 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
               />
             </div>
 
-            {/* ผู้สอน */}
-            <div className="mb-2 col-span-3">
+            {/* Classroom */}
+            <div className="mb-2">
+              <label className="block text-sm font-medium">ห้องเรียน</label>
+              <input
+                type="text"
+                value={sec.classroom}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  handleSectionChange(index, "classroom", e.target.value)
+                }
+                className="border rounded p-2 w-full text-sm"
+                required
+              />
+            </div>
+
+            {/* Professor */}
+            <div className="mb-2 col-span-4">
               <label className="block text-sm font-medium">ผู้สอน</label>
               <input
                 type="text"
@@ -223,6 +221,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
                 required
               />
             </div>
+
             {index > 0 && (
               <div className="col-span-1 flex items-end">
                 <button
@@ -275,14 +274,14 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
       <div className="flex justify-center space-x-2 pt-8">
         <button
           type="submit"
-          className="bg-blue-900 text-white rounded px-4 py-2 w-1/5"
+          className="bg-blue-900 text-white rounded px-4 py-2 w-24"
         >
           Add
         </button>
         <button
           type="button"
           onClick={onClose}
-          className="bg-red-600 text-white rounded px-4 py-2 w-1/5"
+          className="bg-red-600 text-white rounded px-4 py-2 w-24"
         >
           Cancel
         </button>

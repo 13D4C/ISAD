@@ -68,7 +68,7 @@ const SelectSubjects: React.FC<SelectSubjectsProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
-      <div className="bg-white p-2 rounded shadow-md w-1/3 max-w-lg h-4/5">
+      <div className="bg-white p-2 rounded shadow-md lg:w-1/3 w-80">
         <div className="p-6 pb-0 flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">วิชาที่เลือก</h2>
           <button
@@ -90,7 +90,7 @@ const SelectSubjects: React.FC<SelectSubjectsProps> = ({
           </button>
         </div>
 
-        <div className="h-4/6 mt-8 mb-4 overflow-y-scroll pl-4 pr-4">
+        <div className="h-72 mt-8 mb-4 overflow-y-scroll pl-4 pr-4">
           {selectSubjects.length === 0 ? (
             <div className="pb-10 h-full">
               <div className="flex justify-center items-center h-full">
@@ -102,7 +102,7 @@ const SelectSubjects: React.FC<SelectSubjectsProps> = ({
           )}
         </div>
 
-        <div className="p-6 pt-0">
+        <div className="p-6 xl:pt-20">
           <p className="p-2 font-medium text-blue-900">
             รวม {getTotalCredits()} หน่วยกิต
           </p>
