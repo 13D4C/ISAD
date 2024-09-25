@@ -1,24 +1,9 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
-
-interface Section {
-  section: string;
-  time: string;
-  professor: string;
-  classroom: string;
-}
+import { Section, SubjectData } from '../components/interface';
 
 interface SubjectFormProps {
   onSubmit: (subjectData: SubjectData) => void;
   onClose: () => void;
-}
-
-interface SubjectData {
-  subjectID: string;
-  subjectName: string;
-  subjectCredit: number;
-  studyDays: string[];
-  description: string;
-  sections: Section[];
 }
 
 const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
@@ -28,7 +13,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
   const [studyDays, setStudyDays] = useState<string[]>([]);
   const [description, setDescription] = useState<string>("");
   const [sections, setSections] = useState<Section[]>([
-    { section: "", time: "", professor: "", classroom: "" },
+    { section: null, time: "", day : "",professor: "", room: "" },
   ]);
 
   const days = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์"];
@@ -49,12 +34,16 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
     value: string
   ) => {
     const updatedSections = [...sections];
-    updatedSections[index][field] = value;
+    if (field === "section") {
+      updatedSections[index][field] = value ? parseInt(value) : null; // Ensure correct type
+    } else {
+      updatedSections[index][field] = value;
+    }
     setSections(updatedSections);
   };
 
   const handleAddSection = () => {
-    setSections([...sections, { section: "", time: "", professor: "", classroom: "" }]);
+    setSections([...sections, { section: null, time: "", day: "", professor: "", room: "" }]);
   };
 
   const handleRemoveSection = (index: number) => {
@@ -65,12 +54,19 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     const subjectData: SubjectData = {
-      subjectID,
-      subjectName,
-      subjectCredit,
+      subject_id: subjectID,
+      name: subjectName,
+      credit: subjectCredit,
       studyDays,
-      description,
+      detail: description,
       sections,
+      day: [], // Assuming 'day' should be handled on the backend
+      professors: [], // Assuming professors will be added later
+      midterm: new Date(), // Default values, modify as needed
+      final: new Date(),
+      midtermTime: "",
+      finalTime: "",
+      style: ""
     };
     onSubmit(subjectData);
   };
@@ -168,7 +164,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
               <label className="block text-sm font-medium">Sec</label>
               <input
                 type="text"
-                value={sec.section}
+                value={sec.section !== null ? sec.section.toString() : ""}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   handleSectionChange(index, "section", e.target.value)
                 }
@@ -198,9 +194,9 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
               <label className="block text-sm font-medium">ห้องเรียน</label>
               <input
                 type="text"
-                value={sec.classroom}
+                value={sec.room}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  handleSectionChange(index, "classroom", e.target.value)
+                  handleSectionChange(index, "room", e.target.value)
                 }
                 className="border rounded p-2 w-full text-sm"
                 required

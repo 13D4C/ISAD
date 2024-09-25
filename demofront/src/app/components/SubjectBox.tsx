@@ -1,22 +1,8 @@
 import React, { useState } from "react";
-
-interface Section {
-  section: string;
-  time: string;
-  professor: string;
-  classroom: string;
-}
-
-interface SubjectBox {
-  subjectID: string;
-  subjectName: string;
-  subjectCredit: number;
-  studyDays: string[];
-  sections: Section[];
-}
+import { Section, SubjectData } from '../components/interface';
 
 interface SubjectProps {
-  BoxSubject: SubjectBox[];
+  BoxSubject: SubjectData[];
   DeleteSubject: (index: number) => void;
   toggleSubjectSelection: (index: number) => void;
   selectSubjects: number[];
@@ -46,31 +32,32 @@ const Subject: React.FC<SubjectProps> = ({
   selectSubjects,
   isSMScreen,
 }) => {
-  const [selectedSections, setSelectedSections] = useState<{
-    [index: number]: string;
-  }>({});
+  const [selectedSections, setSelectedSections] = useState<{ [index: number]: number | null }>({});
+
 
   const handleSectionChange = (
     index: number,
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
+    const value = event.target.value ? Number(event.target.value) : null; // Convert to number or null
     setSelectedSections((prev) => ({
       ...prev,
-      [index]: event.target.value,
+      [index]: value,
     }));
   };
+
 
   return (
     <div className="space-y-4">
       {BoxSubject.map((box, index) => (
         <div key={index} className="rounded border shadow-md p-6">
           <div className="flex space-x-2 flex-wrap">
-            <p className="text-xl font-bold text-blue-900">{box.subjectID}</p>
+            <p className="text-xl font-bold text-blue-900">{box.subject_id}</p>
             <button className="text-xl font-bold hover:underline text-blue-900 hover:text-blue-950">
-              {box.subjectName}
+              {box.name}
             </button>
             <p className="text-lg font-bold text-gray-500/50">
-              [{box.subjectCredit} หน่วยกิต]
+              [{box.credit} หน่วยกิต]
             </p>
 
             {/* Delete Button */}
@@ -118,27 +105,27 @@ const Subject: React.FC<SubjectProps> = ({
               <div className="space-y-2">
                 <p className="text-sm text-gray-500/50">เวลา</p>
                 <p className="text-base">
-                  {selectedSections[index] !== "" &&
+                  {selectedSections[index] !== null && // Check against null
                     box.sections.find(
                       (sec) => sec.section === selectedSections[index]
-                    )?.time}
+                    )?.professor}
                 </p>
               </div>
 
               <div className="space-y-2">
                 <p className="text-sm text-gray-500/50">ห้องเรียน</p>
                 <p className="text-base">
-                  {selectedSections[index] !== "" &&
+                  {selectedSections[index] !== null && // Check against null
                     box.sections.find(
                       (sec) => sec.section === selectedSections[index]
-                    )?.classroom}
+                    )?.professor}
                 </p>
               </div>
 
               <div className="space-y-2">
                 <p className="text-sm text-gray-500/50">ผู้สอน</p>
                 <p className="text-base">
-                  {selectedSections[index] !== "" &&
+                  {selectedSections[index] !== null && // Check against null
                     box.sections.find(
                       (sec) => sec.section === selectedSections[index]
                     )?.professor}
@@ -158,11 +145,13 @@ const Subject: React.FC<SubjectProps> = ({
                     <option value="" disabled className="text-blue-900">
                       Sec
                     </option>
-                    {box.sections.map((sec, secIndex) => (
-                      <option key={secIndex} value={sec.section}>
-                        {sec.section}
-                      </option>
-                    ))}
+                    {box.sections.map((sec, secIndex) =>
+                      sec.section !== null ? ( // Check if sec.section is not null
+                        <option key={secIndex} value={sec.section}>
+                          {sec.section}
+                        </option>
+                      ) : null // Skip rendering if sec.section is null
+                    )}
                   </select>
 
                   {/* ปุ่มเลือกวิชา */}
@@ -216,11 +205,13 @@ const Subject: React.FC<SubjectProps> = ({
                   onChange={(e) => handleSectionChange(index, e)}
                   className="shadow-md rounded border gap-2 w-20 h-10 flex justify-center items-center p-2 border-blue-900 text-sm"
                 >
-                  {box.sections.map((sec, secIndex) => (
-                    <option key={secIndex} value={sec.section}>
-                      {sec.section}
-                    </option>
-                  ))}
+                    {box.sections.map((sec, secIndex) =>
+                      sec.section !== null ? ( 
+                        <option key={secIndex} value={sec.section}>
+                          {sec.section}
+                        </option>
+                      ) : null 
+                    )}
                 </select>
 
                 {/* ปุ่มเลือกวิชา */}

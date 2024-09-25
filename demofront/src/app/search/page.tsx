@@ -3,24 +3,7 @@ import React, { useState, useEffect } from "react";
 import SubjectBox from "../components/SubjectBox";
 import SubjectForm from "../components/SubjectForm";
 import SelectSubjects from "../components/SelectSubject";
-
-// Define the type for subject data
-interface Section {
-  section: string;
-  time: string;
-  professor: string;
-}
-
-interface SubjectData {
-  subjectID: string;
-  subjectName: string;
-  subjectCredit: string;
-  studyDays: string[];
-  classroom: string;
-  instructors: string;
-  description: string;
-  sections: Section[];
-}
+import { Section, SubjectData } from '../components/interface';
 
 // Define the type for select page state
 interface SelectPageState {
@@ -37,6 +20,7 @@ const SelectPage: React.FC = () => {
   const [boxSubject, setBoxSubject] = useState<SubjectData[]>([]);
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const [isSelectSubjectsVisible, setSelectSubjectsVisible] = useState<boolean>(false);
+  const [isSMScreen, setIsSMScreen] = useState<boolean>(false);
   const roleChecker = localStorage.getItem('role');
   // Function to add a subject
   const addSubject = (subjectData: SubjectData) => {
@@ -46,6 +30,15 @@ const SelectPage: React.FC = () => {
       return updatedBox;
     });
   };
+  const updateScreenSize = () => {
+    setIsSMScreen(window.innerWidth <= 640); // Set threshold for small screen (640px)
+  };
+  useEffect(() => {
+    updateScreenSize(); // Initial check
+    window.addEventListener("resize", updateScreenSize);
+
+    return () => window.removeEventListener("resize", updateScreenSize);
+  }, []);
 
   // Function to delete a subject
   const deleteSubject = (index: number) => {
@@ -102,8 +95,8 @@ const SelectPage: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-300">
-    <div className="mx-36 pb-10 bg-gray-300">
+    <div>
+    <div className="mx-36 pb-10">
       <h1 className="text-4xl py-5">ค้นหาวิชาเรียน</h1>
       <div className="flex flex-row gap-4">
 
@@ -162,6 +155,7 @@ const SelectPage: React.FC = () => {
                   DeleteSubject={deleteSubject}
                   toggleSubjectSelection={toggleSubjectSelection}
                   selectSubjects={selectSubjects}
+                  isSMScreen={isSMScreen}
                 />
               </div>
             </div>

@@ -7,7 +7,7 @@ const sectionSchema = new mongoose.Schema({
         required: true
     },
     section: {
-        type: String,
+        type: Number,
     },
     professor: {
         type: String,

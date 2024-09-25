@@ -1,16 +1,34 @@
 import React from "react";
+import { SubjectData, Section } from '../components/interface';
 
-type Subject = {
-  subjectID: string;
-  subjectName: string;
-  subjectCredit: number;
-};
+interface Section {
+  section: number | null;
+  time: string;
+  professor: string;
+  room: string;
+  day: string;
+}
 
+interface SubjectData {
+  name: String;
+  day: string[];
+  subject_id: string;
+  sections: Section[];
+  studyDays: string[];
+  professors: string[];
+  detail: string;
+  credit: number;
+  style: string;
+  midterm: Date;
+  final: Date;
+  midtermTime: String;
+  finalTime: String;
+}
 interface SelectSubjectsProps {
   isVisible: boolean;
   onClose: () => void;
   selectSubjects: number[];
-  boxSubject: Subject[];
+  boxSubject: SubjectData[];
   removeSelectedSubject: (index: number) => void;
 }
 
@@ -30,11 +48,11 @@ const SelectSubjects: React.FC<SelectSubjectsProps> = ({
         <div key={index} className="flex justify-between p-2 border-b">
           <div className="flex">
             <p>
-              {subject.subjectID} {subject.subjectName}
+              {subject.subject_id} {subject.name}
             </p>
             <p className="text-gray-400">
               {"[ "}
-              {subject.subjectCredit} หน่วยกิต{" ]"}
+              {subject.credit} หน่วยกิต{" ]"}
             </p>
           </div>
           <button
@@ -62,7 +80,7 @@ const SelectSubjects: React.FC<SelectSubjectsProps> = ({
   const getTotalCredits = () => {
     return selectSubjects.reduce((total, index) => {
       const subject = boxSubject[index];
-      return total + Number(subject.subjectCredit);
+      return total + Number(subject.credit);
     }, 0);
   };
 

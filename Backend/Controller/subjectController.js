@@ -5,7 +5,7 @@ const SubjectModel = require('../models/SubjectModel');
 class SubjectController {
     async addSubject(req, res) {
         try {
-            let { name, subject_id, sections, Time, detail, credit, style, midterm, final, midtermTime, finalTime } = req.body;
+            let { name, subject_id, sections, detail, credit, style, midterm, final, midtermTime, finalTime } = req.body;
             const existingSubject = await SubjectModel.findOne({ subject_id });
             if (existingSubject) {
                 return res.status(400).json({ message: 'Subject already exists' });
@@ -14,7 +14,6 @@ class SubjectController {
             const subject = new SubjectModel({
                 name, 
                 subject_id, 
-                Time, 
                 detail, 
                 credit, 
                 style, 

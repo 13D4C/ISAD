@@ -21,9 +21,6 @@ class Subject {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'Section'
             }],
-            Time: {  //(เวลาในการเรียนของคาบ)
-                type: String,
-            },
             professors: {
                 type: [String],
             },
