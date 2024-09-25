@@ -4,6 +4,7 @@ export interface Section {
     professor: string;
     room: string;
     day: string;
+    style: string;
 }
 
 export interface SubjectData {
@@ -11,11 +12,10 @@ export interface SubjectData {
     day: string[];
     subject_id: string;
     sections: Section[];
-    studyDays: string[];
     professors: string[];
     detail: string;
     credit: number;
-    style: string;
+    style: string[];
     midterm: Date;
     final: Date;
     midtermTime: String;

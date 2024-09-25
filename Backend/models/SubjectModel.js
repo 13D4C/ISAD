@@ -27,7 +27,7 @@ const subjectSchema = new mongoose.Schema({
         required: true,
     },
     style: {  //(คืออะไรนะ จำไม่ได้)
-        type: String,
+        type: [String],
     },
     midterm: { //(วันสอบ midterm)
         type: Date,

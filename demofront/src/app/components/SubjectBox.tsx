@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Section, SubjectData } from '../components/interface';
 
 interface SubjectProps {
@@ -46,6 +46,15 @@ const Subject: React.FC<SubjectProps> = ({
     }));
   };
 
+  useEffect(() => {
+    const initialSelections: { [index: number]: number | null } = {};
+    BoxSubject.forEach((box, index) => {
+      if (box.sections.length > 0 && box.sections[0].section !== null) {
+        initialSelections[index] = box.sections[0].section; // Set to first section
+      }
+    });
+    setSelectedSections(initialSelections);
+  }, [BoxSubject]);
 
   return (
     <div className="space-y-4">
@@ -89,7 +98,7 @@ const Subject: React.FC<SubjectProps> = ({
                 <p className="text-sm text-gray-500/50">วันที่เรียน</p>
                 <div className="flex space-x-2">
                   {/* แสดงวันที่เรียนของวิชานั้นๆ */}
-                  {box.studyDays.map((day, idx) => (
+                  {box.day.map((day, idx) => (
                     <p
                       key={idx}
                       className={`text-sm ${textColor[day] || "text-gray-500"
@@ -108,7 +117,7 @@ const Subject: React.FC<SubjectProps> = ({
                   {selectedSections[index] !== null && // Check against null
                     box.sections.find(
                       (sec) => sec.section === selectedSections[index]
-                    )?.professor}
+                    )?.time}
                 </p>
               </div>
 
@@ -118,7 +127,7 @@ const Subject: React.FC<SubjectProps> = ({
                   {selectedSections[index] !== null && // Check against null
                     box.sections.find(
                       (sec) => sec.section === selectedSections[index]
-                    )?.professor}
+                    )?.room}
                 </p>
               </div>
 
@@ -131,6 +140,15 @@ const Subject: React.FC<SubjectProps> = ({
                     )?.professor}
                 </p>
               </div>
+              <div className="space-y-2">
+                <p className="text-sm text-gray-500/50">รูปแบบ</p>
+                <p className="text-base">
+                  {selectedSections[index] !== null && // Check against null
+                    box.sections.find(
+                      (sec) => sec.section === selectedSections[index]
+                    )?.style}
+                </p>
+              </div>
             </div>
 
             {!isSMScreen ? (
@@ -138,7 +156,7 @@ const Subject: React.FC<SubjectProps> = ({
                 {/* ปุ่มเลือก sec */}
                 <div className="absolute bottom-0 right-0 flex space-x-2">
                   <select
-                    value={selectedSections[index] || ""}
+                    value={selectedSections[index] || 1}
                     onChange={(e) => handleSectionChange(index, e)}
                     className="shadow-md rounded border w-20 h-10 flex justify-center items-center p-2 border-blue-900 text-sm"
                   >

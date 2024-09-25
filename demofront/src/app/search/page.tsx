@@ -4,6 +4,7 @@ import SubjectBox from "../components/SubjectBox";
 import SubjectForm from "../components/SubjectForm";
 import SelectSubjects from "../components/SelectSubject";
 import { Section, SubjectData } from '../components/interface';
+import axios from "axios";
 
 // Define the type for select page state
 interface SelectPageState {
@@ -23,6 +24,16 @@ const SelectPage: React.FC = () => {
   const [isSMScreen, setIsSMScreen] = useState<boolean>(false);
   const roleChecker = localStorage.getItem('role');
   // Function to add a subject
+  const fetchSubjectsFromDatabase = async () => {
+    try {
+      const response = await axios.get('http://localhost:8888/api/fetchSubject'); // Adjust the API endpoint as per your backend setup
+      const subjectsFromDB = response.data as SubjectData[];
+      setBoxSubject(subjectsFromDB);
+    } catch (error) {
+      console.error("Error fetching subjects from the database:", error);
+    }
+  };
+  
   const addSubject = (subjectData: SubjectData) => {
     setBoxSubject((prevBoxSubject) => {
       const updatedBox = [...prevBoxSubject, subjectData];
@@ -59,6 +70,9 @@ const SelectPage: React.FC = () => {
       }
     });
   };
+  useEffect(() => {
+    fetchSubjectsFromDatabase();
+  }, []);
 
   // Load subjects from local storage
   useEffect(() => {

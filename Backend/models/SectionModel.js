@@ -21,6 +21,9 @@ const sectionSchema = new mongoose.Schema({
     time: {
         type: String,
     },
+    style: {
+        type: String,
+    }
 });
 
 const sectionModel = mongoose.model('Section', sectionSchema);

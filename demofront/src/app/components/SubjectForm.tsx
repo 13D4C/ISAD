@@ -1,5 +1,6 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { Section, SubjectData } from '../components/interface';
+import axios from "axios";
 
 interface SubjectFormProps {
   onSubmit: (subjectData: SubjectData) => void;
@@ -10,23 +11,26 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
   const [subjectID, setSubjectID] = useState<string>("");
   const [subjectName, setSubjectName] = useState<string>("");
   const [subjectCredit, setSubjectCredit] = useState<number>(0);
-  const [studyDays, setStudyDays] = useState<string[]>([]);
+  const [day, setDay] = useState<string[]>([]);
+  const [style, setStyle] = useState<string[]>([]);
+  const [midtermDay, setMidtermDay] = useState<string>("");
+  const [midtermTime, setMidtermTime] = useState<string>("");
+  const [finalDay, setFinalDay] = useState<string>("");
+  const [finalTime, setFinalTime] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [sections, setSections] = useState<Section[]>([
-    { section: null, time: "", day : "",professor: "", room: "" },
+    { section: null, time: "", day: "", professor: "", room: "", style: "" },
   ]);
+
 
   const days = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์"];
 
-  const handleDaySelection = (day: string) => {
-    setStudyDays((prevStudyDays) => {
-      if (prevStudyDays.includes(day)) {
-        return prevStudyDays.filter((d) => d !== day);
-      } else {
-        return [...prevStudyDays, day];
-      }
-    });
+  const handleDaySelection = (index: number, day: string) => {
+    const updatedSections = [...sections];
+    updatedSections[index].day = updatedSections[index].day === day ? "" : day; // Toggle selection
+    setSections(updatedSections);
   };
+
 
   const handleSectionChange = (
     index: number,
@@ -43,7 +47,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
   };
 
   const handleAddSection = () => {
-    setSections([...sections, { section: null, time: "", day: "", professor: "", room: "" }]);
+    setSections([...sections, { section: null, time: "", day: "", professor: "", room: "", style: style.join(", ") }]);
   };
 
   const handleRemoveSection = (index: number) => {
@@ -51,13 +55,12 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
     setSections(updatedSections);
   };
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     const subjectData: SubjectData = {
       subject_id: subjectID,
       name: subjectName,
       credit: subjectCredit,
-      studyDays,
       detail: description,
       sections,
       day: [], // Assuming 'day' should be handled on the backend
@@ -66,9 +69,15 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
       final: new Date(),
       midtermTime: "",
       finalTime: "",
-      style: ""
+      style: []
     };
-    onSubmit(subjectData);
+    try {
+      const response = await axios.post('http://localhost:8888/api/addSubject', subjectData);
+      console.log("Subject added:", response.data); 
+      onSubmit(subjectData);
+    } catch (error) {
+      console.error("Error adding subject:", error);
+    }
   };
 
   return (
@@ -118,30 +127,58 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
           />
         </div>
 
-        {/* วันที่เรียน */}
-        <div className="mb-2 col-span-4">
-          <label className="block text-sm font-medium">วันที่เรียน</label>
-          <div className="grid grid-cols-3 gap-2 pt-2">
-            {days.map((day) => (
-              <div key={day} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id={day}
-                  value={day}
-                  checked={studyDays.includes(day)}
-                  onChange={() => handleDaySelection(day)}
-                />
-                <label
-                  htmlFor={day}
-                  className={`text-sm ${studyDays.includes(day) ? "text-black" : "text-gray-500"
-                    }`}
-                >
-                  {day}
-                </label>
-              </div>
-            ))}
-          </div>
+        {/* วันสอบ midterm */}
+        <div className="mb-2 col-span-2">
+          <label className="block text-sm font-medium">วันสอบกลางภาค</label>
+          <input
+            type="date"
+            value={midtermDay}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setMidtermDay(e.target.value)
+            }
+            className="border rounded p-2 w-full text-sm"
+            required
+          />
         </div>
+        <div className="mb-2 col-span-2">
+          <label className="block text-sm font-medium">ช่วงเวลา</label>
+          <input
+            type="text"
+            value={midtermTime}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setMidtermTime(e.target.value)
+            }
+            className="border rounded p-2 w-full text-sm"
+            required
+          />
+        </div>
+
+        {/* วันสอบ final */}
+        <div className="mb-2 col-span-2">
+          <label className="block text-sm font-medium">วันสอบปลายภาค</label>
+          <input
+            type="date"
+            value={finalDay}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setFinalDay(e.target.value)
+            }
+            className="border rounded p-2 w-full text-sm"
+            required
+          />
+        </div>
+        <div className="mb-2 col-span-2">
+          <label className="block text-sm font-medium">ช่วงเวลา</label>
+          <input
+            type="text"
+            value={finalTime}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setFinalTime(e.target.value)
+            }
+            className="border rounded p-2 w-full text-sm"
+            required
+          />
+        </div>
+        
 
         {/* Description */}
         <div className="mb-2 col-span-4">
@@ -203,18 +240,57 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
               />
             </div>
 
-            {/* Professor */}
+            {/* วันที่เรียน */}
             <div className="mb-2 col-span-4">
-              <label className="block text-sm font-medium">ผู้สอน</label>
-              <input
-                type="text"
-                value={sec.professor}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  handleSectionChange(index, "professor", e.target.value)
-                }
-                className="border rounded p-2 w-full text-sm"
-                required
-              />
+              <label className="block text-sm font-medium">วันที่เรียน</label>
+              <div className="grid grid-cols-3 gap-2 pt-2">
+                {days.map((day) => (
+                  <div key={day} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={`${day}-${index}`} // Unique ID for each section
+                      checked={sec.day === day} // Check if the section's day matches
+                      onChange={() => handleDaySelection(index, day)} // Pass index to differentiate sections
+                    />
+                    <label
+                      htmlFor={`${day}-${index}`}
+                      className={`text-sm ${sec.day === day ? "text-black" : "text-gray-500"}`}
+                    >
+                      {day}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+
+            {/* Professor */}
+            <div className="col-span-4 grid grid-cols-2 gap-2 mb-2">
+              <div className="mb-2">
+                <label className="block text-sm font-medium">ผู้สอน</label>
+                <input
+                  type="text"
+                  value={sec.professor}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    handleSectionChange(index, "professor", e.target.value)
+                  }
+                  className="border rounded p-2 w-full text-sm"
+                  required
+                />
+              </div>
+              {/* รูปแบบการสอน */}
+              <div className="mb-2">
+                <label className="block text-sm font-medium">รูปแบบการสอน</label>
+                <input
+                  type="text"
+                  value={sec.style}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    handleSectionChange(index, "style", e.target.value)
+                  }
+                  className="border rounded p-2 w-full text-sm"
+                  required
+                />
+              </div>
             </div>
 
             {index > 0 && (
