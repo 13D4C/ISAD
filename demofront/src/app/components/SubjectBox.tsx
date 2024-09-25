@@ -1,8 +1,29 @@
 import React, { useState } from "react";
 
-type Day = "จันทร์" | "อังคาร" | "พุธ" | "พฤหัสบดี" | "ศุกร์";
+interface Section {
+  section: string;
+  time: string;
+  professor: string;
+  classroom: string;
+}
 
-const bgColor: Record<Day, string> = {
+interface SubjectBox {
+  subjectID: string;
+  subjectName: string;
+  subjectCredit: number;
+  studyDays: string[];
+  sections: Section[];
+}
+
+interface SubjectProps {
+  BoxSubject: SubjectBox[];
+  DeleteSubject: (index: number) => void;
+  toggleSubjectSelection: (index: number) => void;
+  selectSubjects: number[];
+  isSMScreen: boolean;
+}
+
+const bgColor: { [key: string]: string } = {
   จันทร์: "bg-yellow-100",
   อังคาร: "bg-rose-100",
   พุธ: "bg-lime-200",
@@ -10,7 +31,7 @@ const bgColor: Record<Day, string> = {
   ศุกร์: "bg-cyan-100",
 };
 
-const textColor: Record<Day, string> = {
+const textColor: { [key: string]: string } = {
   จันทร์: "text-yellow-500",
   อังคาร: "text-pink-500",
   พุธ: "text-lime-700",
@@ -18,46 +39,21 @@ const textColor: Record<Day, string> = {
   ศุกร์: "text-cyan-500",
 };
 
-interface Section {
-  section: string;
-  time: string;   
-  room: string;
-  professor: string;
-  day: string;
-}
-
-interface SubjectData {
-  name: String;
-  day: String[];
-  subject_id: String;
-  section: Section[];
-  Time: String;
-  teacher: String;
-  detail: String;
-  credit: number;
-  style: String;
-  midterm: Date;
-  final: Date;
-  midtermTime: String;
-  finalTime: String;
-}
-
-
-interface SubjectProps {
-  BoxSubject: SubjectData[];
-  DeleteSubject: (subjectIndex: number) => void;
-  toggleSubjectSelection: (subjectIndex: number) => void;
-  selectSubjects: number[];
-}
 const Subject: React.FC<SubjectProps> = ({
   BoxSubject,
   DeleteSubject,
   toggleSubjectSelection,
   selectSubjects,
+  isSMScreen,
 }) => {
-  const [selectedSections, setSelectedSections] = useState<{ [key: number]: string } > ({});
+  const [selectedSections, setSelectedSections] = useState<{
+    [index: number]: string;
+  }>({});
 
-  const handleSectionChange = (index: number, event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSectionChange = (
+    index: number,
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     setSelectedSections((prev) => ({
       ...prev,
       [index]: event.target.value,
@@ -68,20 +64,24 @@ const Subject: React.FC<SubjectProps> = ({
     <div className="space-y-4">
       {BoxSubject.map((box, index) => (
         <div key={index} className="rounded border shadow-md p-6">
-          <div className="flex space-x-2">
-            <p className="font-sans text-xl font-bold">
-              {box.subject_id} {box.name}
-            </p>
-            <p className="font-sans text-lg font-bold text-gray-500/50">
-              [{box.credit} หน่วยกิต]
+          <div className="flex space-x-2 flex-wrap">
+            <p className="text-xl font-bold text-blue-900">{box.subjectID}</p>
+            <button className="text-xl font-bold hover:underline text-blue-900 hover:text-blue-950">
+              {box.subjectName}
+            </button>
+            <p className="text-lg font-bold text-gray-500/50">
+              [{box.subjectCredit} หน่วยกิต]
             </p>
 
             {/* Delete Button */}
-            <button onClick={() => DeleteSubject(index)} className="ml-4">
+            <button
+              onClick={() => DeleteSubject(index)}
+              className="ml-4 text-red-600 hover:text-red-700"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
-                fill="#dc2626"
+                fill="CurrentColor"
                 className="size-5"
               >
                 <path
@@ -96,111 +96,176 @@ const Subject: React.FC<SubjectProps> = ({
           <br />
           <br />
 
-          <div className="flex space-x-10">
-            <div className="space-y-2">
-              <p className="text-sm text-gray-500/50">วันที่เรียน</p>
-              <div className="flex space-x-2">
-                {/* แสดงวันที่เรียนของวิชานั้นๆ */}
-                {box.day.map((day, idx) => (
-                  <p
-                    key={idx}
-                    className={`text-sm ${textColor[day as Day] || "text-gray-500"} ${
-                      bgColor[day as Day] || "bg-gray-100"
-                    } rounded-full max-w-fit px-3 py-1`}
-                  >
-                    วัน{day}
-                  </p>
-                ))}
+          <div className="flex flex-col">
+            <div className="lg:flex lg:space-x-10 flex flex-wrap gap-x-12 gap-y-3">
+              <div className="space-y-2">
+                <p className="text-sm text-gray-500/50">วันที่เรียน</p>
+                <div className="flex space-x-2">
+                  {/* แสดงวันที่เรียนของวิชานั้นๆ */}
+                  {box.studyDays.map((day, idx) => (
+                    <p
+                      key={idx}
+                      className={`text-sm ${textColor[day] || "text-gray-500"
+                        } ${bgColor[day] || "bg-gray-100"
+                        } rounded-full max-w-fit px-3 py-1`}
+                    >
+                      {day}
+                    </p>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm text-gray-500/50">เวลา</p>
+                <p className="text-base">
+                  {selectedSections[index] !== "" &&
+                    box.sections.find(
+                      (sec) => sec.section === selectedSections[index]
+                    )?.time}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm text-gray-500/50">ห้องเรียน</p>
+                <p className="text-base">
+                  {selectedSections[index] !== "" &&
+                    box.sections.find(
+                      (sec) => sec.section === selectedSections[index]
+                    )?.classroom}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm text-gray-500/50">ผู้สอน</p>
+                <p className="text-base">
+                  {selectedSections[index] !== "" &&
+                    box.sections.find(
+                      (sec) => sec.section === selectedSections[index]
+                    )?.professor}
+                </p>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <p className="text-sm text-gray-500/50">เวลา</p>
-              <p className="text-base">
-                {selectedSections[index] !== "" &&
-                  box.section.find(
-                    (sec) => sec.section === selectedSections[index]
-                  )?.time}
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-sm text-gray-500/50">ห้องเรียน</p>
-              <p className="text-base"> {selectedSections[index] !== "" &&
-                box.section.find(
-                  (sec) => sec.section === selectedSections[index]
-                )?.room}</p>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-sm text-gray-500/50">ผู้สอน</p>
-              <p className="text-base">
-                {selectedSections[index] !== "" &&
-                  box.section.find(
-                    (sec) => sec.section === selectedSections[index]
-                  )?.professor}
-              </p>
-            </div>
-          </div>
-
-          <div className="relative">
-            {/* ปุ่มเลือก sec */}
-            <div className="absolute bottom-0 right-0 flex space-x-2">
-              <select
-                value={selectedSections[index] || ""}
-                onChange={(e) => handleSectionChange(index, e)}
-                className="shadow-md rounded border gap-2 w-20 h-10 flex justify-center items-center p-2 border-blue-900 text-sm"
-              >
-                {box.section.map((sec, secIndex) => (
-                  <option key={secIndex} value={sec.section}>
-                    {sec.section}
-                  </option>
-                ))}
-              </select>
-
-              {/* ปุ่มเลือกวิชา */}
-              <button
-                onClick={() => toggleSubjectSelection(index)}
-                className={`shadow-md rounded border gap-2 w-20 h-10 flex justify-center items-center ${
-                  selectSubjects.includes(index)
-                    ? "bg-white hover:bg-gray-100 text-blue-900 border-blue-900"
-                    : "bg-blue-900 hover:bg-blue-950 text-white"
-                }`}
-              >
-                {selectSubjects.includes(index) ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2"
-                    stroke="currentColor"
-                    className="size-4 text-current"
+            {!isSMScreen ? (
+              <div className="relative">
+                {/* ปุ่มเลือก sec */}
+                <div className="absolute bottom-0 right-0 flex space-x-2">
+                  <select
+                    value={selectedSections[index] || ""}
+                    onChange={(e) => handleSectionChange(index, e)}
+                    className="shadow-md rounded border w-20 h-10 flex justify-center items-center p-2 border-blue-900 text-sm"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2"
-                    stroke="currentColor"
-                    className="size-4 text-current"
+                    <option value="" disabled className="text-blue-900">
+                      Sec
+                    </option>
+                    {box.sections.map((sec, secIndex) => (
+                      <option key={secIndex} value={sec.section}>
+                        {sec.section}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* ปุ่มเลือกวิชา */}
+                  <button
+                    onClick={() => toggleSubjectSelection(index)}
+                    className={`shadow-md rounded border gap-2 w-20 h-10 flex justify-center items-center ${selectSubjects.includes(index)
+                        ? "bg-white hover:bg-gray-100 text-blue-900 border-blue-900"
+                        : "bg-blue-900 hover:bg-blue-950 text-white"
+                      }`}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 4.5v15m7.5-7.5h-15"
-                    />
-                  </svg>
-                )}
-                <p className="text-sm">เลือก</p>
-              </button>
-            </div>
+                    {selectSubjects.includes(index) ? (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="2"
+                        stroke="currentColor"
+                        className="size-4 text-current"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="2"
+                        stroke="currentColor"
+                        className="size-4 text-current"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 4.5v15m7.5-7.5h-15"
+                        />
+                      </svg>
+                    )}
+                    <p className="text-sm">เลือก</p>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex space-x-2 pt-3">
+                {/* ปุ่มเลือก sec */}
+                <select
+                  value={selectedSections[index] || ""}
+                  onChange={(e) => handleSectionChange(index, e)}
+                  className="shadow-md rounded border gap-2 w-20 h-10 flex justify-center items-center p-2 border-blue-900 text-sm"
+                >
+                  {box.sections.map((sec, secIndex) => (
+                    <option key={secIndex} value={sec.section}>
+                      {sec.section}
+                    </option>
+                  ))}
+                </select>
+
+                {/* ปุ่มเลือกวิชา */}
+                <button
+                  onClick={() => toggleSubjectSelection(index)}
+                  className={`shadow-md rounded border gap-2 w-full h-10 flex justify-center items-center ${selectSubjects.includes(index)
+                      ? "bg-white hover:bg-gray-100 text-blue-900 border-blue-900"
+                      : "bg-blue-900 hover:bg-blue-950 text-white"
+                    }`}
+                >
+                  {selectSubjects.includes(index) ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="2"
+                      stroke="currentColor"
+                      className="size-4 text-current"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="2"
+                      stroke="currentColor"
+                      className="size-4 text-current"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 4.5v15m7.5-7.5h-15"
+                      />
+                    </svg>
+                  )}
+                  <p className="text-sm">เลือก</p>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       ))}
