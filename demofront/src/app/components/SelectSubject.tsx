@@ -1,29 +1,6 @@
 import React from "react";
-import { SubjectData, Section } from '../components/interface';
+import { Section, SubjectData } from '../components/interface';
 
-interface Section {
-  section: number | null;
-  time: string;
-  professor: string;
-  room: string;
-  day: string;
-}
-
-interface SubjectData {
-  name: String;
-  day: string[];
-  subject_id: string;
-  sections: Section[];
-  studyDays: string[];
-  professors: string[];
-  detail: string;
-  credit: number;
-  style: string;
-  midterm: Date;
-  final: Date;
-  midtermTime: String;
-  finalTime: String;
-}
 interface SelectSubjectsProps {
   isVisible: boolean;
   onClose: () => void;
