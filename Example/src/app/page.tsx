@@ -1,3 +1,4 @@
+// app/page.tsx
 "use client";
 
 import React, { useState } from 'react';
@@ -5,15 +6,26 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
 // Components
-const Container: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="flex flex-col items-center justify-center min-h-screen bg-blue-600">
-    {children}
-  </div>
-);
+const Container: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const router = useRouter(); // Initialize useRouter to use navigation
 
-const Form: React.FC<{ children: React.ReactNode; onSubmit: (e: React.FormEvent<HTMLFormElement>) => void }> = ({ children, onSubmit }) => (
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-blue-600 relative">
+      {children}
+      
+      <button
+        className="absolute bottom-4 right-4 bg-gray-800 text-white p-2 rounded text-sm"
+        onClick={() => router.push('/admin')}  // Navigate to the "/user" page
+      >
+        User
+      </button>
+    </div>
+  );  
+};
+
+const Form: React.FC<{ children: React.ReactNode; onSubmit: (event: React.FormEvent<HTMLFormElement>) => void }> = ({ children, onSubmit }) => (
   <form className="flex flex-col bg-white p-6 rounded-lg shadow-md w-full max-w-lg text-black relative"
-        onSubmit={onSubmit}>
+    onSubmit={onSubmit}>
     {children}
   </form>
 );
@@ -21,7 +33,7 @@ const Form: React.FC<{ children: React.ReactNode; onSubmit: (e: React.FormEvent<
 const Header: React.FC = () => (
   <div className="mb-4 text-left">
     <h1 className="text-3xl font-bold m-0">Welcome</h1>
-    <p>Sign in with your account.</p>
+    <p>Sign in with KMITL account or ITKMITL account.</p>
   </div>
 );
 
@@ -45,78 +57,96 @@ const Input: React.FC<{ type: string; placeholder: string; value: string; onChan
   />
 );
 
-const Button: React.FC<{ children: React.ReactNode; type: "submit" }> = ({ children, type }) => {
+const Button: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const router = useRouter();
+  return <button
+    className="bg-blue-600 text-center text-white p-2 text-base rounded cursor-pointer mb-2"
+    type="submit"
+  >
+    {children}
+  </button>
+};
+
+const Register: React.FC<{ children: React.ReactNode; onClick: () => void }> = ({ children, onClick }) => {
   const router = useRouter();
   return (
     <button
-      className="bg-blue-600 text-white p-2 text-base rounded cursor-pointer mb-2"
-      type={type}
+      className="bg-white text-black p-2 text-base rounded border border-gray-300 flex items-center justify-center"
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+};
+const AdminLogin: React.FC<{ children: React.ReactNode; onClick: () => void }> = ({ children, onClick }) => {
+  const router = useRouter();
+  return (
+    <button
+      className="bg-white text-black p-2 text-base rounded border border-gray-300 flex items-center justify-center"
+      onClick={onClick}
     >
       {children}
     </button>
   );
 };
 
-const GoogleButton: React.FC = () => (
-  <button className="bg-white text-black p-2 text-base rounded border border-gray-300 flex items-center justify-center">
-    <img
-      src="https://img.icons8.com/color/16/000000/google-logo.png"
-      alt="Google logo"
-      className="mr-2"
-    />
-    Login
-  </button>
-);
-
-// Main LoginPage component
 const LoginPage: React.FC = () => {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const router = useRouter();
 
   const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     try {
-      if (email.slice(-12) == "@kmitl.ac.th" && email != "@kmitl.ac.th")
+      if (email.endsWith("@kmitl.ac.th") && email != "@kmitl.ac.th")
       {
-        const response = await axios.post('http://localhost:8888/login', { email, password });
-        if (response.status === 200) {
+        const response = await axios.post('http://localhost:8888/api/login', { email, password });
+        if (response.status === 201 || response.status === 200) {
           localStorage.setItem('token', response.data.token);
-          router.push('/lima'); // Redirect to a protected route or dashboard
+          localStorage.setItem('role', response.data.role);
+          console.log("created token");
+          setTimeout(() => {
+            router.push('/search');
+            setTimeout(() => {
+              window.location.reload();
+            }, 300);
+          }, 500);
+          
+
+        } else {
+          console.error("Unexpected response status:", response.status, response.data);
         }
+      } else {
+        console.log("error");
       }
     } catch (error) {
       console.error('Error logging in', error);
-      // Optionally show an error message to the user
+      // Log error response if available
+      if (axios.isAxiosError(error) && error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+      }
     }
   };
-
   return (
     <Container>
       <Form onSubmit={handleSignIn}>
         <Header />
         <InputContainer>
           <InputLabel label="Email" />
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <Input type="text" placeholder="email"
+            value={email} onChange={(e) => setEmail(e.target.value)} />
           <InputLabel label="Password" />
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <Button type="submit">Sign In</Button>
+          <Input type="password" placeholder="Password"
+            value={password} onChange={(e) => setPassword(e.target.value)} />
+          <Button>Sign In</Button>
         </InputContainer>
         <div className="text-center text-gray-500 my-3">or</div>
-        <GoogleButton />
+        <Register onClick={() => router.push('/regis')}>Register</Register>
+        <AdminLogin onClick={() => router.push('/adminLogin')}>Admin Login</AdminLogin>
       </Form>
     </Container>
   );
 };
+
 export default LoginPage;

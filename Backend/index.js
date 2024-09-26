@@ -1,33 +1,34 @@
-const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
+const Database = require('./config/dbCon');
 const subjectRoutes = require('./routes/subjectRoutes');
 const authRoutes = require('./routes/authRoutes');
-const searchRoutes = require('./routes/searchApi');
+const searchRoutes = require('./routes/searchRoutes');
+require('dotenv').config();
 
 const app = express();
+const port = process.env.PORT || 8888;
+
+const mongoURI = process.env.MONGO_URI;
+const db = new Database(mongoURI);
 
 app.use(express.json());
 app.use(cors());
-
-
-const PORT = 8888
-const mongoURI = "mongodb+srv://Nettae:3gqoMaDCSqrNekZA@cluster0.m4azkwi.mongodb.net/"
-// เปลี่ยน url mongodb 
-
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => {
-        const db = mongoose.connection.db;
-        console.log('Connected to database:', db.databaseName);
-    })
-    .catch(err => {
-        console.error('Failed to connect to MongoDB', err);
-    });
 
 app.use('/api', subjectRoutes);
 app.use('/api', authRoutes);
 app.use('/api', searchRoutes);
 
-app.listen(PORT, () => {
-    console.log(`listening on port ${PORT}`);
-});
+(async () => {
+    try {
+        await db.connect();
+        app.listen(port, () => console.log(`Server is running on port ${port}`));
+    } catch (error) {
+        console.error('Error starting the application:', error);
+    }
+
+    process.on('SIGINT', async () => {
+        await Database.disconnect();
+        process.exit(0);
+    });
+})();
