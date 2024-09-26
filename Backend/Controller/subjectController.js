@@ -1,6 +1,7 @@
-const Subject = require('../models/Subject');
-const SectionModel  = require('../models/SectionModel');
 const SubjectModel = require('../models/SubjectModel');
+const SectionModel  = require('../models/SectionModel');
+const Subject = require('../models/Subject');
+const Section = require('../models/Section');
 
 class SubjectController {
     async addSubject(req, res) {
@@ -11,7 +12,7 @@ class SubjectController {
                 return res.status(400).json({ message: 'Subject already exists' });
             }
 
-            const subject = new SubjectModel({
+            const subjectInstance = new Subject({
                 name, 
                 subject_id, 
                 detail, 
@@ -22,17 +23,20 @@ class SubjectController {
                 finalTime
             });
 
+            const subject = new SubjectModel(subjectInstance);
+
             if (sections && sections.length > 0) {
                 const sectionPromises = sections.map(sectionData => {
-                    const section = new SectionModel({
-                        subject_id: subject._id,
-                        section: sectionData.section,
-                        professor: sectionData.professor,
-                        room: sectionData.room,
-                        day: sectionData.day,
-                        time: sectionData.time,
-                        style: sectionData.style,
-                    });
+                    const sectionInstance = new Section(
+                        subject._id,
+                        sectionData.section,
+                        sectionData.professor,
+                        sectionData.room,
+                        sectionData.day,
+                        sectionData.time,
+                        sectionData.style,
+                    );
+                    const section = new SectionModel(sectionInstance);
                     return section.save();
                 });
                 const savedSections = await Promise.all(sectionPromises);
@@ -63,11 +67,23 @@ class SubjectController {
     async fetchSubject(req, res) {
         try {
             const subjects = await SubjectModel.find().populate('sections'); // Fetch all subjects and populate sections
-            const transformedSubjects = subjects.map(subject => ({
-                ...subject.toObject(),
-                studyDays: subject.day,
-                // Assuming 'day' holds the relevant data
-            }));
+            const transformedSubjects = subjects.map(subjectData => {
+                const subject = new Subject({
+                    name: subjectData.name,
+                    day: subjectData.day,
+                    subject_id: subjectData.subject_id,
+                    sections: subjectData.sections,
+                    professors: subjectData.professors,
+                    detail: subjectData.detail,
+                    credit: subjectData.credit,
+                    style: subjectData.style,
+                    midterm: subjectData.midterm,
+                    final: subjectData.final,
+                    midtermTime: subjectData.midtermTime,
+                    finalTime: subjectData.finalTime
+                });
+                return subject;
+            });
             res.status(200).json(transformedSubjects); // Respond with the list of subjects
         } catch (e) {
             console.error(e);

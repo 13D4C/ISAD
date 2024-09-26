@@ -21,15 +21,15 @@ class AuthController {
             }
 
             const hashedPassword = await bcrypt.hash(password, 10); // hash password
-            const user = new UserModel({
+            const userInstance = new Student({
                 username, 
                 email,
                 password: hashedPassword,
             });
+            const user = new UserModel(userInstance.username, userInstance.email, userInstance.password);
 
             await user.save(); // save user
-            const student = new Student(user.username, user.password, user.email, user.role);
-            res.status(201).json({ message: 'User created successfully', user: student.getName(), role: student.getRole()});
+            res.status(201).json({ message: 'User created successfully', user: userInstance.getName(), role: userInstance.getRole()});
         } catch (error) {
             console.error('Error creating user:', error);
             res.status(500).json({ message: 'Internal server error' });
