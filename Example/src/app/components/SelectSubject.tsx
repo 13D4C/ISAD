@@ -1,35 +1,75 @@
+'use client'
+
 import React from "react";
+import { useRouter } from 'next/navigation';
+import { Section, SubjectData } from '../components/interface';
 
-export interface Section {
-    section: number | null;
-    time: string;
-    professor: string;
-    room: string;
-    day: string;
-    style: string;
-}
-
-export interface SubjectData {
-    name: String;
-    day: string[];
-    subject_id: string;
-    sections: Section[];
-    professors: string[];
-    detail: string;
-    credit: number;
-    style: string[];
-    midterm: Date;
-    final: Date;
-    midtermTime: String;
-    finalTime: String;
+interface Subject {
+  code: string;
+  subject: String;
+  credits: number;
+  section: number | null;
+  day: string;
+  startTime?: string;
+  duration: number;
+  room: string;
+  location: string;
+  hasConflict?: boolean;
 }
 
 interface SelectSubjectsProps {
-  isVisible: boolean;
+  isVisible: boolean; 
   onClose: () => void;
   selectSubjects: number[];
   boxSubject: SubjectData[];
   removeSelectedSubject: (index: number) => void;
+}
+
+function parseTime(timeString: string): { day: string, startTime: string, duration: number } {
+  const timeMatch = timeString.match(/^([A-Z]{3})\s(.+)$/);
+
+  if (!timeMatch) {
+    console.error('Invalid time format:', timeString);
+    return { day: '', startTime: '', duration: 0 };  // return a fallback or handle error
+  }
+
+  const dayAbbr = timeMatch[1];
+  const timeRange = timeMatch[2]; 
+
+  const [startTime, endTime] = timeRange.trim().split(' - '); 
+
+  if (!startTime || !endTime) {
+    console.error('Invalid time format:', timeString);
+    return { day: dayAbbr, startTime: '', duration: 0 };
+  }
+
+  const start = new Date(`1970-01-01T${startTime}`);
+  const end = new Date(`1970-01-01T${endTime}`);
+  const durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+
+  return {
+      day: dayAbbr,
+      startTime,
+      duration: durationHours
+  };
+}
+
+function transformSubjectDataToSubject(subjectData: SubjectData, sectionIndex: number): Subject {
+  const section = subjectData.sections[sectionIndex];
+  const { day, startTime, duration } = parseTime(section.time);
+
+  return {
+      code: subjectData.subject_id,
+      subject: subjectData.name,
+      credits: subjectData.credit,
+      section: section.section,
+      day,
+      startTime,
+      duration,
+      room: section.room,
+      location: 'IT', // You might want to add this information to your SubjectData if available
+      hasConflict: false // You can implement conflict detection logic if needed
+  };
 }
 
 const SelectSubjects: React.FC<SelectSubjectsProps> = ({
@@ -40,6 +80,17 @@ const SelectSubjects: React.FC<SelectSubjectsProps> = ({
   removeSelectedSubject,
 }) => {
   if (!isVisible) return null;
+
+  const router = useRouter();
+
+  const handleScheduleCreation = () => {
+    const selectedSubjectData = selectSubjects.map(index => {
+      const subjectData = boxSubject[index];
+      return transformSubjectDataToSubject(subjectData, 0);
+    });
+    const queryString = encodeURIComponent(JSON.stringify(selectedSubjectData));
+    router.push(`/timetable?selectedSubjects=${queryString}`);
+  };
 
   const renderSelectSubjects = () => {
     return selectSubjects.map((index) => {
@@ -124,7 +175,7 @@ const SelectSubjects: React.FC<SelectSubjectsProps> = ({
           <p className="p-2 font-medium text-blue-900">
             รวม {getTotalCredits()} หน่วยกิต
           </p>
-          <button className="shadow-md w-full flex gap-2 justify-center items-center bg-blue-900 hover:bg-blue-950 rounded p-2 text-white">
+          <button className="shadow-md w-full flex gap-2 justify-center items-center bg-blue-900 hover:bg-blue-950 rounded p-2 text-white" onClick={handleScheduleCreation}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"

@@ -1,5 +1,5 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
-import { Section, SubjectData } from './interface';
+import { Section, SubjectData } from '../components/interface';
 import axios from "axios";
 
 interface SubjectFormProps {
@@ -65,10 +65,10 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
       sections,
       day: [], // Assuming 'day' should be handled on the backend
       professors: [], // Assuming professors will be added later
-      midterm: new Date(), // Default values, modify as needed
-      final: new Date(),
-      midtermTime: "",
-      finalTime: "",
+      midterm: new Date(midtermDay), // Default values, modify as needed
+      final: new Date(finalDay),
+      midtermTime: midtermTime,
+      finalTime: finalTime,
       style: []
     };
     try {

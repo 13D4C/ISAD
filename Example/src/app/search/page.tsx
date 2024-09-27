@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import SubjectBox from "../components/SubjectBox";
-import SubjectForm from '../components/SubjectForm';
-import { SubjectData } from "../components/SelectSubject";
+import SubjectForm from "../components/SubjectForm";
 import SelectSubjects from "../components/SelectSubject";
+import { Section, SubjectData } from '../components/interface';
 import axios from "axios";
 
 // Define the type for select page state
@@ -21,9 +21,11 @@ const SelectPage: React.FC = () => {
   const [boxSubject, setBoxSubject] = useState<SubjectData[]>([]);
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const [isSelectSubjectsVisible, setSelectSubjectsVisible] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>("");
   const [isSMScreen, setIsSMScreen] = useState<boolean>(false);
-  const roleChecker = localStorage.getItem('role');
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [selectedSections, setSelectedSections] = useState<number[]>([]);
+  const [roleChecker, setRoleChecker] = useState<string | null>(null);
+
   // Function to add a subject
   const fetchSubjectsFromDatabase = async () => {
     try {
@@ -48,6 +50,8 @@ const SelectPage: React.FC = () => {
   useEffect(() => {
     updateScreenSize(); // Initial check
     window.addEventListener("resize", updateScreenSize);
+    const role = window?.localStorage.getItem('role');
+    setRoleChecker(role);
 
     return () => window.removeEventListener("resize", updateScreenSize);
   }, []);
@@ -102,10 +106,6 @@ const SelectPage: React.FC = () => {
     setSelectSubjectsVisible(!isSelectSubjectsVisible);
   };
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
-  };
-
   // Remove selected subject
   const removeSelectedSubject = (index: number) => {
     setSelectSubjects((prevSelectSubjects) =>
@@ -113,11 +113,36 @@ const SelectPage: React.FC = () => {
     );
   };
 
-  const filteredSubjects = boxSubject.filter((subject) =>
-    subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    subject.subject_id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
+  const filterSubjects = () => {
+    return boxSubject.filter((subject) => {
+      const dayMatches = selectedDays.length === 0 || subject.day.some((day) => selectedDays.includes(day));
+      const sectionMatches = selectedSections.length === 0 || subject.sections.some((section) => {
+        return section.section !== null && selectedSections.includes(section.section);
+      });
+      return dayMatches && sectionMatches;  
+    });
+  };
+
+  const handleDayChange = (day: string) => {
+    setSelectedDays((prevSelectedDays) => {
+      if (prevSelectedDays.includes(day)) {
+        return prevSelectedDays.filter((selectedDay) => selectedDay !== day);
+      } else {
+        return [...prevSelectedDays, day];
+      }
+    });
+  };
+
+  const handleSectionChange = (section: number) => {
+    setSelectedSections((prevSelectedSections) => {
+      if (prevSelectedSections.includes(section)) {
+        return prevSelectedSections.filter((selectedSection) => selectedSection !== section);
+      } else {
+        return [...prevSelectedSections, section];
+      }
+    });
+  };
 
   return (
     <div>
@@ -128,14 +153,7 @@ const SelectPage: React.FC = () => {
         {/* Search */}
         <div className="rounded border shadow-md p-2 px-4 grow">
           <label className="text-sm" htmlFor="search"></label>
-          <input
-            className="w-full outline-none text-black"
-            type="search"
-            id="search"
-            placeholder="ค้นหารหัสวิชา / ชื่อวิชา"
-            value={searchTerm}
-            onChange={handleSearchChange}
-          />
+          <input className="w-full outline-none text-black" type="search" id="search" placeholder="ค้นหารหัสวิชา / ชื่อวิชา" />
         </div>
 
         {/* Filter Button */}
@@ -183,11 +201,11 @@ const SelectPage: React.FC = () => {
                 )}
 
                 <SubjectBox
-                  BoxSubject={filteredSubjects}
-                  DeleteSubject={deleteSubject}
-                  toggleSubjectSelection={toggleSubjectSelection}
-                  selectSubjects={selectSubjects}
-                  isSMScreen={isSMScreen}
+                    BoxSubject={filterSubjects()} // Display filtered subjects
+                    DeleteSubject={deleteSubject}
+                    toggleSubjectSelection={toggleSubjectSelection}
+                    selectSubjects={selectSubjects}
+                    isSMScreen={isSMScreen}
                 />
               </div>
             </div>
@@ -200,16 +218,26 @@ const SelectPage: React.FC = () => {
                 <h1 className="text-black">วันที่เรียน</h1>
                 {["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์", "อาทิตย์"].map((day) => (
                   <div key={day}>
-                    <input type="checkbox" id={day} />
-                    <label className="text-black" htmlFor={day}> วัน{day}</label>
-                  </div>
-                ))}
+                    <input
+                      type="checkbox"
+                      id={day}
+                      onChange={() => handleDayChange(day)}
+                      checked={selectedDays.includes(day)}
+                    />
+                  <label className="text-black" htmlFor={day}> วัน{day}</label>
+                </div>
+            ))}
               </div>
               <div className="m-4 p-4 pt-0 space-y-3">
                 <h1 className="text-gray-500/50">Section</h1>
                 {[1, 2, 3].map((sec) => (
                   <div key={sec}>
-                    <input type="checkbox" id={`sec${sec}`} />
+                    <input
+                      type="checkbox"
+                      id={`sec${sec}`}
+                      onChange={() => handleSectionChange(sec)}
+                      checked={selectedSections.includes(sec)}
+                    />
                     <label className="text-black" htmlFor={`sec${sec}`}> sec {sec}</label>
                   </div>
                 ))}
