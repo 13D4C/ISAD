@@ -7,7 +7,7 @@ class Student extends User {
     }
 
     getIsAdmin() {
-        return this.isAdmin === 'admin';
+        return this.role === 'admin';
     }
 }
 

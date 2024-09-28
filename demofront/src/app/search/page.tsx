@@ -4,16 +4,10 @@ import SubjectBox from "../components/SubjectBox";
 import SubjectForm from "../components/SubjectForm";
 import SelectSubjects from "../components/SelectSubject";
 import { Section, SubjectData } from '../components/interface';
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 // Define the type for select page state
-interface SelectPageState {
-  isFilterMenuVisible: boolean;
-  selectSubjects: number[];
-  boxSubject: SubjectData[];
-  isModalVisible: boolean;
-  isSelectSubjectsVisible: boolean;
-}
+
 
 const SelectPage: React.FC = () => {
   const [isFilterMenuVisible, setFilterMenuVisible] = useState<boolean>(true);
@@ -22,7 +16,7 @@ const SelectPage: React.FC = () => {
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const [isSelectSubjectsVisible, setSelectSubjectsVisible] = useState<boolean>(false);
   const [isSMScreen, setIsSMScreen] = useState<boolean>(false);
-  const roleChecker = localStorage.getItem('role');
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   // Function to add a subject
   const fetchSubjectsFromDatabase = async () => {
     try {
@@ -44,14 +38,27 @@ const SelectPage: React.FC = () => {
   const updateScreenSize = () => {
     setIsSMScreen(window.innerWidth <= 640); // Set threshold for small screen (640px)
   };
-  useEffect(() => {
-    updateScreenSize(); // Initial check
-    window.addEventListener("resize", updateScreenSize);
 
-    return () => window.removeEventListener("resize", updateScreenSize);
-  }, []);
-
-  // Function to delete a subject
+  const roleChecker = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error("No token found");
+      return;
+    }
+    try {
+      const response = await axios.get('http://localhost:8888/api/rolechecker', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (response.status === 200) { 
+          setIsAdmin(true);
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("Error checking role:", axiosError.response?.data || axiosError.message);
+    }
+  }
   const deleteSubject = (index: number) => {
     setBoxSubject((prevBoxSubject) => {
       const updatedBoxSubject = prevBoxSubject.filter((_, i) => i !== index);
@@ -70,14 +77,18 @@ const SelectPage: React.FC = () => {
       }
     });
   };
-  useEffect(() => {
-    fetchSubjectsFromDatabase();
-  }, []);
 
   // Load subjects from local storage
   useEffect(() => {
     const savedBoxSubject = JSON.parse(localStorage.getItem("BoxSubject") || '[]') as SubjectData[];
     setBoxSubject(savedBoxSubject);
+    roleChecker();
+    fetchSubjectsFromDatabase();
+    updateScreenSize(); 
+    window.addEventListener("resize", updateScreenSize);
+
+    return () => window.removeEventListener("resize", updateScreenSize);
+
   }, []);
 
   // Toggle filter menu visibility
@@ -147,7 +158,7 @@ const SelectPage: React.FC = () => {
             <div className="w-full">
               <div className="space-y-4">
                 <div className="justify-items-center">
-                  {roleChecker === 'admin' && ( 
+                  {isAdmin && ( 
                   <button onClick={handleAddBoxSubject} className="rounded border shadow-md w-full p-4 flex justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#9ca3af" className="size-6">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

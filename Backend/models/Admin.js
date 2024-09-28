@@ -14,7 +14,7 @@ class Admin extends User {
     }
 
     getIsAdmin() {
-        return this.isAdmin === 'admin';
+        return this.role === 'admin';
     }
 
     static verifyAdmin(id, password) {

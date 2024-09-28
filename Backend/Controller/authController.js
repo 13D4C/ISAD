@@ -44,9 +44,9 @@ class AuthController {
                 return res.status(401).json({ message: 'Invalid email or password' });
             }
 
-            const token = jwt.sign({ userId: user._id }, this.secretKey, { expiresIn: '1h' });
-            const student = new Student(user.username, user.password, user.email, user.role);
-            res.json({ token, email: student.email, message: "Login successfully!", role: student.role });
+            const student = new Student(user.username, user.password, user.email);
+            const token = jwt.sign({ userId: user._id , username: student.getName(), role: student.getRole()}, this.secretKey, { expiresIn: '1h' });
+            res.json({ token, email: student.getEmail(), message: "Login successfully!", role: student.getRole() });
         } catch (e) {
             console.error(e);
             res.status(500).json({ message: 'Internal server error' });
@@ -57,16 +57,37 @@ class AuthController {
         try {
             let { username, password } = req.body;
 
-            const isValidAdmin = Admin.verifyAdmin( username, password);
+            const isValidAdmin = Admin.verifyAdmin(username, password);
             if (!isValidAdmin) {
                 return res.status(401).json({ message: "Invalid admin credentials" });
             }
-            const token = jwt.sign({ adminId: username }, this.secretKey, { expiresIn: '1h' })
             const admin = new Admin(username, password);
+            const token = jwt.sign({ adminId: username, role: admin.getRole() }, this.secretKey, { expiresIn: '1h' })
             return res.status(200).json({ token, message: "Login successfully!", role: admin.getRole()});
         } catch(error) {
             console.error(error);
             return res.status(500).json({ message: "Internal server error" });
+        }
+    }
+    
+    async roleChecker(req, res) {
+        const token = req.headers['authorization']?.split(' ')[1]; 
+        if (!token) return res.status(401).json({ message: 'Unauthorized: No token provided' });
+        try {
+            const decoded = jwt.verify(token, this.secretKey);
+
+            if (decoded && decoded.role) {
+                if (decoded.role === "admin") {
+                    res.json({ message: "Access granted", role: decoded.role });
+                } else {
+                    res.status(403).json({ message: 'Forbidden: Not an admin' });
+                }
+            } else {
+                res.status(401).json({ message: 'Unauthorized: No role found' });
+            }
+        } catch (error) {
+            console.error('Error verifying token:', error);
+            res.status(403).json({ message: 'Forbidden: Invalid token' });
         }
     }
 }

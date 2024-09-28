@@ -91,6 +91,10 @@ class SubjectController {
         }
     }
 
+    async deleteSubject(req, res) {
+        
+    }
+
 }
 
 module.exports = new SubjectController();

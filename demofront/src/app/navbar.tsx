@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import axios from "axios";
 
 export default function Navbar() {
     const router = useRouter();
@@ -22,11 +23,14 @@ export default function Navbar() {
             router.push("/"); // Redirect to login if the token does not exist
         }
     };
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("role");
-        setLinkText("เข้าสู่ระบบ");
-        router.push("/");
+    const handleLogout = async () => {
+        try {
+            localStorage.removeItem("token");
+            setLinkText("เข้าสู่ระบบ");
+            router.push("/"); // เปลี่ยนเส้นทางไปหน้าแรก
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
     };
 
     return (

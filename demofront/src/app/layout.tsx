@@ -18,7 +18,6 @@ export default function RootLayout({
 }>) {
 
   return (
-    <AuthProvider>
     <html lang="en">
       <body className={inter.className}>
         {/* Blue Bar */}
@@ -41,7 +40,6 @@ export default function RootLayout({
         {/* End Footer of page */}
       </body>
     </html>
-    </AuthProvider>
   );
 }
 

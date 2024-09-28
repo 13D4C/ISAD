@@ -103,7 +103,6 @@ const LoginPage: React.FC = () => {
         const response = await axios.post('http://localhost:8888/api/login', { email, password });
         if (response.status === 201 || response.status === 200) {
           localStorage.setItem('token', response.data.token);
-          localStorage.setItem('role', response.data.role);
           console.log("created token");
           setTimeout(() => {
             router.push('/search');
