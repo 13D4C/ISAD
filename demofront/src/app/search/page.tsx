@@ -59,12 +59,22 @@ const SelectPage: React.FC = () => {
       console.error("Error checking role:", axiosError.response?.data || axiosError.message);
     }
   }
-  const deleteSubject = (index: number) => {
-    setBoxSubject((prevBoxSubject) => {
-      const updatedBoxSubject = prevBoxSubject.filter((_, i) => i !== index);
-      localStorage.setItem("BoxSubject", JSON.stringify(updatedBoxSubject));
-      return updatedBoxSubject;
-    });
+  const deleteSubject = async (index: number) => {
+    const subjectId = boxSubject[index].subject_id;
+    try {
+      console.log(subjectId);
+      console.log(index);
+      await axios.delete(`http://localhost:8888/api/subjects/${subjectId}`);
+
+      setBoxSubject((prevBoxSubject) => {
+        const updatedBoxSubject = prevBoxSubject.filter((_, i) => i !== index);
+        localStorage.setItem("BoxSubject", JSON.stringify(updatedBoxSubject));
+        return updatedBoxSubject;
+      });
+    } catch (e) {
+      console.log(e);
+    }
+    
   };
 
   // Function to toggle subject selection

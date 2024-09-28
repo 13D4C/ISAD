@@ -92,9 +92,21 @@ class SubjectController {
     }
 
     async deleteSubject(req, res) {
-        
-    }
+        try {
+            const { id } = req.params;
+            const deletedSubject = await SubjectModel.findOneAndDelete({ subject_id: id });
 
+            if (!deletedSubject) {
+                return res.status(404).json({ message: 'Subject not found' }); 
+            }
+            await SectionModel.deleteMany({ subjectId: id });
+
+            res.status(200).json({ message: 'Subject deleted successfully' });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal server error', error: error.message });
+        }
+    }
 }
 
 module.exports = new SubjectController();

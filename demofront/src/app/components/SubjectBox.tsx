@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Section, SubjectData } from '../components/interface';
+import axios, { AxiosError } from "axios";
 
 interface SubjectProps {
   BoxSubject: SubjectData[];
@@ -25,6 +26,7 @@ const textColor: { [key: string]: string } = {
   ศุกร์: "text-cyan-500",
 };
 
+
 const Subject: React.FC<SubjectProps> = ({
   BoxSubject,
   DeleteSubject,
@@ -33,7 +35,27 @@ const Subject: React.FC<SubjectProps> = ({
   isSMScreen,
 }) => {
   const [selectedSections, setSelectedSections] = useState<{ [index: number]: number | null }>({});
-
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const roleChecker = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error("No token found");
+      return;
+    }
+    try {
+      const response = await axios.get('http://localhost:8888/api/rolechecker', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (response.status === 200) {
+        setIsAdmin(true);
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("Error checking role:", axiosError.response?.data || axiosError.message);
+    }
+  }
 
   const handleSectionChange = (
     index: number,
@@ -56,6 +78,12 @@ const Subject: React.FC<SubjectProps> = ({
     setSelectedSections(initialSelections);
   }, [BoxSubject]);
 
+  useEffect(() => {
+    roleChecker();
+  }, []);
+
+  
+
   return (
     <div className="space-y-4">
       {BoxSubject.map((box, index) => (
@@ -70,7 +98,7 @@ const Subject: React.FC<SubjectProps> = ({
             </p>
 
             {/* Delete Button */}
-            <button
+            {isAdmin && <button
               onClick={() => DeleteSubject(index)}
               className="ml-4 text-red-600 hover:text-red-700"
             >
@@ -86,7 +114,7 @@ const Subject: React.FC<SubjectProps> = ({
                   clipRule="evenodd"
                 />
               </svg>
-            </button>
+            </button>}
           </div>
 
           <br />

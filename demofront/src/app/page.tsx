@@ -15,9 +15,9 @@ const Container: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       
       <button
         className="absolute bottom-4 right-4 bg-gray-800 text-white p-2 rounded text-sm"
-        onClick={() => router.push('/admin')}  // Navigate to the "/user" page
+        onClick={() => router.push('/adminLogin')}  // Navigate to the "/user" page
       >
-        User
+        Admin
       </button>
     </div>
   );  
@@ -142,7 +142,6 @@ const LoginPage: React.FC = () => {
         </InputContainer>
         <div className="text-center text-gray-500 my-3">or</div>
         <Register onClick={() => router.push('/regis')}>Register</Register>
-        <AdminLogin onClick={() => router.push('/adminLogin')}>Admin Login</AdminLogin>
       </Form>
     </Container>
   );
