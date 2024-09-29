@@ -1,4 +1,4 @@
-"use client";
+
 import { useState } from 'react';
 
 const AlertBox: React.FC = () => {
