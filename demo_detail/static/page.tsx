@@ -1,4 +1,5 @@
 // pages/Home.tsx
+"use client";
 import React from 'react';
 import CourseDetail from '../components/CourseDetail';
 
@@ -7,49 +8,42 @@ const Home: React.FC = () => {
     code: "06066304",
     name: "INFORMATION SYSTEM ANALYSIS AND DESIGN",
     faculty: "Information Technology",
-    department: "เทคโนโลยีสารสนเทศ",
-    type: "LEC",
+    department: "Information Technology",
+    type: "Lecture",
     credits: "3(3-0-6)",
-    midtermExam: "เสาร์ 2 กันยายน 2566 13:30 - 16:30", 
-    finalExam: "ศุกร์ 3 พฤศจิกายน 2566 13:30 - 16:30",
-    gradingMethod: "เป็นไปตามอาจารย์ผู้สอน",
+    midtermExam: "02 Nov 2023",
+    finalExam: "22 Dec 2023",
+    gradingMethod: "Letter Grade",
     description: "การพัฒนาโดยใช้แนวคิดเชิงวัตถุ การวิเคราะห์และออกแบบ การเลือกโครงการและการจัดการ โครงการสารสนเทศ กำหนดความต้องการระบบ การวิเคราะห์ด้วยยูสเคส แบบจำลองกระบวนการ แบบจำลองข้อมูล การออกแบบสถาปัตยกรรมและกลยุทธการออก การออกแบบส่วนติดต่อกับผู้ใช้ การออกแบบส่วนจัดเก็บข้อมูล การออกแบบโปรแกรม คลาสและเมธอด การสร้างและการติดตั้งระบบ",
-    
     sections: [
       {
-        group: "สาขาเทคโนโลยีสารสนเทศ ลำดับที่ 1 -73",
-        section: "1",
+        group: "A",
+        section: "01",
         instructors: ["ผศ.ดร. บุญประเสริฐ สุรักษ์รัตนสกุล"],
         schedule: [
-          { day: "TUE", time: "09:00-12:00", room: "M23", type: "LEC" },
+          { day: "Tuesday", time: "13:00 - 16:00", room: "M23", type: "Lecture" },
         ],
       },
       {
-        group: "สาขาเทคโนโลยีสารสนเทศ ลำดับที่ 74-146",
-        section: "2",
+        group: "B",
+        section: "02",
         instructors: ["ผศ.ดร. พัฒนพงษ์ ฉันทมิตรโอภาส"],
         schedule: [
-          { day: "TUE", time: "09:00-12:00", room: "M03", type: "LEC" },
+          { day: "Tuesday", time: "09:00 - 12:00", room: "M04", type: "Lecture" },
         ],
       },
       {
-        group: "สาขาเทคโนโลยีสารสนเทศ ลำดับที่ 147-220",
-        section: "3",
+        group: "C",
+        section: "03",
         instructors: ["ผศ.ดร. บุญประเสริฐ สุรักษ์รัตนสกุล"],
         schedule: [
-          { day: "TUE", time: "13:00 - 16:00", room: "M23", type: "LEC" },
+          { day: "Tuesday", time: "09:00 - 12:00", room: "M23", type: "Lecture" },
         ],
       },
     ],
   };
 
-  return (
-    <div className="w-full h-full min-h-screen flex flex-col items-center justify-center bg-gray-200 p-8">
-      <div className="w-full max-w-7xl">
-        <CourseDetail course={course} />
-      </div>
-    </div>
-  );
+  return <CourseDetail course={course} />;
 };
 
 export default Home;
