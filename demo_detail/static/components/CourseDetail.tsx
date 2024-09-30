@@ -9,12 +9,11 @@ type Course = {
   faculty: string;
   department: string;
   type: string;
-  credits: number;
+  credits: string;
   midtermExam: string;
   finalExam: string;
   gradingMethod: string;
-  descriptionTH: string;
-  descriptionEN: string;
+  description: string;
   sections: Section[];
 };
 
@@ -57,56 +56,51 @@ const CourseDetail: React.FC<{ course: Course }> = ({ course }) => {
       {!isEditing ? (
         <>
           <h1 className="text-2xl font-bold text-blue-800 mb-2">
-            {course.code} {course.name}
+            {editableCourse.code} {editableCourse.name}
           </h1>
 
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div>
               <p className="mb-2">
                 <strong className="text-gray-700">คณะ:</strong>
-                <span className="text-blue-500"> {course.faculty}</span>
+                <span className="text-blue-500"> {editableCourse.faculty}</span>
               </p>
               <p className="mb-2">
                 <strong className="text-gray-700">รูปแบบรายวิชา:</strong>
-                <span className="text-blue-500"> {course.type}</span>
+                <span className="text-blue-500"> {editableCourse.type}</span>
               </p>
               <p className="mb-2">
                 <strong className="text-gray-700">สอบกลางภาค:</strong>
-                <span className="text-blue-500">{course.midtermExam}</span>
+                <span className="text-blue-500">{editableCourse.midtermExam}</span>
               </p>
               <p className="mb-2">
                 <strong className="text-gray-700">สอบปลายภาค:</strong>
-                <span className="text-blue-500"> {course.finalExam}</span>
+                <span className="text-blue-500"> {editableCourse.finalExam}</span>
               </p>
             </div>
             <div>
               <p className="mb-2">
                 <strong className="text-gray-700">ภาควิชา:</strong>
-                <span className="text-blue-500"> {course.department}</span>
+                <span className="text-blue-500"> {editableCourse.department}</span>
               </p>
               <p className="mb-2">
                 <strong className="text-gray-700">หน่วยกิต:</strong>
-                <span className="text-blue-500"> {course.credits}</span>
+                <span className="text-blue-500"> {editableCourse.credits}</span>
               </p>
               <p className="mb-2">
                 <strong className="text-gray-700">วิธีการวัดผล:</strong>
-                <span className="text-blue-500"> {course.gradingMethod}</span>
+                <span className="text-blue-500"> {editableCourse.gradingMethod}</span>
               </p>
             </div>
           </div>
 
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">คำอธิบายรายวิชา (ภาษาไทย)</h3>
-            <p className="text-gray-600">{course.descriptionTH}</p>
-          </div>
-
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">คำอธิบายรายวิชา (ภาษาอังกฤษ)</h3>
-            <p className="text-gray-600">{course.descriptionEN}</p>
+            <p className="text-gray-600">{editableCourse.description}</p>
           </div>
 
           <div className="space-y-8">
-            {course.sections.map((section, index) => (
+            {editableCourse.sections.map((section, index) => (
               <SectionDetail key={index} section={section} />
             ))}
           </div>
@@ -181,18 +175,8 @@ const CourseDetail: React.FC<{ course: Course }> = ({ course }) => {
             <label className="text-gray-700">คำอธิบายรายวิชา (ภาษาไทย):</label>
             <textarea
               className="w-full p-2 border rounded"
-              name="descriptionTH"
-              value={editableCourse.descriptionTH}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="mb-6">
-            <label className="text-gray-700">คำอธิบายรายวิชา (ภาษาอังกฤษ):</label>
-            <textarea
-              className="w-full p-2 border rounded"
-              name="descriptionEN"
-              value={editableCourse.descriptionEN}
+              name="description"
+              value={editableCourse.description}
               onChange={handleChange}
             />
           </div>
