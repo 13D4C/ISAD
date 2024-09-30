@@ -13,8 +13,8 @@ const Home: React.FC = () => {
     midtermExam: "เสาร์ 2 กันยายน 2566 13:30 - 16:30", 
     finalExam: "ศุกร์ 3 พฤศจิกายน 2566 13:30 - 16:30",
     gradingMethod: "เป็นไปตามอาจารย์ผู้สอน",
-    descriptionTH: "การพัฒนาโดยใช้แนวคิดเชิงวัตถุ การวิเคราะห์และออกแบบ การเลือกโครงการและการจัดการ โครงการสารสนเทศ กำหนดความต้องการระบบ การวิเคราะห์ด้วยยูสเคส แบบจำลองกระบวนการ แบบจำลองข้อมูล การออกแบบสถาปัตยกรรมและกลยุทธการออก การออกแบบส่วนติดต่อกับผู้ใช้ การออกแบบส่วนจัดเก็บข้อมูล การออกแบบโปรแกรม คลาสและเมธอด การสร้างและการติดตั้งระบบ",
-    descriptionEN: "Material-based development, analysis and design, project selection and management. Information Project Determine system requirements Analysis with use cases, process models, data models, architectural design and exit strategies. User Interface Design, Storage Unit Design, Program Design, Classes and Methods, System Creation and Installation",
+    description: "การพัฒนาโดยใช้แนวคิดเชิงวัตถุ การวิเคราะห์และออกแบบ การเลือกโครงการและการจัดการ โครงการสารสนเทศ กำหนดความต้องการระบบ การวิเคราะห์ด้วยยูสเคส แบบจำลองกระบวนการ แบบจำลองข้อมูล การออกแบบสถาปัตยกรรมและกลยุทธการออก การออกแบบส่วนติดต่อกับผู้ใช้ การออกแบบส่วนจัดเก็บข้อมูล การออกแบบโปรแกรม คลาสและเมธอด การสร้างและการติดตั้งระบบ",
+    
     sections: [
       {
         group: "สาขาเทคโนโลยีสารสนเทศ ลำดับที่ 1 -73",
