@@ -125,17 +125,20 @@ const Subject: React.FC<SubjectProps> = ({
               <div className="space-y-2">
                 <p className="text-sm text-gray-500/50">วันที่เรียน</p>
                 <div className="flex space-x-2">
-                  {/* แสดงวันที่เรียนของวิชานั้นๆ */}
-                  {box.day.map((day, idx) => (
-                    <p
-                      key={idx}
-                      className={`text-sm ${textColor[day] || "text-gray-500"
-                        } ${bgColor[day] || "bg-gray-100"
-                        } rounded-full max-w-fit px-3 py-1`}
-                    >
-                      {day}
-                    </p>
-                  ))}
+                  {/* แสดงวันที่เรียนของ section ที่ถูกเลือก */}
+                  {selectedSections[index] !== null && // ตรวจสอบว่าได้เลือก section
+                    box.sections
+                      .find((sec) => sec.section === selectedSections[index]) // ค้นหา section ที่ถูกเลือก
+                      ?.day.map((day, idx) => ( // แสดงวันใน section นั้น
+                        <p
+                          key={idx}
+                          className={`text-sm ${textColor[day] || "text-gray-500"
+                            } ${bgColor[day] || "bg-gray-100"
+                            } rounded-full max-w-fit px-3 py-1`}
+                        >
+                          {day}
+                        </p>
+                      ))}
                 </div>
               </div>
 
