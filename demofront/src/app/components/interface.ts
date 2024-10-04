@@ -21,4 +21,5 @@ export interface SubjectData {
     final: Date;
     midtermTime: String;
     finalTime: String;
+    major: String;
 }

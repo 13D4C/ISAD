@@ -41,6 +41,9 @@ const subjectSchema = new mongoose.Schema({
     finalTime: { //(เวลาในการสอบ final)
         type: String,
     },
+    major: { //(เวลาในการสอบ final)
+        type: String,
+    },
 });
 
 const SubjectModel = mongoose.model('Subject', subjectSchema);

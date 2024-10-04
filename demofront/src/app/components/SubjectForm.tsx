@@ -18,6 +18,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
   const [finalDay, setFinalDay] = useState<string>("");
   const [finalTime, setFinalTime] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const [major, setMajor] = useState<string>("");
   const [sections, setSections] = useState<Section[]>([
     { subject_id: "", section: null, time: "", day: [], professor: "", room: "", style: "" },
   ]);
@@ -82,7 +83,8 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
       final: new Date(finalDay),
       midtermTime: midtermTime,
       finalTime: finalTime,
-      style: []
+      style: [],
+      major,
     };
     try {
       const response = await axios.post('http://localhost:8888/api/addSubject', subjectData);
@@ -140,7 +142,17 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
             required
           />
         </div>
-
+        {/*สาขาวิชา*/}
+        <div className="mb-2 col-span-4">
+          <label className="block text-sm font-medium">สาขาวิชา</label>
+          <input
+            value={major}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setMajor(e.target.value)
+            }
+            className="border rounded p-2 w-full resize-none text-sm"
+          ></input>
+        </div>
         {/* วันสอบ midterm */}
         <div className="mb-2 col-span-2">
           <label className="block text-sm font-medium">วันสอบกลางภาค</label>

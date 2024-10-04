@@ -1,5 +1,5 @@
 class Subject {
-    constructor({ name, day, subject_id, sections, professors, detail, credit, style, midterm, final, midtermTime, finalTime }) {
+    constructor({ name, day, subject_id, sections, professors, detail, credit, style, midterm, final, midtermTime, finalTime, major }) {
         this.name = name;
         this.day = day;
         this.subject_id = subject_id;
@@ -12,6 +12,7 @@ class Subject {
         this.final = final;
         this.midtermTime = midtermTime;
         this.finalTime = finalTime;
+        this.major = major;
     }
 }
 
