@@ -8,7 +8,6 @@ import axios, { AxiosError } from "axios";
 
 // Define the type for select page state
 
-
 const SelectPage: React.FC = () => {
   const [isFilterMenuVisible, setFilterMenuVisible] = useState<boolean>(true);
   const [selectSubjects, setSelectSubjects] = useState<number[]>([]);
@@ -16,6 +15,8 @@ const SelectPage: React.FC = () => {
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const [isSelectSubjectsVisible, setSelectSubjectsVisible] = useState<boolean>(false);
   const [isSMScreen, setIsSMScreen] = useState<boolean>(false);
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [selectedSections, setSelectedSections] = useState<number[]>([]);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   // Function to add a subject
   const fetchSubjectsFromDatabase = async () => {
@@ -52,6 +53,42 @@ const SelectPage: React.FC = () => {
   };
   const updateScreenSize = () => {
     setIsSMScreen(window.innerWidth <= 640); // Set threshold for small screen (640px)
+  };
+
+  const filterSubjects = () => {
+    return boxSubject.filter((subject) => {
+      const dayMatches = selectedDays.length === 0 || subject.day.some((daysArray) => {
+        if (Array.isArray(daysArray)) {
+        return daysArray.some((day) => selectedDays.includes(day));
+      }
+        return selectedDays.includes(daysArray); // Handle if it's a string directly
+      });
+
+      const sectionMatches = selectedSections.length === 0 || subject.sections.some((section) => {
+        return section.section !== null && selectedSections.includes(section.section);
+      });
+
+      return dayMatches && sectionMatches;
+    });
+  };
+
+  const handleDayChange = (day: string) => {
+    setSelectedDays((prevSelectedDays) => {
+      if (prevSelectedDays.includes(day)) {
+        return prevSelectedDays.filter((selectedDay) => selectedDay !== day);
+      } else {
+        return [...prevSelectedDays, day];
+      }
+    });
+  };
+  const handleSectionChange = (section: number) => {
+    setSelectedSections((prevSelectedSections) => {
+      if (prevSelectedSections.includes(section)) {
+        return prevSelectedSections.filter((selectedSection) => selectedSection !== section);
+      } else {
+        return [...prevSelectedSections, section];
+      }
+    });
   };
 
   const roleChecker = async () => {
@@ -91,7 +128,7 @@ const SelectPage: React.FC = () => {
     }
     
   };
-
+  
   // Function to toggle subject selection
   const toggleSubjectSelection = (index: number) => {
     setSelectSubjects((prevSelectSubjects) => {
@@ -201,7 +238,7 @@ const SelectPage: React.FC = () => {
                 )}
 
                 <SubjectBox
-                  BoxSubject={boxSubject}
+                  BoxSubject={filterSubjects()}
                   DeleteSubject={deleteSubject}
                   toggleSubjectSelection={toggleSubjectSelection}
                   selectSubjects={selectSubjects}
@@ -218,7 +255,12 @@ const SelectPage: React.FC = () => {
                 <h1 className="text-black">วันที่เรียน</h1>
                 {["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์", "อาทิตย์"].map((day) => (
                   <div key={day}>
-                    <input type="checkbox" id={day} />
+                    <input
+                      type="checkbox"
+                      id={day}
+                      onChange={() => handleDayChange(day)}
+                      checked={selectedDays.includes(day)}
+                    />
                     <label className="text-black" htmlFor={day}> วัน{day}</label>
                   </div>
                 ))}
@@ -227,7 +269,12 @@ const SelectPage: React.FC = () => {
                 <h1 className="text-gray-500/50">Section</h1>
                 {[1, 2, 3].map((sec) => (
                   <div key={sec}>
-                    <input type="checkbox" id={`sec${sec}`} />
+                    <input
+                      type="checkbox"
+                      id={`sec${sec}`}
+                      onChange={() => handleSectionChange(sec)}
+                      checked={selectedSections.includes(sec)}
+                    />
                     <label className="text-black" htmlFor={`sec${sec}`}> sec {sec}</label>
                   </div>
                 ))}
