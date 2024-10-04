@@ -63,7 +63,7 @@ class SubjectController {
             if (!deletedSubject) {
                 return res.status(404).json({ message: 'Subject not found' }); 
             }
-            await SectionModel.deleteMany({ subjectId: id });
+            await SectionModel.deleteMany({ ref_id: deletedSubject._id });
 
             res.status(200).json({ message: 'Subject deleted successfully' });
         } catch (error) {
