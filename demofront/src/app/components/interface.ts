@@ -1,9 +1,10 @@
 export interface Section {
+    subject_id: string;
     section: number | null;
     time: string;
     professor: string;
     room: string;
-    day: string;
+    day: string[];
     style: string;
 }
 

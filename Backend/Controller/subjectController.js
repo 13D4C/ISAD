@@ -2,10 +2,12 @@ const SubjectModel = require('../models/SubjectModel');
 const SectionModel  = require('../models/SectionModel');
 const Subject = require('../models/Subject');
 const Section = require('../models/Section');
+const SectionController = require('../Controller/sectionController');
 
 class SubjectController {
     async addSubject(req, res) {
         try {
+            console.log(req.body);
             let { name, subject_id, sections, detail, credit, midterm, final, midtermTime, finalTime } = req.body;
             const existingSubject = await SubjectModel.findOne({ subject_id });
             if (existingSubject) {
@@ -26,33 +28,12 @@ class SubjectController {
             const subject = new SubjectModel(subjectInstance);
 
             if (sections && sections.length > 0) {
-                const sectionPromises = sections.map(sectionData => {
-                    const sectionInstance = new Section(
-                        subject._id,
-                        sectionData.section,
-                        sectionData.professor,
-                        sectionData.room,
-                        sectionData.day,
-                        sectionData.time,
-                        sectionData.style,
-                    );
-                    const section = new SectionModel(sectionInstance);
-                    return section.save();
-                });
-                const savedSections = await Promise.all(sectionPromises);
-
+                const savedSections = await SectionController.addSection(subject._id, sections);
                 subject.sections = savedSections.map(sec => sec._id);
-
-                const uniqueDays = [...new Set(savedSections.map(sec => sec.day))];
-                subject.day = uniqueDays; // Save unique professors
-
-                const uniqueProfessors = [...new Set(savedSections.map(sec => sec.professor))];
-                subject.professors = uniqueProfessors; // Save unique professors
-
-                const uniqueStyles = [...new Set(savedSections.map(sec => sec.style))];
-                subject.style = uniqueStyles; // Save unique professors
-
-                await subject.save(); 
+                subject.day = [...new Set(savedSections.map(sec => sec.day))];
+                subject.professors = [...new Set(savedSections.map(sec => sec.professor))];
+                subject.style = [...new Set(savedSections.map(sec => sec.style))];
+                await subject.save();
             } else {
                 await subject.save();
             }
@@ -66,25 +47,8 @@ class SubjectController {
 
     async fetchSubject(req, res) {
         try {
-            const subjects = await SubjectModel.find().populate('sections'); // Fetch all subjects and populate sections
-            const transformedSubjects = subjects.map(subjectData => {
-                const subject = new Subject({
-                    name: subjectData.name,
-                    day: subjectData.day,
-                    subject_id: subjectData.subject_id,
-                    sections: subjectData.sections,
-                    professors: subjectData.professors,
-                    detail: subjectData.detail,
-                    credit: subjectData.credit,
-                    style: subjectData.style,
-                    midterm: subjectData.midterm,
-                    final: subjectData.final,
-                    midtermTime: subjectData.midtermTime,
-                    finalTime: subjectData.finalTime
-                });
-                return subject;
-            });
-            res.status(200).json(transformedSubjects); // Respond with the list of subjects
+            const subjects = await SubjectModel.find(); 
+            res.status(200).json(subjects); 
         } catch (e) {
             console.error(e);
             res.status(500).json({ message: 'Internal server error', error: e.message });

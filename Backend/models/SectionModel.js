@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
 
 const sectionSchema = new mongoose.Schema({
-    subject_id: {
+    ref_id: {
         type: mongoose.Schema.Types.ObjectId, //Foreign key
         ref: 'Subject',
-        required: true
+    },
+    subject_id: {
+        type: String,
     },
     section: {
         type: Number,
@@ -16,7 +18,7 @@ const sectionSchema = new mongoose.Schema({
         type: String,
     },
     day: {
-        type: String,
+        type: [String],
     },
     time: {
         type: String,

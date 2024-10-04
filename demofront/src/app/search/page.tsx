@@ -20,14 +20,29 @@ const SelectPage: React.FC = () => {
   // Function to add a subject
   const fetchSubjectsFromDatabase = async () => {
     try {
-      const response = await axios.get('http://localhost:8888/api/fetchSubject'); // Adjust the API endpoint as per your backend setup
+      const response = await axios.get('http://localhost:8888/api/fetchSubject'); 
       const subjectsFromDB = response.data as SubjectData[];
-      setBoxSubject(subjectsFromDB);
+      const subjectsWithSections = await Promise.all(subjectsFromDB.map(async (subject) => {
+        const sections = await fetchSections(subject.subject_id); 
+        return { ...subject, sections }; 
+      }));
+      setBoxSubject(subjectsWithSections);
     } catch (error) {
       console.error("Error fetching subjects from the database:", error);
     }
   };
   
+  const fetchSections =  async (subject_id : String) => { 
+    try {
+      const response = await axios.get(`http://localhost:8888/api/fetchSections/${subject_id}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching sections for subject_id ${subject_id}:`, error);
+      return []; // ในกรณีที่เกิด error, ส่งค่าเป็น array ว่างกลับ
+    }
+
+  }
+
   const addSubject = (subjectData: SubjectData) => {
     setBoxSubject((prevBoxSubject) => {
       const updatedBox = [...prevBoxSubject, subjectData];

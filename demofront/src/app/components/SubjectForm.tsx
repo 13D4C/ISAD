@@ -19,7 +19,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
   const [finalTime, setFinalTime] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [sections, setSections] = useState<Section[]>([
-    { section: null, time: "", day: "", professor: "", room: "", style: "" },
+    { subject_id: "", section: null, time: "", day: [], professor: "", room: "", style: "" },
   ]);
 
 
@@ -27,7 +27,14 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
 
   const handleDaySelection = (index: number, day: string) => {
     const updatedSections = [...sections];
-    updatedSections[index].day = updatedSections[index].day === day ? "" : day; // Toggle selection
+    const dayIndex = updatedSections[index].day.indexOf(day);
+
+    if (dayIndex === -1) {
+      updatedSections[index].day.push(day);
+    } else {
+      updatedSections[index].day.splice(dayIndex, 1);
+    }
+
     setSections(updatedSections);
   };
 
@@ -40,14 +47,20 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
     const updatedSections = [...sections];
     if (field === "section") {
       updatedSections[index][field] = value ? parseInt(value) : null; // Ensure correct type
-    } else {
+    } else if (field === "day") {
+      updatedSections[index][field] = value.split(",").map(day => day.trim()); 
+    }
+    else {
       updatedSections[index][field] = value;
     }
+
+    console.log(`Updated Section [${index}]:`, updatedSections[index]); // Log ค่าที่เปลี่ยนแปลง
+    console.log('All Sections:', updatedSections); // Log ค่าทั้งหมดของ sections
     setSections(updatedSections);
   };
 
   const handleAddSection = () => {
-    setSections([...sections, { section: null, time: "", day: "", professor: "", room: "", style: style.join(", ") }]);
+    setSections([...sections, { subject_id: "", section: null, time: "", day: [], professor: "", room: "", style: style.join(", ") }]);
   };
 
   const handleRemoveSection = (index: number) => {
@@ -63,9 +76,9 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
       credit: subjectCredit,
       detail: description,
       sections,
-      day: [], // Assuming 'day' should be handled on the backend
-      professors: [], // Assuming professors will be added later
-      midterm: new Date(midtermDay), // Default values, modify as needed
+      day: [], 
+      professors: [], 
+      midterm: new Date(midtermDay), 
       final: new Date(finalDay),
       midtermTime: midtermTime,
       finalTime: finalTime,
@@ -89,8 +102,9 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
           <input
             type="text"
             value={subjectID}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               setSubjectID(e.target.value)
+            }
             }
             placeholder="06xxxx"
             className="border rounded p-2 w-full text-sm"
@@ -104,7 +118,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
           <input
             type="text"
             value={subjectName}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            onChange={(e: ChangeEvent<HTMLInputElement>) => 
               setSubjectName(e.target.value)
             }
             className="border rounded p-2 w-full text-sm"
@@ -202,9 +216,10 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
               <input
                 type="text"
                 value={sec.section !== null ? sec.section.toString() : ""}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  handleSectionChange(index, "subject_id", subjectID);
                   handleSectionChange(index, "section", e.target.value)
-                }
+                }}
                 placeholder="1"
                 className="border rounded p-2 w-full text-sm"
                 required
@@ -249,12 +264,12 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
                     <input
                       type="checkbox"
                       id={`${day}-${index}`} // Unique ID for each section
-                      checked={sec.day === day} // Check if the section's day matches
+                      checked={sec.day.includes(day)} // Check if the section's day matches
                       onChange={() => handleDaySelection(index, day)} // Pass index to differentiate sections
                     />
                     <label
                       htmlFor={`${day}-${index}`}
-                      className={`text-sm ${sec.day === day ? "text-black" : "text-gray-500"}`}
+                      className={`text-sm ${sec.day.includes(day) ? "text-black" : "text-gray-500"}`}
                     >
                       {day}
                     </label>

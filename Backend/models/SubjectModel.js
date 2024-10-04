@@ -6,7 +6,7 @@ const subjectSchema = new mongoose.Schema({
         required: true,
     },
     day: {
-        type: [String],
+        type: [[String]],
     },
     subject_id: {
         type: String,
@@ -17,7 +17,7 @@ const subjectSchema = new mongoose.Schema({
         ref: 'Section'
     }],
     professors: {
-        type: [String],
+        type: [String],                                                                                                                                                                                                                                         
     },
     detail: { //(description ของวิชา)
         type: String,
