@@ -1,9 +1,10 @@
 // app/page.tsx
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import AlertBox from './components/button_error';
 
 // Components
 const Container: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -14,7 +15,7 @@ const Container: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {children}
       
       <button
-        className="absolute bottom-4 right-4 bg-gray-800 text-white p-2 rounded text-sm"
+        className="absolute bottom-4 right-4 bg-gray-800 hover:bg-gray-900 transition duration-300 text-white p-2 rounded text-sm"
         onClick={() => router.push('/adminLogin')}  // Navigate to the "/user" page
       >
         Admin
@@ -60,7 +61,7 @@ const Input: React.FC<{ type: string; placeholder: string; value: string; onChan
 const Button: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const router = useRouter();
   return <button
-    className="bg-blue-600 text-center text-white p-2 text-base rounded cursor-pointer mb-2"
+    className="bg-blue-600 hover:bg-blue-700 transition duration-300 text-center text-white p-2 text-base rounded cursor-pointer mb-2"
     type="submit"
   >
     {children}
@@ -71,7 +72,8 @@ const Register: React.FC<{ children: React.ReactNode; onClick: () => void }> = (
   const router = useRouter();
   return (
     <button
-      className="bg-white text-black p-2 text-base rounded border border-gray-300 flex items-center justify-center"
+      type="button"
+      className="bg-white hover:bg-gray-100 transition duration-300 text-black p-2 text-base rounded border border-gray-300 flex items-center justify-center"
       onClick={onClick}
     >
       {children}
@@ -94,6 +96,8 @@ const LoginPage: React.FC = () => {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
+
 
   const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -108,25 +112,23 @@ const LoginPage: React.FC = () => {
             router.push('/search');
             setTimeout(() => {
               window.location.reload();
-            }, 300);
+            }, 500);
           }, 500);
-          
-
-        } else {
-          console.error("Unexpected response status:", response.status, response.data);
-        }
+        } 
       } else {
-        console.log("error");
+        setErrorMessage("กรุณาใช้อีเมลของทางสถาบัน ในการเข้าสู่ระบบ");
       }
-    } catch (error) {
-      console.error('Error logging in', error);
-      // Log error response if available
-      if (axios.isAxiosError(error) && error.response) {
-        console.error('Response data:', error.response.data);
-        console.error('Response status:', error.response.status);
+    } catch (error: any) {
+      if (error.response && error.response.status === 401) {
+        setErrorMessage("อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง");
       }
     }
   };
+  const closeAlert = () => {
+    setErrorMessage("");
+  };
+
+  
   return (
     <Container>
       <Form onSubmit={handleSignIn}>
@@ -143,6 +145,7 @@ const LoginPage: React.FC = () => {
         <div className="text-center text-gray-500 my-3">or</div>
         <Register onClick={() => router.push('/regis')}>Register</Register>
       </Form>
+      {errorMessage && <AlertBox message={errorMessage} onClose={closeAlert}/>}
     </Container>
   );
 };

@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import AlertBox from '../components/button_error';
 
 // Components
 const Container: React.FC<{ children: React.ReactNode; }> = ({ children }) => (
@@ -49,7 +50,7 @@ const Input: React.FC<{ type: string; placeholder: string; value: string; onChan
 const Button: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const router = useRouter();
   return <button
-    className="bg-blue-600 text-center text-white p-2 text-base rounded cursor-pointer mb-2"
+    className="bg-blue-600 hover:bg-blue-700 transition duration-300 text-center text-white p-2 text-base rounded cursor-pointer mb-2"
     type="submit"
   >
     {children}
@@ -61,7 +62,9 @@ const RegisPage: React.FC = () => {
   const [name, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
+
 
   const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -75,11 +78,14 @@ const RegisPage: React.FC = () => {
           router.push('/');
         } 
       } else {
-        console.log("Error");
+        setErrorMessage("กรุณาใช้อีเมลของทางสถาบัน ในสร้างบัญชี");
       }
-    } catch (error) {
-      console.error('Error logging in', error);
+    } catch (error: any) {
+        setErrorMessage("อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง");
     }
+  };
+  const closeAlert = () => {
+    setErrorMessage("");
   };
 
   return (
@@ -97,9 +103,9 @@ const RegisPage: React.FC = () => {
           <Input type="password" placeholder="Password"
             value={password} onChange={(e) => setPassword(e.target.value)} />
           <Button>Register</Button>
-
         </InputContainer>
       </Form>
+      {errorMessage && <AlertBox message={errorMessage} onClose={closeAlert} />}
     </Container>
   );
 };
