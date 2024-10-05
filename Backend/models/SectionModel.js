@@ -1,0 +1,34 @@
+const mongoose = require('mongoose');
+
+const sectionSchema = new mongoose.Schema({
+    ref_id: {
+        type: mongoose.Schema.Types.ObjectId, //Foreign key
+        ref: 'Subject',
+    },
+    subject_id: {
+        type: String,
+    },
+    section: {
+        type: Number,
+    },
+    professor: {
+        type: String,
+    },
+    room: {
+        type: String,
+    },
+    day: {
+        type: [String],
+    },
+    time: {
+        type: String,
+    },
+    style: {
+        type: String,
+    }
+});
+
+const sectionModel = mongoose.model('Section', sectionSchema);
+
+module.exports = sectionModel;
+
