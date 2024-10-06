@@ -15,7 +15,7 @@ const Detail: React.FC = () => {
         const fetchSubjectData = async () => {
             if (id) {
                 try {
-                    const response = await axios.get(`http://localhost:8888/api/fetchSelectedSubject/${id}`);
+                    const response = await axios.get(`http://localhost:8888/api/fetchSubject/${id}`);
                     let subjectsFromDB = response.data as SubjectData[];
                     if (typeof subjectsFromDB === 'object' && !Array.isArray(subjectsFromDB)) {
                         subjectsFromDB = [subjectsFromDB]; // ถ้าไม่ใช่แปลงเป็นอาร์เรย์
@@ -53,7 +53,7 @@ const Detail: React.FC = () => {
         <div className="w-full h-full min-h-screen flex flex-col items-center justify-center bg-gray-200 p-8">
             <div className="w-full max-w-7xl">
                 {subjectData.length > 0 ? (
-                    <CourseDetail course={subjectData[0]} /> // ส่งอ็อบเจ็กต์แรกไปที่ CourseDetail
+                    <CourseDetail course={subjectData[0]} />
                 ) : (
                     <div>No data found</div>
                 )}

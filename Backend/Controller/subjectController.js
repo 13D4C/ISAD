@@ -8,7 +8,7 @@ class SubjectController {
     async addSubject(req, res) {
         try {
             console.log(req.body);
-            let { name, subject_id, sections, detail, credit, midterm, final, midtermTime, finalTime, major } = req.body;
+            let { name, subject_id, sections, detail, credit, style, midterm, final, midtermTime, finalTime, major } = req.body;
             const existingSubject = await SubjectModel.findOne({ subject_id });
             if (existingSubject) {
                 return res.status(400).json({ message: 'Subject already exists' });
@@ -21,6 +21,7 @@ class SubjectController {
                 credit,
                 midterm,
                 final,
+                style,
                 midtermTime,
                 finalTime,
                 major
@@ -31,9 +32,7 @@ class SubjectController {
             if (sections && sections.length > 0) {
                 const savedSections = await SectionController.addSection(subject._id, sections);
                 subject.sections = savedSections.map(sec => sec._id);
-                subject.day = [...new Set(savedSections.map(sec => sec.day))];
                 subject.professors = [...new Set(savedSections.map(sec => sec.professor))];
-                subject.style = [...new Set(savedSections.map(sec => sec.style))];
                 await subject.save();
             } else {
                 await subject.save();
@@ -48,19 +47,14 @@ class SubjectController {
 
     async fetchSubject(req, res) {
         try {
-            const subjects = await SubjectModel.find();
-            res.status(200).json(subjects);
-        } catch (e) {
-            console.error(e);
-            res.status(500).json({ message: 'Internal server error', error: e.message });
-        }
-    }
-
-    async fetchSelectedSubject(req, res) {
-        try {
             const { id } = req.params;
-            const subjects = await SubjectModel.findOne({ subject_id: id });
-            res.status(200).json(subjects);
+            if (id) {
+                const subjects = await SubjectModel.findOne({ subject_id: id });
+                res.status(200).json(subjects);
+            } else {
+                const subjects = await SubjectModel.find();
+                res.status(200).json(subjects);
+            }
         } catch (e) {
             console.error(e);
             res.status(500).json({ message: 'Internal server error', error: e.message });

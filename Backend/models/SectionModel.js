@@ -1,8 +1,20 @@
 const mongoose = require('mongoose');
 
+const subjectScheduleSchema = new mongoose.Schema({
+    day: {
+        type: String,
+    },
+    time: {
+        type: String,
+    },
+    room: {
+        type: String,
+    }
+});
+
 const sectionSchema = new mongoose.Schema({
     ref_id: {
-        type: mongoose.Schema.Types.ObjectId, //Foreign key
+        type: mongoose.Schema.Types.ObjectId, // Foreign key
         ref: 'Subject',
     },
     subject_id: {
@@ -14,15 +26,7 @@ const sectionSchema = new mongoose.Schema({
     professor: {
         type: String,
     },
-    room: {
-        type: String,
-    },
-    day: {
-        type: [String],
-    },
-    time: {
-        type: String,
-    },
+    schedule: [subjectScheduleSchema],
     style: {
         type: String,
     }
@@ -31,4 +35,3 @@ const sectionSchema = new mongoose.Schema({
 const sectionModel = mongoose.model('Section', sectionSchema);
 
 module.exports = sectionModel;
-

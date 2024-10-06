@@ -63,18 +63,18 @@ const SelectPage: React.FC = () => {
 
   const filterSubjects = () => {
     return boxSubject.filter((subject) => {
-      const dayMatches = selectedDays.length === 0 || subject.day.some((daysArray) => {
-        if (Array.isArray(daysArray)) {
-        return daysArray.some((day) => selectedDays.includes(day));
-      }
-        return selectedDays.includes(daysArray); // Handle if it's a string directly
-      });
+      const sectionMatches =
+        selectedSections.length === 0 || subject.sections.some((section) => {
+          // ตรวจสอบว่า section มีค่าไม่เป็น null และอยู่ใน selectedSections
+          return section.section !== null && selectedSections.includes(section.section);
+        });
 
-      const sectionMatches = selectedSections.length === 0 || subject.sections.some((section) => {
-        return section.section !== null && selectedSections.includes(section.section);
-      });
+      const scheduleMatches =
+        selectedDays.length === 0 || subject.sections.some((section) =>
+          section.schedule.some((schedule) => selectedDays.includes(schedule.day))
+        );
 
-      return dayMatches && sectionMatches;
+      return sectionMatches && scheduleMatches;
     });
   };
   const filteredSubjects = filterSubjects();

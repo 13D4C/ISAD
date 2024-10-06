@@ -1,25 +1,26 @@
 export interface Section {
     subject_id: string;
     section: number | null;
-    time: string;
     professor: string;
-    room: string;
-    day: string[];
+    schedule: {
+        day: string; 
+        time: string;
+        room: string; 
+    }[];
     style: string;
 }
 
 export interface SubjectData {
-    name: String;
-    day: string[];
+    name: string;
     subject_id: string;
     sections: Section[];
     professors: string[];
     detail: string;
     credit: number;
-    style: string[];
+    style: string;
     midterm: Date;
     final: Date;
-    midtermTime: String;
-    finalTime: String;
-    major: String;
+    midtermTime: string;
+    finalTime: string;
+    major: string;
 }

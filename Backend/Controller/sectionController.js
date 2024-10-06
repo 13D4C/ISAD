@@ -7,11 +7,9 @@ class SectionController {
             const sectionInstance = new Section(
                 ref_id,
                 sectionData.subject_id,
+                sectionData.schedule,
                 sectionData.section,
                 sectionData.professor,
-                sectionData.room,
-                sectionData.day,
-                sectionData.time,
                 sectionData.style
             );
             console.log(sectionInstance);

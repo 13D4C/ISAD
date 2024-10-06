@@ -1,7 +1,6 @@
 class Subject {
-    constructor({ name, day, subject_id, sections, professors, detail, credit, style, midterm, final, midtermTime, finalTime, major }) {
+    constructor({ name, subject_id, sections, professors, detail, credit, style, midterm, final, midtermTime, finalTime, major }) {
         this.name = name;
-        this.day = day;
         this.subject_id = subject_id;
         this.sections = sections;
         this.professors = professors;

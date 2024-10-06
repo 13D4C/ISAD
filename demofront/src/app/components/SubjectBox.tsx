@@ -136,14 +136,14 @@ const Subject: React.FC<SubjectProps> = ({
                   {selectedSections[index] !== null && // ตรวจสอบว่าได้เลือก section
                     box.sections
                       .find((sec) => sec.section === selectedSections[index]) // ค้นหา section ที่ถูกเลือก
-                      ?.day.map((day, idx) => ( // แสดงวันใน section นั้น
+                      ?.schedule.map((scheduleEntry, idx) => ( // แสดงวันใน schedule นั้น
                         <p
                           key={idx}
-                          className={`text-sm ${textColor[day] || "text-gray-500"
-                            } ${bgColor[day] || "bg-gray-100"
+                          className={`text-sm ${textColor[scheduleEntry.day] || "text-gray-500"
+                            } ${bgColor[scheduleEntry.day] || "bg-gray-100"
                             } rounded-full max-w-fit px-3 py-1`}
                         >
-                          {day}
+                          {scheduleEntry.day}
                         </p>
                       ))}
                 </div>
@@ -155,7 +155,7 @@ const Subject: React.FC<SubjectProps> = ({
                   {selectedSections[index] !== null && // Check against null
                     box.sections.find(
                       (sec) => sec.section === selectedSections[index]
-                    )?.time}
+                    )?.schedule.map(scheduleEntry => scheduleEntry.time).join(", ") || 'ไม่ระบุ'}
                 </p>
               </div>
 
@@ -165,9 +165,10 @@ const Subject: React.FC<SubjectProps> = ({
                   {selectedSections[index] !== null && // Check against null
                     box.sections.find(
                       (sec) => sec.section === selectedSections[index]
-                    )?.room}
+                    )?.schedule.map(scheduleEntry => scheduleEntry.room).join(", ") || 'ไม่ระบุ'}
                 </p>
               </div>
+
 
               <div className="space-y-2">
                 <p className="text-sm text-gray-500/50">ผู้สอน</p>
