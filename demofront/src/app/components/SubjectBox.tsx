@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Section, SubjectData } from '../components/interface';
+import { SubjectData } from '../components/interface';
 import axios, { AxiosError } from "axios";
 
 interface SubjectProps {
@@ -8,6 +8,7 @@ interface SubjectProps {
   toggleSubjectSelection: (index: number) => void;
   selectSubjects: number[];
   isSMScreen: boolean;
+  onNavigate: (subjectId: string) => void;
 }
 
 const bgColor: { [key: string]: string } = {
@@ -33,7 +34,9 @@ const Subject: React.FC<SubjectProps> = ({
   toggleSubjectSelection,
   selectSubjects,
   isSMScreen,
+  onNavigate,
 }) => {
+
   const [selectedSections, setSelectedSections] = useState<{ [index: number]: number | null }>({});
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const roleChecker = async () => {
@@ -68,6 +71,8 @@ const Subject: React.FC<SubjectProps> = ({
     }));
   };
 
+
+
   useEffect(() => {
     const initialSelections: { [index: number]: number | null } = {};
     BoxSubject.forEach((box, index) => {
@@ -90,7 +95,9 @@ const Subject: React.FC<SubjectProps> = ({
         <div key={index} className="rounded border shadow-md p-6">
           <div className="flex space-x-2 flex-wrap">
             <p className="text-xl font-bold text-blue-900">{box.subject_id}</p>
-            <button className="text-xl font-bold hover:underline text-blue-900 hover:text-blue-950">
+            <button 
+              onClick={() => onNavigate(box.subject_id)}
+              className="text-xl font-bold hover:underline text-blue-900 hover:text-blue-950">
               {box.name}
             </button>
             <p className="text-lg font-bold text-gray-500/50">

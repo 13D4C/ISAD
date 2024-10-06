@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 import SubjectBox from "../components/SubjectBox";
 import SubjectForm from "../components/SubjectForm";
 import SelectSubjects from "../components/SelectSubject";
@@ -18,7 +19,12 @@ const SelectPage: React.FC = () => {
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [selectedSections, setSelectedSections] = useState<number[]>([]);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  // Function to add a subject
+  const router = useRouter();
+  const handleNavigate = (subjectId : string) => {
+    console.log(subjectId);
+    router.push(`/subject_detail/${subjectId}`);
+  };
+
   const fetchSubjectsFromDatabase = async () => {
     try {
       const response = await axios.get('http://localhost:8888/api/fetchSubject'); 
@@ -71,6 +77,7 @@ const SelectPage: React.FC = () => {
       return dayMatches && sectionMatches;
     });
   };
+  const filteredSubjects = filterSubjects();
 
   const handleDayChange = (day: string) => {
     setSelectedDays((prevSelectedDays) => {
@@ -238,11 +245,12 @@ const SelectPage: React.FC = () => {
                 )}
 
                 <SubjectBox
-                  BoxSubject={filterSubjects()}
+                  BoxSubject={filteredSubjects}
                   DeleteSubject={deleteSubject}
                   toggleSubjectSelection={toggleSubjectSelection}
                   selectSubjects={selectSubjects}
                   isSMScreen={isSMScreen}
+                  onNavigate={handleNavigate}
                 />
               </div>
             </div>

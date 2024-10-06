@@ -1,5 +1,5 @@
 const SubjectModel = require('../models/SubjectModel');
-const SectionModel  = require('../models/SectionModel');
+const SectionModel = require('../models/SectionModel');
 const Subject = require('../models/Subject');
 const Section = require('../models/Section');
 const SectionController = require('../Controller/sectionController');
@@ -15,13 +15,13 @@ class SubjectController {
             }
 
             const subjectInstance = new Subject({
-                name, 
-                subject_id, 
-                detail, 
-                credit, 
-                midterm, 
-                final, 
-                midtermTime, 
+                name,
+                subject_id,
+                detail,
+                credit,
+                midterm,
+                final,
+                midtermTime,
                 finalTime,
                 major
             });
@@ -48,8 +48,19 @@ class SubjectController {
 
     async fetchSubject(req, res) {
         try {
-            const subjects = await SubjectModel.find(); 
-            res.status(200).json(subjects); 
+            const subjects = await SubjectModel.find();
+            res.status(200).json(subjects);
+        } catch (e) {
+            console.error(e);
+            res.status(500).json({ message: 'Internal server error', error: e.message });
+        }
+    }
+
+    async fetchSelectedSubject(req, res) {
+        try {
+            const { id } = req.params;
+            const subjects = await SubjectModel.findOne({ subject_id: id });
+            res.status(200).json(subjects);
         } catch (e) {
             console.error(e);
             res.status(500).json({ message: 'Internal server error', error: e.message });
@@ -62,7 +73,7 @@ class SubjectController {
             const deletedSubject = await SubjectModel.findOneAndDelete({ subject_id: id });
 
             if (!deletedSubject) {
-                return res.status(404).json({ message: 'Subject not found' }); 
+                return res.status(404).json({ message: 'Subject not found' });
             }
             await SectionModel.deleteMany({ ref_id: deletedSubject._id });
 

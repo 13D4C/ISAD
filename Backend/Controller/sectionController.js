@@ -25,7 +25,6 @@ class SectionController {
         try {
             const { id } = req.params;
             const deletedSection = await SectionModel.findOneAndDelete({ _id: id });
-
             if (!deletedSection) {
                 return res.status(404).json({ message: 'Section not found' });
             }
