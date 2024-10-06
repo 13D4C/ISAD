@@ -7,15 +7,24 @@ import axios from 'axios';
 
 const Detail: React.FC = () => {
     const { id } = useParams();
-    const [subjectData, setSubjectData] = useState<SubjectData | null>(null);
+    const [subjectData, setSubjectData] = useState<SubjectData[] | null>(null);
     const [loading, setLoading] = useState(true);
+    
 
     useEffect(() => {
         const fetchSubjectData = async () => {
             if (id) {
                 try {
                     const response = await axios.get(`http://localhost:8888/api/fetchSelectedSubject/${id}`);
-                    setSubjectData(response.data);
+                    let subjectsFromDB = response.data as SubjectData[];
+                    if (typeof subjectsFromDB === 'object' && !Array.isArray(subjectsFromDB)) {
+                        subjectsFromDB = [subjectsFromDB]; // ถ้าไม่ใช่แปลงเป็นอาร์เรย์
+                    }
+                    const subjectsWithSections = await Promise.all(subjectsFromDB.map(async (subject) => {
+                        const sections = await fetchSections(subject.subject_id);
+                        return { ...subject, sections };
+                    }));
+                    setSubjectData(subjectsWithSections);
                 } catch (error) {
                     console.error('Error fetching subject data:', error);
                 } finally {
@@ -23,6 +32,15 @@ const Detail: React.FC = () => {
                 }
             }
         };
+        const fetchSections = async (subject_id: String) => {
+            try {
+                const response = await axios.get(`http://localhost:8888/api/fetchSections/${subject_id}`);
+                return response.data;
+            } catch (error) {
+                console.error(`Error fetching sections for subject_id ${subject_id}:`, error);
+                return []; // ในกรณีที่เกิด error, ส่งค่าเป็น array ว่างกลับ
+            }
+        }
 
         fetchSubjectData();
     }, [id]);
@@ -34,7 +52,11 @@ const Detail: React.FC = () => {
     return (
         <div className="w-full h-full min-h-screen flex flex-col items-center justify-center bg-gray-200 p-8">
             <div className="w-full max-w-7xl">
-                <CourseDetail course={subjectData} />
+                {subjectData.length > 0 ? (
+                    <CourseDetail course={subjectData[0]} /> // ส่งอ็อบเจ็กต์แรกไปที่ CourseDetail
+                ) : (
+                    <div>No data found</div>
+                )}
             </div>
         </div>
     );
