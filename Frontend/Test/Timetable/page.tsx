@@ -54,18 +54,6 @@ const ScheduleTable = () => {
       hidden: false,
       color: getColorFromCode("90642999")
     },
-    {
-      subject: "CHARM SCHOOL2",
-      day: "WED",
-      startTime: "11:00",
-      duration: 3,
-      room: "M23",
-      section: "903",
-      code: "9062999",
-      location: "IT",
-      hidden: false,
-      color: getColorFromCode("9062999")
-    },
   ]);
 
   const [popupSubject, setPopupSubject] = useState(null); // State to manage the pop-up subject details
