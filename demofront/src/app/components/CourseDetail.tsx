@@ -1,10 +1,19 @@
 "use client";
 import React, { useState } from 'react';
 import { Section, SubjectData } from '../components/interface';
+import DecisionBox from './DecisionComponent';
+
+type DelClassIndex = { sectionIndex: number; scheduleIndex: number } | null;
+
 
 const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editableCourse, setEditableCourse] = useState(course);
+  const [isDelSecBoxVisible, setDelSecBoxVisible] = useState(false);
+  const [isDelClassBoxVisible, setDelClassBoxVisible] = useState(false);
+  const [delSecIndex, setDelSecIndex] = useState<number | null>(null);
+  const [delClassIndex, setDelClassIndex] = useState<{ sectionIndex: number; scheduleIndex: number } | null>(null);
+
 
   // กดเพื่อเริ่มแก้ไข
   const handleEditClick = () => setIsEditing(true);
@@ -40,6 +49,42 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
     setEditableCourse({ ...editableCourse, sections: updatedSections });
   };
 
+  const handleScheduleChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    sectionIndex: number,
+    scheduleIndex: number,
+    field: keyof Section['schedule'][number],
+    selectedDay?: string 
+  ) => {
+    const updatedSections = [...editableCourse.sections];
+    const scheduleItem = updatedSections[sectionIndex].schedule[scheduleIndex];
+
+    if (field === 'day' && selectedDay) {
+      scheduleItem.day = selectedDay;
+    } else {
+      scheduleItem[field] = e.target.value;
+    }
+    setEditableCourse({ ...editableCourse, sections: updatedSections });
+  };
+
+  const handleAddClass = (sectionIndex: number) => {
+    const newSchedule: Section['schedule'][number] = {
+      day: '',
+      time: '',
+      room: '',
+    }
+    const updatedSections = [...editableCourse.sections];
+    updatedSections[sectionIndex].schedule.push(newSchedule);
+
+    setEditableCourse({ ...editableCourse, sections: updatedSections });
+  };
+  const handleDeleteClass = (sectionIndex: number, scheduleIndex: number) => {
+    const updatedSections = [...editableCourse.sections];
+    console.log('Deleting section at index:', scheduleIndex);
+    updatedSections[sectionIndex].schedule.splice(scheduleIndex, 1);
+    setEditableCourse({ ...editableCourse, sections: updatedSections });
+  };
+
   const handleAddSection = () => {
     const newSection: Section = {
       subject_id: editableCourse.subject_id,
@@ -56,6 +101,7 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
     const updatedSections = editableCourse.sections.filter((_, idx) => idx !== sectionIndex);
     setEditableCourse({ ...editableCourse, sections: updatedSections });
   };
+
 
   return (
     <div className="w-full max-w-7xl h-full p-6 bg-white rounded shadow-lg">
@@ -116,15 +162,6 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
           <div className="space-y-2">
             {editableCourse.sections.map((section, sectionIndex) => (
               <div key={sectionIndex} className="relative mb-4 p-4 border rounded-md bg-gray-100">
-                {/* ปุ่ม Delete จะแสดงเฉพาะในโหมดแก้ไข */}
-                {isEditing && (
-                  <button
-                    onClick={() => handleDeleteSection(sectionIndex)}
-                    className="absolute top-2 right-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded"
-                  >
-                    Delete
-                  </button>
-                )}
                 <h4 className="text-md font-bold text-purple-700">Sec {section.section}</h4>
                 <table className="table-auto w-full mt-4">
                   <thead>
@@ -153,7 +190,7 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
           </div>
 
           <button
-            className="text-sm text-white bg-yellow-500 hover:bg-yellow-700 py-2 px-4 rounded mb-4 shadow-md transition duration-300 ease-in-out"
+            className="text-sm mt-4 text-white bg-yellow-500 hover:bg-yellow-700 py-2 px-4 rounded mb-4 shadow-md transition duration-300 ease-in-out"
             onClick={handleEditClick}
           >
             Edit
@@ -240,13 +277,32 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
               <div key={sectionIndex} className="relative pt-8 mb-4 p-4 border rounded-md bg-gray-100">
                 {/* ปุ่ม Delete จะหายไปถ้าไม่อยู่ในโหมดแก้ไข */}
                 {isEditing && (
+                  <>
                   <button
-                    onClick={() => handleDeleteSection(sectionIndex)}
-                    className="absolute top-3 right-4 bg-red-600 transition duration-300 ease-in-out hover:bg-red-700 text-white font-bold py-1 px-3 rounded"
+                    className="absolute top-3 right-4 text-md bg-red-600 transition duration-300 ease-in-out hover:bg-red-700 text-white py-1 px-3 rounded"
+                    onClick={() => {
+                      setDelSecIndex(sectionIndex); 
+                      setDelSecBoxVisible(true);
+                    }}
                   >
-                    Delete
+                    Delete Section
                   </button>
+                  {isDelSecBoxVisible && delSecIndex !== null && (
+                  <DecisionBox
+                    message_1="คุณแน่ใจที่จะลบ Section นี้ใช่หรือไม่?"
+                    message_2="(Section นี้จะหายไปและไม่สามารถกู้คืนได้)"
+                    onClose={(action) => {
+                      if (action === 'delete') {
+                        handleDeleteSection(delSecIndex);
+                      }
+                      setDelSecBoxVisible(false);
+                      setDelSecIndex(null);
+                    }}
+                  />
                 )}
+                  </>
+                )}
+
 
                 <label className="block text-sm font-medium text-gray-700">Section</label>
                 <input
@@ -261,32 +317,72 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
                   type="text"
                   value={section.professor}
                   onChange={(e) => handleSectionChange(e, sectionIndex, 'professor')}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-1 block w-full px-3 py-2 border mb-4 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
 
-                <label className="block text-sm font-medium text-gray-700">Room</label>
-                <input
-                  type="text"
-                  value={section.room}
-                  onChange={(e) => handleSectionChange(e, sectionIndex, 'room')}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                />
+                {section.schedule.map((scheduleItem, scheduleIndex) => (
+                  <div key={scheduleIndex} className="relative p-4 border rounded-md bg-gray-100 mb-4">
+                    {isEditing && (
+                      <>
+                      <button
+                        className="absolute top-3 right-4 text-sm bg-red-600 transition duration-300 ease-in-out hover:bg-red-700 text-white py-1 px-3 rounded"
+                        onClick={() => {
+                          setDelClassBoxVisible(true); 
+                          setDelClassIndex({sectionIndex, scheduleIndex});}}
+                      >
+                        Delete Class
+                      </button>
+                        {isDelClassBoxVisible && delClassIndex !== null && (
+                          <DecisionBox
+                            message_1="คุณแน่ใจที่จะลบ Class นี้ใช่หรือไม่?"
+                            message_2="(Class นี้จะหายไปและไม่สามารถกู้คืนได้)"
+                            onClose={(action) => {
+                              if (action === 'delete') {
+                                handleDeleteClass(delClassIndex.sectionIndex, delClassIndex.scheduleIndex); 
+                              }
+                              setDelClassBoxVisible(false);
+                              setDelClassIndex(null);
+                            }}
+                          />
+                        )}
+                      </>
+                    )}
+                    
+                    <div className="mt-1 block">
+                      <label className="block text-sm font-medium text-gray-700 mt-2">Day</label>
+                      {["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์", "อาทิตย์"].map((day) => (
+                        <label key={day} className="inline-flex items-center text-gray-700 mr-4 ml-1 mt-1 mb-1">
+                          <input
+                            type="radio"
+                            name={`day-${sectionIndex}-${scheduleIndex}`} // กำหนด name เดียวกันให้ทุกวันในกลุ่มนี้
+                            checked={scheduleItem.day === day} // ตรวจสอบว่าถ้าวันนี้ถูกเลือกหรือไม่
+                            onChange={(e) => handleScheduleChange(e, sectionIndex, scheduleIndex, 'day', day)} // ส่ง day ที่เลือกไป
+                            className="hidden peer"
+                          />
+                          <div className="w-3 h-3 border border-gray-300 rounded peer-checked:bg-blue-500 peer-checked:border-white peer-checked:border-2 "></div>
+                          <span className="ml-2">{day}</span>
+                        </label>
+                      ))}
+                    </div>
 
-                <label className="block text-sm font-medium text-gray-700">Time</label>
-                <input
-                  type="text"
-                  value={section.time}
-                  onChange={(e) => handleSectionChange(e, sectionIndex, 'time')}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                />
+                    <label className="block text-sm font-medium text-gray-700">Time</label>
+                    <input
+                      type="text"
+                      value={scheduleItem.time}
+                      onChange={(e) => handleScheduleChange(e, sectionIndex, scheduleIndex, 'time')}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    />
 
-                <label className="block text-sm font-medium text-gray-700">Day</label>
-                <input
-                  type="text"
-                  value={section.day.join(', ')} // แสดงวันในรูปแบบ String
-                  onChange={(e) => handleSectionChange(e, sectionIndex, 'day')} // ต้องจัดการให้ตรงตาม type ของ day
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                />
+                    <label className="block text-sm font-medium text-gray-700">Room</label>
+                    <input
+                      type="text"
+                      value={scheduleItem.room}
+                      onChange={(e) => handleScheduleChange(e, sectionIndex, scheduleIndex, 'room')}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    />
+                  </div>
+                ))}
+                
 
                 <label className="block text-sm font-medium text-gray-700">Style</label>
                 <input
@@ -295,6 +391,11 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
                   onChange={(e) => handleSectionChange(e, sectionIndex, 'style')}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
+                <button 
+                className='text-sm mt-4 text-white bg-green-500 hover:bg-green-700 py-2 px-2 rounded mb-2 shadow-md transition duration-300 ease-in-out'
+                onClick={() => handleAddClass(sectionIndex)}>
+                  Add Class
+                </button>
               </div>
             ))}
 
