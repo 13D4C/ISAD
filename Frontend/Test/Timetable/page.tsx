@@ -3,6 +3,25 @@ import React, { useState, useRef } from "react";
 import SubjectBox from "./SubjectBox";
 import { toPng } from "html-to-image";
 import SubjectDetailBox from "./SubjectDetailBox"; // Import the SubjectDetailBox
+import  CharmSchoolComponent from "./PopupComponent"
+import chroma from 'chroma-js';
+
+// Predefined color palette from your image
+const colorPalette = ['#48A4FF', '#FFB74D', '#4CAF50', '#F27537', '#FF609B', '#FFC107'];
+
+// Function to map the subject code to a color or allow forcing a color
+const getColorFromCode = (code, forceColor = null) => {
+  // If a forced color is provided and valid, use it
+  if (forceColor && colorPalette.includes(forceColor)) {
+    return forceColor;
+  }
+
+  // Hash the subject code to consistently assign a color from the palette
+  const hash = [...code].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+
+  // Map the hash to one of the colors in the predefined palette
+  return chroma.scale(colorPalette).mode('lab')(hash % colorPalette.length / colorPalette.length).hex();
+};
 
 const ScheduleTable = () => {
   const days = ["MON", "TUE", "WED", "THU", "FRI"];
@@ -33,6 +52,19 @@ const ScheduleTable = () => {
       code: "90642999",
       location: "IT",
       hidden: false,
+      color: getColorFromCode("90642999")
+    },
+    {
+      subject: "CHARM SCHOOL2",
+      day: "WED",
+      startTime: "11:00",
+      duration: 3,
+      room: "M23",
+      section: "903",
+      code: "9062999",
+      location: "IT",
+      hidden: false,
+      color: getColorFromCode("9062999")
     },
   ]);
 
@@ -171,6 +203,7 @@ const ScheduleTable = () => {
                               section={subject.section}
                               code={subject.code}
                               location={subject.location}
+                              forceColor={subject.color}
                               // Trigger pop-up on subject click
                               onClick={() => handleSubjectClick(subject)}
                             />
@@ -218,31 +251,21 @@ const ScheduleTable = () => {
               subject={subject}
               onToggleVisibility={toggleVisibility}
               onDelete={deleteSubject} // Pass delete function to the SubjectDetailBox
+              forceColor={subject.color}
             />
           ))}
         </div>
       </div>
-
-      {/* Pop-up for subject details */}
-      {popupSubject && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg font-semibold mb-4">{popupSubject.subject}</h3>
-            <p>Code: {popupSubject.code}</p>
-            <p>Room: {popupSubject.room}</p>
-            <p>Section: {popupSubject.section}</p>
-            <p>Location: {popupSubject.location}</p>
-            <p>Time: {popupSubject.startTime}</p>
-            <p>Duration: {popupSubject.duration} hours</p>
-            <button
-              onClick={closePopup}
-              className="mt-4 bg-blue-600 text-white py-2 px-4 rounded-lg"
-            >
-              Close
-            </button>
+      
+      {
+        popupSubject && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <CharmSchoolComponent />
           </div>
-        </div>
-      )}
+        )
+      }
+
+      
     </div>
   );
 };

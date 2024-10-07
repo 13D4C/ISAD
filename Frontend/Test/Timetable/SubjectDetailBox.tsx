@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const SubjectDetailBox = ({ subject, onDelete, onToggleVisibility }) => {
+const SubjectDetailBox = ({ subject, onDelete, onToggleVisibility, forceColor }) => {
   const [isHidden, setIsHidden] = useState(false);
 
   const toggleVisibility = () => {
@@ -94,14 +94,14 @@ const SubjectDetailBox = ({ subject, onDelete, onToggleVisibility }) => {
           {/* Circle with fixed color next to "สีในตาราง" */}
           <span
             className="w-3 h-3 rounded-full mr-2"
-            style={{ backgroundColor: "#48A4FF" }} // Fixed blue color #48A4FF
+            style={{ backgroundColor: forceColor }} // Fixed blue color #48A4FF
           ></span>
           สีในตาราง
         </button>
 
         {/* Delete button */}
         <button
-          className="text-gray-400 hover:text-red-600 transition-all"
+          className="text-gray-400"
           onClick={() => onDelete(subject.code)} // Trigger delete logic
         >
           <svg
