@@ -11,7 +11,6 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
   const [subjectID, setSubjectID] = useState<string>("");
   const [subjectName, setSubjectName] = useState<string>("");
   const [subjectCredit, setSubjectCredit] = useState<number>(0);
-  const [day, setDay] = useState<string[]>([]);
   const [style, setStyle] = useState<string>("");
   const [midtermDay, setMidtermDay] = useState<string>("");
   const [midtermTime, setMidtermTime] = useState<string>("");
@@ -20,7 +19,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
   const [description, setDescription] = useState<string>("");
   const [major, setMajor] = useState<string>("");
   const [sections, setSections] = useState<Section[]>([
-    { subject_id: subjectID, section: null, schedule: [],  professor: "", style: "" },
+    {subject_id: subjectID, section: null, schedule: [],  professor: "", style: "" },
   ]);
 
 
@@ -91,7 +90,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
     };
     try {
       const response = await axios.post('http://localhost:8888/api/addSubject', subjectData);
-      console.log("Subject added:", response.data); 
+      console.log("Subject added:", subjectData); 
       onSubmit(subjectData);
     } catch (error) {
       console.error("Error adding subject:", error);

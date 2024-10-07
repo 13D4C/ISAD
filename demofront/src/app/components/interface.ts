@@ -10,6 +10,7 @@ export interface Section {
     style: string;
 }
 
+
 export interface SubjectData {
     name: string;
     subject_id: string;

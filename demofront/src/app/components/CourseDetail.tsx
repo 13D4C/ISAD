@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Section, SubjectData } from '../components/interface';
 import DecisionBox from './DecisionComponent';
+import axios from 'axios';
 
 
 
@@ -34,9 +35,33 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
   };
 
   // กดบันทึกการแก้ไข
-  const handleSaveClick = () => {
-    // เพิ่ม logic สำหรับการบันทึก เช่นการเรียก API
-    setIsEditing(false);
+  const handleSaveClick = async () => {
+    try {
+      const updatedSubject = {
+        style: editableCourse.style,
+        credit: editableCourse.credit,
+        midterm: editableCourse.midterm,
+        final: editableCourse.final,
+        midtermTime: editableCourse.midtermTime,
+        finalTime: editableCourse.finalTime,
+        major: editableCourse.major,
+        detail: editableCourse.detail,
+      };
+
+      await axios.put(`http://localhost:8888/api/subjects/${editableCourse.subject_id}`, updatedSubject);
+
+      const updatedSections = editableCourse.sections.map(section => ({
+        section: section.section,
+        professor: section.professor,
+        schedule: section.schedule,
+        style: section.style,
+      }));
+      await axios.put(`http://localhost:8888/api/sections/${editableCourse.subject_id}`, updatedSections);
+      console.log(updatedSubject);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating subject or sections:', error);
+    }
   };
 
   // ฟังก์ชันที่ใช้จัดการการเปลี่ยนแปลงของฟิลด์ข้อมูลหลักๆ
@@ -118,9 +143,22 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
   };
 
   // ฟังก์ชันสำหรับลบ Section
-  const handleDeleteSection = (sectionIndex: number) => {
-    const updatedSections = editableCourse.sections.filter((_, idx) => idx !== sectionIndex);
-    setEditableCourse({ ...editableCourse, sections: updatedSections });
+  const handleDeleteSection = async(sectionIndex: number) => {
+    try {
+      const response = await axios.delete(`http://localhost:8888/api/sections/${editableCourse.subject_id}`, {
+        data: [sectionIndex] // ส่ง array ที่มีแค่ index ที่ต้องการลบ
+      });
+
+      // อัปเดต sections ใน state หลังจากลบสำเร็จ
+      const updatedSections = editableCourse.sections.filter((_, idx) => idx !== sectionIndex);
+      setEditableCourse({ ...editableCourse, sections: updatedSections });
+
+      console.log("Section deleted successfully", response.data);
+
+    } catch (error) {
+      console.log(editableCourse.sections)
+      console.error("Failed to delete section:", error);
+    }
   };
 
 

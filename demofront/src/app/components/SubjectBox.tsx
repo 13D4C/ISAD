@@ -17,6 +17,8 @@ const bgColor: { [key: string]: string } = {
   พุธ: "bg-lime-200",
   พฤหัสบดี: "bg-amber-100",
   ศุกร์: "bg-cyan-100",
+  เสาร์: "bg-purple-200",
+  อาทิตย์: "bg-red-200",
 };
 
 const textColor: { [key: string]: string } = {
@@ -25,6 +27,8 @@ const textColor: { [key: string]: string } = {
   พุธ: "text-lime-700",
   พฤหัสบดี: "text-orange-500",
   ศุกร์: "text-cyan-500",
+  เสาร์: "text-purple-500",
+  อาทิตย์: "text-gray-600",
 };
 
 

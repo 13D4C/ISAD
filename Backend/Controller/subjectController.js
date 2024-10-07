@@ -77,6 +77,23 @@ class SubjectController {
             res.status(500).json({ message: 'Internal server error', error: error.message });
         }
     }
+    async editSubject(req, res) {
+        try {
+            const { id } = req.params;
+            const updatedSubject = req.body;
+            const subject = await SubjectModel.findOne({ subject_id: id });
+            if (!subject) {
+                return res.status(404).json({ message: 'Subject not found' });
+            }
+            subject.set(updatedSubject);
+            await subject.save();
+            return res.status(200).json(subject);
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
 }
 
 module.exports = new SubjectController();
