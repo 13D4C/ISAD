@@ -1,20 +1,29 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Section, SubjectData } from '../components/interface';
 import DecisionBox from './DecisionComponent';
 
-type DelClassIndex = { sectionIndex: number; scheduleIndex: number } | null;
 
 
 const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editableCourse, setEditableCourse] = useState(course);
+  const [editableCourse, setEditableCourse] = useState<SubjectData>({
+    ...course,
+    midterm: new Date(course.midterm), 
+    final: new Date(course.final)
+  });  
   const [isDelSecBoxVisible, setDelSecBoxVisible] = useState(false);
   const [isDelClassBoxVisible, setDelClassBoxVisible] = useState(false);
   const [delSecIndex, setDelSecIndex] = useState<number | null>(null);
   const [delClassIndex, setDelClassIndex] = useState<{ sectionIndex: number; scheduleIndex: number } | null>(null);
 
-
+  useEffect(() => {
+    setEditableCourse({
+      ...course,
+      midterm: new Date(course.midterm),
+      final: new Date(course.final),
+    });
+  }, [course]);
   // กดเพื่อเริ่มแก้ไข
   const handleEditClick = () => setIsEditing(true);
 
@@ -33,7 +42,19 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
   // ฟังก์ชันที่ใช้จัดการการเปลี่ยนแปลงของฟิลด์ข้อมูลหลักๆ
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setEditableCourse({ ...editableCourse, [name]: value });
+
+    if (name === 'midtermExam' || name === 'finalExam') {
+      const dateValue = new Date(value); // ถ้า value เป็น string ว่างให้เป็น null
+      setEditableCourse((prev) => ({
+        ...prev,
+        [name]: dateValue,
+      }));
+    } else {
+      setEditableCourse((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
  const handleSectionChange = (
@@ -215,16 +236,16 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
               <label className="block text-sm font-medium text-gray-700">สอบกลางภาค</label>
                 <input
                   type="date"
-                  name="midtermExam"
-                  value={editableCourse.midterm instanceof Date ? editableCourse.midterm.toISOString().substring(0, 10) : ''}
+                  name="midterm"
+                  value={editableCourse.midterm ? new Date(editableCourse.midterm).toISOString().substring(0, 10) : ''}                  
                   onChange={handleChange}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
                 <label className="block text-sm font-medium text-gray-700">สอบปลายภาค</label>
                 <input
                   type="date"
-                  name="finalExam"
-                  value={editableCourse.final instanceof Date ? editableCourse.final.toISOString().substring(0, 10) : ''} // แก้จาก editableCourse.midterm เป็น editableCourse.final
+                  name="final"
+                  value={editableCourse.final ? new Date(editableCourse.final).toISOString().substring(0, 10) : ''}                  
                   onChange={handleChange}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
@@ -242,7 +263,7 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
               <input
                 type="text"
                 name="midtermTime"
-                value={editableCourse.midtermTime}
+                value={editableCourse.midtermTime}     
                 onChange={handleChange}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
