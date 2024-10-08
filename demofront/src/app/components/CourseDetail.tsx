@@ -57,12 +57,30 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
         schedule: section.schedule,
         style: section.style,
       }));
+      
 
       if (updatedSections.length > 0) {
         await axios.put(`http://localhost:8888/api/sections/${editableCourse.subject_id}`, updatedSections);
         console.log("Sections updated:", updatedSections);
       } else {
         console.warn("No sections to update.");
+      }
+
+      const sectionsToAdd = editableCourse.sections.filter(section => {
+        const exists = originalCourse.sections.some(existingSection => existingSection.section === section.section);
+        return (section.section && section.professor.trim() === '' && !exists);
+      });
+      for (const section of sectionsToAdd) {
+        const newSection = {
+          subject_id: editableCourse.subject_id,
+          section: section.section,
+          professor: section.professor,
+          schedule: section.schedule,
+          style: section.style,
+        };
+
+        await axios.post(`http://localhost:8888/api/addSection/${editableCourse.subject_id}`, newSection);
+        console.log("Section added successfully:", newSection);
       }
 
       setIsEditing(false);
@@ -150,13 +168,6 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
       ...editableCourse,
       sections: [...editableCourse.sections, newSection]
     })
-    try {
-      
-      const response = await axios.post(`http://localhost:8888/api/addSection/${editableCourse.subject_id}`, newSection);
-      console.log("Section added successfully", response.data);
-    } catch (error) {
-      console.error("Error adding section:", error);
-    }
   };
 
   // ฟังก์ชันสำหรับลบ Section
@@ -383,7 +394,8 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
                 <label className="block text-sm font-medium text-gray-700">Section</label>
                 <input
                   type="number"
-                  value={section.section ?? 0} // ใช้ 0 แทน null ถ้า section เป็น null
+                  required
+                  value={section.section ?? 0} 
                   onChange={(e) => handleSectionChange(e, sectionIndex, 'section')}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
