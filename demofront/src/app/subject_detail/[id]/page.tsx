@@ -53,7 +53,7 @@ const Detail: React.FC = () => {
         <div className="w-full h-full min-h-screen flex flex-col items-center justify-center bg-gray-200 p-8">
             <div className="w-full max-w-7xl">
                 {subjectData.length > 0 ? (
-                    <CourseDetail course={subjectData[0]} />
+                    <CourseDetail course={subjectData[0]}/>
                 ) : (
                     <div>No data found</div>
                 )}

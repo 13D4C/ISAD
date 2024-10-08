@@ -93,6 +93,61 @@ class SubjectController {
             return res.status(500).json({ message: 'Internal Server Error' });
         }
     }
+    async addSection(req, res) {
+        try {
+            const { id } = req.params;
+            const sections = req.body;
+            console.log(sections);
+
+            const existingSubject = await SubjectModel.findOne({ subject_id: id });
+            console.log(sections, id);
+            if (!existingSubject) {
+                return res.status(404).json({ message: 'Subject not found' });
+            }
+
+            const savedSection = await SectionController.addSection(existingSubject._id, sections);
+            savedSection.forEach(sec => {
+                existingSubject.sections.push(sec._id);
+                existingSubject.professors.addToSet(sec.professor);
+            });
+
+            await existingSubject.save();
+
+            res.status(201).json({ message: 'Section added successfully!', section: savedSection });
+        } catch (e) {
+            console.error(e);
+            res.status(500).json({ message: 'Internal server error', error: e.message });
+        }
+    }
+    async deleteSection(req, res) {
+        try {
+            const { id } = req.params;
+            const sectionIdsToDelete = req.body; // ค่าที่ส่งมาจาก frontend เป็น array ของ _id ที่ต้องการลบ
+            console.log(sectionIdsToDelete);
+            /*    const existingSubject = await SubjectModel.findOne({ subject_id: id });
+                if (!existingSubject) {
+                    return res.status(404).json({ message: 'Subject not found' });
+                }
+
+                // เรียกใช้ SectionController เพื่อลบ sections
+                const deleteResponse = await SectionController.deleteSection({ body: sectionIdsToDelete }, res);
+                if (deleteResponse.status !== 200) {
+                    return res.status(deleteResponse.status).json(deleteResponse.data);
+                }
+
+                existingSubject.sections = existingSubject.sections.filter(
+                    secId => !sectionIdsToDelete.includes(secId.toString())
+                );
+
+                await existingSubject.save(); // บันทึกการเปลี่ยนแปลง
+
+                res.status(200).json({ message: 'Subject sections updated after deletion', sectionIds: sectionIdsToDelete });*/
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal server error', error: error.message });
+        }
+    }
+
 
 }
 

@@ -13,25 +13,26 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
     midterm: new Date(course.midterm), 
     final: new Date(course.final)
   });  
+  const [originalCourse, setOriginalCourse] = useState<SubjectData>({
+    ...course,
+    midterm: new Date(course.midterm),
+    final: new Date(course.final)
+  });
   const [isDelSecBoxVisible, setDelSecBoxVisible] = useState(false);
   const [isDelClassBoxVisible, setDelClassBoxVisible] = useState(false);
   const [delSecIndex, setDelSecIndex] = useState<number | null>(null);
   const [delClassIndex, setDelClassIndex] = useState<{ sectionIndex: number; scheduleIndex: number } | null>(null);
 
-  useEffect(() => {
-    setEditableCourse({
-      ...course,
-      midterm: new Date(course.midterm),
-      final: new Date(course.final),
-    });
-  }, [course]);
   // กดเพื่อเริ่มแก้ไข
-  const handleEditClick = () => setIsEditing(true);
+  const handleEditClick = (course : SubjectData) => {
+    setOriginalCourse(course); 
+    setIsEditing(true);     
+  };
 
   // กดยกเลิกการแก้ไข
   const handleCancelClick = () => {
     setIsEditing(false);
-    setEditableCourse(course); // รีเซ็ตกลับไปที่ข้อมูลเดิม
+    setEditableCourse(originalCourse); // รีเซ็ตกลับไปที่ข้อมูลเดิม
   };
 
   // กดบันทึกการแก้ไข
@@ -56,8 +57,14 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
         schedule: section.schedule,
         style: section.style,
       }));
-      await axios.put(`http://localhost:8888/api/sections/${editableCourse.subject_id}`, updatedSections);
-      console.log(updatedSubject);
+
+      if (updatedSections.length > 0) {
+        await axios.put(`http://localhost:8888/api/sections/${editableCourse.subject_id}`, updatedSections);
+        console.log("Sections updated:", updatedSections);
+      } else {
+        console.warn("No sections to update.");
+      }
+
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating subject or sections:', error);
@@ -131,7 +138,7 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
     setEditableCourse({ ...editableCourse, sections: updatedSections });
   };
 
-  const handleAddSection = () => {
+  const handleAddSection = async () => {
     const newSection: Section = {
       subject_id: editableCourse.subject_id,
       section: null,
@@ -139,7 +146,17 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
       schedule: [],
       style: '',
     };
-    setEditableCourse({ ...editableCourse, sections: [...editableCourse.sections, newSection] });
+    setEditableCourse({
+      ...editableCourse,
+      sections: [...editableCourse.sections, newSection]
+    })
+    try {
+      
+      const response = await axios.post(`http://localhost:8888/api/addSection/${editableCourse.subject_id}`, newSection);
+      console.log("Section added successfully", response.data);
+    } catch (error) {
+      console.error("Error adding section:", error);
+    }
   };
 
   // ฟังก์ชันสำหรับลบ Section
@@ -250,7 +267,7 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
 
           <button
             className="text-sm mt-4 text-white bg-yellow-500 hover:bg-yellow-700 py-2 px-4 rounded mb-4 shadow-md transition duration-300 ease-in-out"
-            onClick={handleEditClick}
+            onClick={() => handleEditClick(course)}
           >
             Edit
           </button>
