@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import AlertBox from '../components/button_error';
 
 // Components
 const Container: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -14,7 +15,7 @@ const Container: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {children}
         
         <button
-          className="absolute bottom-4 right-4 bg-gray-800 text-white p-2 rounded text-sm"
+          className="absolute bottom-4 right-4 bg-gray-800 hover:bg-gray-900 text-white p-2 rounded text-sm"
           onClick={() => router.push('/')}  // Navigate to the "/user" page
         >
           User
@@ -63,7 +64,7 @@ const Input: React.FC<{
 const Button: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <button
     type="submit" // Set type to submit to trigger form submission
-    className="bg-blue-600 text-center text-white p-2 text-base rounded cursor-pointer mb-2"
+    className="bg-blue-600 hover:bg-blue-700 transition duration-300 text-center text-white p-2 text-base rounded cursor-pointer mb-2"
   >
     {children}
   </button>
@@ -74,32 +75,31 @@ const AdminLoginPage: React.FC = () => {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-    
+  const [errorMessage, setErrorMessage] = useState("");
+  
     const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       try {
           const response = await axios.post('http://localhost:8888/api/adminLogin', { username, password });
           if (response.status === 201 || response.status === 200) {
             localStorage.setItem('token', response.data.token);
-            localStorage.setItem('role', response.data.role);
             console.log("created token");
             setTimeout(() => {
               router.push('/search'); // Refresh the page after a delay
               setTimeout(() => {
                 window.location.reload();
-              }, 300);
+              }, 500);
             }, 500);
           } else {
-            console.error("Incorrect ID or Password!!!");
+            setErrorMessage("บัญชีหรือรหัสผ่านไม่ถูกต้อง");
           }
       } catch (error) {
-        console.error('Error logging in', error);
-        if (axios.isAxiosError(error) && error.response) {
-          console.error('Response data:', error.response.data);
-          console.error('Response status:', error.response.status);
-        }
+        setErrorMessage("บัญชีหรือรหัสผ่านไม่ถูกต้อง");
       }
     };
+  const closeAlert = () => {
+    setErrorMessage("");
+  };
     return (
       <Container>
         <Form onSubmit={handleSignIn}>
@@ -111,6 +111,7 @@ const AdminLoginPage: React.FC = () => {
             <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
             <Button>Sign In</Button>
           </InputContainer>
+          {errorMessage && <AlertBox message={errorMessage} onClose={closeAlert} />}
         </Form>
       </Container>
   );

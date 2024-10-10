@@ -3,7 +3,7 @@ const cors = require('cors');
 const Database = require('./config/dbCon');
 const subjectRoutes = require('./routes/subjectRoutes');
 const authRoutes = require('./routes/authRoutes');
-const searchRoutes = require('./routes/searchRoutes');
+const sectionsRoutes = require('./routes/sectionsRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -17,7 +17,7 @@ app.use(cors());
 
 app.use('/api', subjectRoutes);
 app.use('/api', authRoutes);
-app.use('/api', searchRoutes);
+app.use('/api', sectionsRoutes);
 
 (async () => {
     try {

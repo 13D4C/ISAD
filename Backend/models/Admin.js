@@ -2,8 +2,8 @@ const User = require('./User');
 require('dotenv').config();
 
 class Admin extends User {
-    constructor(username, password, email) {
-        super(username, password, email, 'admin');
+    constructor(username, email, password) {
+        super(username, email, password, 'admin');
         this.isAdmin = true;
     }
     static getAdminCredentials() {
@@ -14,7 +14,7 @@ class Admin extends User {
     }
 
     getIsAdmin() {
-        return this.isAdmin === 'admin';
+        return this.role === 'admin';
     }
 
     static verifyAdmin(id, password) {

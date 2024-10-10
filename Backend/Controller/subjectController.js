@@ -1,54 +1,39 @@
-const Subject = require('../models/Subject');
-const SectionModel  = require('../models/SectionModel');
 const SubjectModel = require('../models/SubjectModel');
+const SectionModel = require('../models/SectionModel');
+const Subject = require('../models/Subject');
+const Section = require('../models/Section');
+const SectionController = require('../Controller/sectionController');
 
-class SubjectController { 
+class SubjectController {
     async addSubject(req, res) {
         try {
-            let { name, subject_id, sections, detail, credit, midterm, final, midtermTime, finalTime } = req.body;
+            console.log(req.body);
+            let { name, subject_id, sections, detail, credit, style, midterm, final, midtermTime, finalTime, major } = req.body;
             const existingSubject = await SubjectModel.findOne({ subject_id });
             if (existingSubject) {
                 return res.status(400).json({ message: 'Subject already exists' });
             }
 
-            const subject = new SubjectModel({
-                name, 
-                subject_id, 
-                detail, 
-                credit, 
-                midterm, 
-                final, 
-                midtermTime, 
-                finalTime
+            const subjectInstance = new Subject({
+                name,
+                subject_id,
+                detail,
+                credit,
+                midterm,
+                final,
+                style,
+                midtermTime,
+                finalTime,
+                major
             });
 
+            const subject = new SubjectModel(subjectInstance);
+
             if (sections && sections.length > 0) {
-                const sectionPromises = sections.map(sectionData => {
-                    const section = new SectionModel({
-                        subject_id: subject._id,
-                        section: sectionData.section,
-                        professor: sectionData.professor,
-                        room: sectionData.room,
-                        day: sectionData.day,
-                        time: sectionData.time,
-                        style: sectionData.style,
-                    });
-                    return section.save();
-                });
-                const savedSections = await Promise.all(sectionPromises);
-
+                const savedSections = await SectionController.addSection(subject._id, sections);
                 subject.sections = savedSections.map(sec => sec._id);
-
-                const uniqueDays = [...new Set(savedSections.map(sec => sec.day))];
-                subject.day = uniqueDays; // Save unique professors
-
-                const uniqueProfessors = [...new Set(savedSections.map(sec => sec.professor))];
-                subject.professors = uniqueProfessors; // Save unique professors
-
-                const uniqueStyles = [...new Set(savedSections.map(sec => sec.style))];
-                subject.style = uniqueStyles; // Save unique professors
-
-                await subject.save(); 
+                subject.professors = [...new Set(savedSections.map(sec => sec.professor))];
+                await subject.save();
             } else {
                 await subject.save();
             }
@@ -62,18 +47,107 @@ class SubjectController {
 
     async fetchSubject(req, res) {
         try {
-            const subjects = await SubjectModel.find().populate('sections'); // Fetch all subjects and populate sections
-            const transformedSubjects = subjects.map(subject => ({
-                ...subject.toObject(),
-                studyDays: subject.day,
-                // Assuming 'day' holds the relevant data
-            }));
-            res.status(200).json(transformedSubjects); // Respond with the list of subjects
+            const { id } = req.params;
+            if (id) {
+                const subjects = await SubjectModel.findOne({ subject_id: id });
+                res.status(200).json(subjects);
+            } else {
+                const subjects = await SubjectModel.find();
+                res.status(200).json(subjects);
+            }
         } catch (e) {
             console.error(e);
             res.status(500).json({ message: 'Internal server error', error: e.message });
         }
     }
+
+    async deleteSubject(req, res) {
+        try {
+            const { id } = req.params;
+            const deletedSubject = await SubjectModel.findOneAndDelete({ subject_id: id });
+
+            if (!deletedSubject) {
+                return res.status(404).json({ message: 'Subject not found' });
+            }
+            await SectionModel.deleteMany({ ref_id: deletedSubject._id });
+
+            res.status(200).json({ message: 'Subject deleted successfully' });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal server error', error: error.message });
+        }
+    }
+    async editSubject(req, res) {
+        try {
+            const { id } = req.params;
+            const updatedSubject = req.body;
+            const subject = await SubjectModel.findOne({ subject_id: id });
+            if (!subject) {
+                return res.status(404).json({ message: 'Subject not found' });
+            }
+            subject.set(updatedSubject);
+            await subject.save();
+            return res.status(200).json(subject);
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+    async addSection(req, res) {
+        try {
+            const { id } = req.params;
+            const sections = req.body;
+            console.log(sections);
+
+            const existingSubject = await SubjectModel.findOne({ subject_id: id });
+            console.log(sections, id);
+            if (!existingSubject) {
+                return res.status(404).json({ message: 'Subject not found' });
+            }
+
+            const savedSection = await SectionController.addSection(existingSubject._id, sections);
+            savedSection.forEach(sec => {
+                existingSubject.sections.push(sec._id);
+                existingSubject.professors.addToSet(sec.professor);
+            });
+
+            await existingSubject.save();
+
+            res.status(201).json({ message: 'Section added successfully!', section: savedSection });
+        } catch (e) {
+            console.error(e);
+            res.status(500).json({ message: 'Internal server error', error: e.message });
+        }
+    }
+    async deleteSection(req, res) {
+        try {
+            const { id } = req.params;
+            const sectionIdsToDelete = req.body; // ค่าที่ส่งมาจาก frontend เป็น array ของ _id ที่ต้องการลบ
+            console.log(sectionIdsToDelete);
+            /*    const existingSubject = await SubjectModel.findOne({ subject_id: id });
+                if (!existingSubject) {
+                    return res.status(404).json({ message: 'Subject not found' });
+                }
+
+                // เรียกใช้ SectionController เพื่อลบ sections
+                const deleteResponse = await SectionController.deleteSection({ body: sectionIdsToDelete }, res);
+                if (deleteResponse.status !== 200) {
+                    return res.status(deleteResponse.status).json(deleteResponse.data);
+                }
+
+                existingSubject.sections = existingSubject.sections.filter(
+                    secId => !sectionIdsToDelete.includes(secId.toString())
+                );
+
+                await existingSubject.save(); // บันทึกการเปลี่ยนแปลง
+
+                res.status(200).json({ message: 'Subject sections updated after deletion', sectionIds: sectionIdsToDelete });*/
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal server error', error: error.message });
+        }
+    }
+
 
 }
 

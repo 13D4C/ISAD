@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Section, SubjectData } from '../components/interface';
+import { SubjectData } from '../components/interface';
+import axios, { AxiosError } from "axios";
 
 interface SubjectProps {
   BoxSubject: SubjectData[];
@@ -7,6 +8,7 @@ interface SubjectProps {
   toggleSubjectSelection: (index: number) => void;
   selectSubjects: number[];
   isSMScreen: boolean;
+  onNavigate: (subjectId: string) => void;
 }
 
 const bgColor: { [key: string]: string } = {
@@ -15,6 +17,8 @@ const bgColor: { [key: string]: string } = {
   พุธ: "bg-lime-200",
   พฤหัสบดี: "bg-amber-100",
   ศุกร์: "bg-cyan-100",
+  เสาร์: "bg-purple-200",
+  อาทิตย์: "bg-red-200",
 };
 
 const textColor: { [key: string]: string } = {
@@ -23,7 +27,10 @@ const textColor: { [key: string]: string } = {
   พุธ: "text-lime-700",
   พฤหัสบดี: "text-orange-500",
   ศุกร์: "text-cyan-500",
+  เสาร์: "text-purple-500",
+  อาทิตย์: "text-gray-600",
 };
+
 
 const Subject: React.FC<SubjectProps> = ({
   BoxSubject,
@@ -31,9 +38,31 @@ const Subject: React.FC<SubjectProps> = ({
   toggleSubjectSelection,
   selectSubjects,
   isSMScreen,
+  onNavigate,
 }) => {
-  const [selectedSections, setSelectedSections] = useState<{ [index: number]: number | null }>({});
 
+  const [selectedSections, setSelectedSections] = useState<{ [index: number]: number | null }>({});
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const roleChecker = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error("No token found");
+      return;
+    }
+    try {
+      const response = await axios.get('http://localhost:8888/api/rolechecker', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (response.status === 200) {
+        setIsAdmin(true);
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("Error checking role:", axiosError.response?.data || axiosError.message);
+    }
+  }
 
   const handleSectionChange = (
     index: number,
@@ -46,6 +75,8 @@ const Subject: React.FC<SubjectProps> = ({
     }));
   };
 
+
+
   useEffect(() => {
     const initialSelections: { [index: number]: number | null } = {};
     BoxSubject.forEach((box, index) => {
@@ -56,13 +87,21 @@ const Subject: React.FC<SubjectProps> = ({
     setSelectedSections(initialSelections);
   }, [BoxSubject]);
 
+  useEffect(() => {
+    roleChecker();
+  }, []);
+
+  
+
   return (
     <div className="space-y-4">
       {BoxSubject.map((box, index) => (
         <div key={index} className="rounded border shadow-md p-6">
           <div className="flex space-x-2 flex-wrap">
             <p className="text-xl font-bold text-blue-900">{box.subject_id}</p>
-            <button className="text-xl font-bold hover:underline text-blue-900 hover:text-blue-950">
+            <button 
+              onClick={() => onNavigate(box.subject_id)}
+              className="text-xl font-bold hover:underline text-blue-900 hover:text-blue-950">
               {box.name}
             </button>
             <p className="text-lg font-bold text-gray-500/50">
@@ -70,7 +109,7 @@ const Subject: React.FC<SubjectProps> = ({
             </p>
 
             {/* Delete Button */}
-            <button
+            {isAdmin && <button
               onClick={() => DeleteSubject(index)}
               className="ml-4 text-red-600 hover:text-red-700"
             >
@@ -86,7 +125,7 @@ const Subject: React.FC<SubjectProps> = ({
                   clipRule="evenodd"
                 />
               </svg>
-            </button>
+            </button>}
           </div>
 
           <br />
@@ -97,17 +136,20 @@ const Subject: React.FC<SubjectProps> = ({
               <div className="space-y-2">
                 <p className="text-sm text-gray-500/50">วันที่เรียน</p>
                 <div className="flex space-x-2">
-                  {/* แสดงวันที่เรียนของวิชานั้นๆ */}
-                  {box.day.map((day, idx) => (
-                    <p
-                      key={idx}
-                      className={`text-sm ${textColor[day] || "text-gray-500"
-                        } ${bgColor[day] || "bg-gray-100"
-                        } rounded-full max-w-fit px-3 py-1`}
-                    >
-                      {day}
-                    </p>
-                  ))}
+                  {/* แสดงวันที่เรียนของ section ที่ถูกเลือก */}
+                  {selectedSections[index] !== null && // ตรวจสอบว่าได้เลือก section
+                    box.sections
+                      .find((sec) => sec.section === selectedSections[index]) // ค้นหา section ที่ถูกเลือก
+                      ?.schedule.map((scheduleEntry, idx) => ( // แสดงวันใน schedule นั้น
+                        <p
+                          key={idx}
+                          className={`text-sm ${textColor[scheduleEntry.day] || "text-gray-500"
+                            } ${bgColor[scheduleEntry.day] || "bg-gray-100"
+                            } rounded-full max-w-fit px-3 py-1`}
+                        >
+                          {scheduleEntry.day}
+                        </p>
+                      ))}
                 </div>
               </div>
 
@@ -117,7 +159,7 @@ const Subject: React.FC<SubjectProps> = ({
                   {selectedSections[index] !== null && // Check against null
                     box.sections.find(
                       (sec) => sec.section === selectedSections[index]
-                    )?.time}
+                    )?.schedule.map(scheduleEntry => scheduleEntry.time).join(", ") || 'ไม่ระบุ'}
                 </p>
               </div>
 
@@ -127,9 +169,10 @@ const Subject: React.FC<SubjectProps> = ({
                   {selectedSections[index] !== null && // Check against null
                     box.sections.find(
                       (sec) => sec.section === selectedSections[index]
-                    )?.room}
+                    )?.schedule.map(scheduleEntry => scheduleEntry.room).join(", ") || 'ไม่ระบุ'}
                 </p>
               </div>
+
 
               <div className="space-y-2">
                 <p className="text-sm text-gray-500/50">ผู้สอน</p>

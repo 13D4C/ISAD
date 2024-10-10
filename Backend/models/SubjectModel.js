@@ -5,9 +5,6 @@ const subjectSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    day: {
-        type: [String],
-    },
     subject_id: {
         type: String,
         required: true,
@@ -26,8 +23,8 @@ const subjectSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    style: {  //(คืออะไรนะ จำไม่ได้)
-        type: [String],
+    style: {
+        type: String,
     },
     midterm: { //(วันสอบ midterm)
         type: Date,
@@ -39,6 +36,9 @@ const subjectSchema = new mongoose.Schema({
         type: String,
     },
     finalTime: { //(เวลาในการสอบ final)
+        type: String,
+    },
+    major: { //(เวลาในการสอบ final)
         type: String,
     },
 });

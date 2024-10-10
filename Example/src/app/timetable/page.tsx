@@ -1,9 +1,10 @@
 "use client";
-import React, { useState, useRef, useEffect  } from "react";
-import { useSearchParams } from 'next/navigation';
+import React, { useState, useRef, useEffect } from "react";
 import SubjectBox from "./SubjectBox";
 import { toPng } from "html-to-image";
 import SubjectDetailBox from "./SubjectDetailBox"; // Import the SubjectDetailBox
+import chroma from 'chroma-js';
+import PopupComponent from "./PopupComponent";
 
 interface Subject {
   subject: string;
@@ -19,21 +20,51 @@ interface Subject {
   hasConflict?: boolean;
 }
 
+const colorPalette = ['#FACC15', '#F472B6', '#4ADE80', 'FB923C', '#60A5FA', '#C084FC'];
+
+const getColorFromCode = (code: any, forceColor = null) => {
+  // If a forced color is provided and valid, use it
+  if (forceColor && colorPalette.includes(forceColor)) {
+    return forceColor;
+  }
+  // Hash the subject code to consistently assign a color from the palette
+  const hash = [...code].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  // Map the hash to one of the colors in the predefined palette
+  return chroma.scale(colorPalette).mode('lab')(hash % colorPalette.length / colorPalette.length).hex();
+};
+
 const ScheduleTable: React.FC = () => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [popupSubject, setPopupSubject] = useState<Subject | null>(null);
+  const [forceColor, setForceColor] = useState('');
   const tableRef = useRef<HTMLTableElement | null>(null);
-  const searchParams = useSearchParams();
 
   useEffect(() => {
-    const selectedSubjectsParam = searchParams.get('selectedSubjects');
-    if (selectedSubjectsParam) {
-      const selectedSubjects: Subject[] = JSON.parse(decodeURIComponent(selectedSubjectsParam));
-      const subjectsWithConflicts = checkForConflicts(selectedSubjects);
+    // Load subjects from localStorage
+    const storedSubjects = localStorage.getItem('selectedSubjectsData');
+    if (storedSubjects) {
+      const parsedSubjects: any[] = JSON.parse(storedSubjects);
+  
+      // Flatten the schedules array to match the Subject interface
+      const subjectsWithFlattenedSchedules = parsedSubjects.map(subject => {
+        const { schedules, ...rest } = subject;
+        const schedule = schedules[0]; // Assuming you only care about the first schedule
+        return {
+          ...rest,
+          day: schedule.day,
+          startTime: schedule.startTime,
+          duration: schedule.duration,
+          room: schedule.room
+        };
+      });
+  
+      const subjectsWithConflicts = checkForConflicts(subjectsWithFlattenedSchedules);
       setSubjects(subjectsWithConflicts);
+      console.log(subjectsWithConflicts);
     }
-    console.log(subjects);
-  }, [searchParams]);
+  }, []);
+  
+  
 
   const checkForConflicts = (subjects: Subject[]): Subject[] => {
     const conflictMap: { [key: string]: boolean } = {};
@@ -61,6 +92,30 @@ const ScheduleTable: React.FC = () => {
 
     return subjects;
   };
+  
+
+  const thaiToEnglishDay = (thaiDay: string) => {
+    switch (thaiDay) {
+      case 'จันทร์':
+        return 'MON';
+      case 'อังคาร':
+        return 'TUE';
+      case 'พุธ':
+        return 'WED';
+      case 'พฤหัสบดี':
+        return 'THU';
+      case 'ศุกร์':
+        return 'FRI';
+      case 'เสาร์':
+        return 'SAT';
+      case 'อาทิตย์':
+        return 'SUN';
+      default:
+        return 'Unknown';
+    }
+  };
+
+  
 
   const days: string[] = ['MON', 'TUE', 'WED', 'THU', 'FRI'];
   const hours: string[] = [
@@ -78,36 +133,8 @@ const ScheduleTable: React.FC = () => {
     return acc;
   }, {});
 
-  // Initialize subjects with a hidden state for each subject
-  // const [subjects, setSubjects] = useState<Subject[]>([
-    // {
-    //   subject: 'CHARM SCHOOL',
-    //   day: 'WED',
-    //   startTime: '09:00',
-    //   duration: 3,
-    //   room: 'M23',
-    //   section: '903',
-    //   code: '90642999',
-    //   location: 'IT',
-    //   hidden: false,
-    //   credits: 3
-    // },
-  //   {
-  //     subject: 'INFORMATION SYSTEM ANALYSIS AND DESIGN',
-  //     day: 'TUE',
-  //     startTime: '14:00',
-  //     duration: 3,
-  //     room: 'M03',
-  //     section: '902',
-  //     code: '90642111',
-  //     location: 'IT',
-  //     hidden: false,
-  //     credits: 3
-  //   },
-  // ]);
-
   const totalCredits = subjects.reduce(
-    (total, subject) => total + (subject.hidden ? 0 : subject.duration),
+    (total, subject) => total + (subject.hidden ? 0 : subject.credits),
     0
   );
 
@@ -130,7 +157,7 @@ const ScheduleTable: React.FC = () => {
 
   const getSubjectAt = (day: string, hour: string) => {
     return subjects.find(
-      (subject) => subject.day === day && subject.startTime === hour && !subject.hidden
+      (subject) => thaiToEnglishDay(subject.day) === day && subject.startTime === hour && !subject.hidden
     );
   };
 
@@ -142,13 +169,16 @@ const ScheduleTable: React.FC = () => {
           : subject
       )
     );
+
+    localStorage.setItem('selectedSubjectsData', JSON.stringify(subjects));
   };
 
   // Function to delete a subject from the state
   const deleteSubject = (subjectCode: string) => {
-    setSubjects((prevSubjects) =>
-      prevSubjects.filter((subject) => subject.code !== subjectCode)
-    );
+    const updatedSubjects = subjects.filter((subject) => subject.code !== subjectCode);
+    setSubjects(updatedSubjects);
+    // Update localStorage
+    localStorage.setItem('selectedSubjectsData', JSON.stringify(updatedSubjects));
   };
 
   // Function to handle the subject click and show a pop-up
@@ -238,6 +268,7 @@ const ScheduleTable: React.FC = () => {
                               location={subject.location}
                               // Trigger pop-up on subject click
                               onClick={() => handleSubjectClick(subject)}
+                              forceColor={forceColor}
                               hasConflict={subject.hasConflict}
                             />
                           );
@@ -282,8 +313,8 @@ const ScheduleTable: React.FC = () => {
           <SubjectDetailBox
             key={subject.code}
             subject={subject}
-            onToggleVisibility={(code) => {/* implement toggle visibility */}}
-            onDelete={(code) => {/* implement delete */}}
+            onToggleVisibility={toggleVisibility}
+            onDelete={deleteSubject}
             hasConflict={subject.hasConflict}
           />
         ))}
@@ -292,24 +323,19 @@ const ScheduleTable: React.FC = () => {
 
       {/* Pop-up for subject details */}
       {popupSubject && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg font-semibold mb-4">{popupSubject.subject}</h3>
-            <p>Code: {popupSubject.code}</p>
-            <p>Room: {popupSubject.room}</p>
-            <p>Section: {popupSubject.section}</p>
-            <p>Location: {popupSubject.location}</p>
-            <p>Time: {popupSubject.startTime}</p>
-            <p>Duration: {popupSubject.duration} hours</p>
-            <button
-              onClick={closePopup}
-              className="mt-4 bg-blue-600 text-white py-2 px-4 rounded-lg"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <PopupComponent
+          subjectId={popupSubject.code}
+          onClose={closePopup}
+          onHide={() => toggleVisibility(popupSubject.code)}
+          onRemove={() => deleteSubject(popupSubject.code)}
+          onColorChange={(color) => {
+            setForceColor(color);
+            closePopup();
+      }}
+    />
+  </div>
+)}
     </div>
   );
 };
