@@ -38,6 +38,7 @@ class SectionController {
             const { subjectId } = req.params;
             const sections = await SectionModel.find({ subject_id: subjectId });
 
+
             if (!sections || sections.length === 0) {
                 return res.status(404).json({ message: 'No sections found for this subject' });
             }
@@ -66,7 +67,17 @@ class SectionController {
                 }
             }));
 
-            // หาหมายเลข section ที่เหลืออยู่
+            const subject = await SubjectModel.findOne({ subject_id: id });
+            if (!subject) {
+                return res.status(404).json({ message: 'Subject not found' });
+            }
+
+            subject.sections = subject.sections.filter(sectionId =>
+                !sectionsToDelete.some(index => sections[index]._id.equals(sectionId))
+            );
+
+            await subject.save();
+
             const updatedSections = await SectionModel.find({ subject_id: id });
 
             return res.status(200).json(updatedSections); // ส่งกลับ sections ที่อัปเดต

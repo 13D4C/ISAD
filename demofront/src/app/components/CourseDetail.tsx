@@ -68,7 +68,8 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
 
       const sectionsToAdd = editableCourse.sections.filter(section => {
         const exists = originalCourse.sections.some(existingSection => existingSection.section === section.section);
-        return (section.section && section.professor.trim() === '' && !exists);
+        console.log("Exists for section", section.section, exists);
+        return (section.section && !exists);
       });
       for (const section of sectionsToAdd) {
         const newSection = {
@@ -78,6 +79,7 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
           schedule: section.schedule,
           style: section.style,
         };
+        console.log("New section:", newSection);
 
         await axios.post(`http://localhost:8888/api/addSection/${editableCourse.subject_id}`, newSection);
         console.log("Section added successfully:", newSection);

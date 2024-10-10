@@ -97,10 +97,9 @@ class SubjectController {
         try {
             const { id } = req.params;
             const sections = req.body;
-            console.log(sections);
 
             const existingSubject = await SubjectModel.findOne({ subject_id: id });
-            console.log(sections, id);
+            console.log(sections);
             if (!existingSubject) {
                 return res.status(404).json({ message: 'Subject not found' });
             }
