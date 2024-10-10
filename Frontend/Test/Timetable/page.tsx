@@ -3,7 +3,7 @@ import React, { useState, useRef } from "react";
 import SubjectBox from "./SubjectBox";
 import { toPng } from "html-to-image";
 import SubjectDetailBox from "./SubjectDetailBox"; // Import the SubjectDetailBox
-import  CharmSchoolComponent from "./PopupComponent"
+import CharmSchoolComponent from "./PopupComponent";
 import chroma from 'chroma-js';
 
 // Predefined color palette from your image
@@ -11,15 +11,11 @@ const colorPalette = ['#48A4FF', '#FFB74D', '#4CAF50', '#F27537', '#FF609B', '#F
 
 // Function to map the subject code to a color or allow forcing a color
 const getColorFromCode = (code, forceColor = null) => {
-  // If a forced color is provided and valid, use it
   if (forceColor && colorPalette.includes(forceColor)) {
     return forceColor;
   }
 
-  // Hash the subject code to consistently assign a color from the palette
   const hash = [...code].reduce((acc, char) => acc + char.charCodeAt(0), 0);
-
-  // Map the hash to one of the colors in the predefined palette
   return chroma.scale(colorPalette).mode('lab')(hash % colorPalette.length / colorPalette.length).hex();
 };
 
@@ -40,26 +36,28 @@ const ScheduleTable = () => {
     return acc;
   }, {});
 
-  // Initialize subjects with a hidden state for each subject
+  // Initialize subjects with a credits field and hidden state
   const [subjects, setSubjects] = useState([
     {
-      subject: "CHARM SCHOOL",
-      day: "WED",
+      subject: "INFORMATION SYSTEM ANALYSIS AND DESIGN",
+      day: "TUE",
       startTime: "09:00",
       duration: 3,
-      room: "M23",
+      room: "M04",
       section: "903",
-      code: "90642999",
+      code: "06066304",
       location: "IT",
       hidden: false,
+      credits: 3,  // Adding credits field
       color: getColorFromCode("90642999")
-    },
+    }
   ]);
 
   const [popupSubject, setPopupSubject] = useState(null); // State to manage the pop-up subject details
 
+  // Calculate total credits based on the credits field
   const totalCredits = subjects.reduce(
-    (total, subject) => total + (subject.hidden ? 0 : subject.duration),
+    (total, subject) => total + (subject.hidden ? 0 : subject.credits),
     0
   );
 
@@ -98,21 +96,18 @@ const ScheduleTable = () => {
     );
   };
 
-  // Function to delete a subject from the state
   const deleteSubject = (subjectCode) => {
     setSubjects((prevSubjects) =>
       prevSubjects.filter((subject) => subject.code !== subjectCode)
     );
   };
 
-  // Function to handle the subject click and show a pop-up
   const handleSubjectClick = (subject) => {
-    setPopupSubject(subject); // Set the subject for the pop-up
+    setPopupSubject(subject);
   };
 
-  // Function to close the pop-up
   const closePopup = () => {
-    setPopupSubject(null); // Clear the subject to hide the pop-up
+    setPopupSubject(null);
   };
 
   return (
@@ -192,7 +187,6 @@ const ScheduleTable = () => {
                               code={subject.code}
                               location={subject.location}
                               forceColor={subject.color}
-                              // Trigger pop-up on subject click
                               onClick={() => handleSubjectClick(subject)}
                             />
                           );
@@ -238,22 +232,18 @@ const ScheduleTable = () => {
               key={subject.code}
               subject={subject}
               onToggleVisibility={toggleVisibility}
-              onDelete={deleteSubject} // Pass delete function to the SubjectDetailBox
+              onDelete={deleteSubject}
               forceColor={subject.color}
             />
           ))}
         </div>
       </div>
-      
-      {
-        popupSubject && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <CharmSchoolComponent />
-          </div>
-        )
-      }
 
-      
+      {popupSubject && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <CharmSchoolComponent />
+        </div>
+      )}
     </div>
   );
 };
