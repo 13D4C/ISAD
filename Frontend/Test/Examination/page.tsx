@@ -14,11 +14,11 @@ const ExamSchedule: React.FC = () => {
   const examData = [
     {
       id: 1,
-      subjectCode: '90642999',
-      subjectName: 'CHARM SCHOOL',
-      examDate: 'TBA',
-      examRoom: 'LAB 203',
-    },
+      subjectCode: '06066304',
+      subjectName: 'INFORMATION SYSTEM ANALYSIS AND DESIGN',
+      examDate: 'พฤหัสบดี 31 ตุลาคม 2567',
+      examTime: '09:30 - 12:30', // Change to examTime
+    }
   ];
 
   const exportToPng = () => {
@@ -97,8 +97,8 @@ const ExamSchedule: React.FC = () => {
                   วันสอบ
                 </th>
                 <th className="border-b border-r border-gray-300 p-2 sm:p-4 md:p-6 text-center font-semibold dark:border-black text-black">
-                  ห้องสอบ
-                </th>
+                  เวลาสอบ
+                </th> {/* Changed from exam room to exam time */}
               </tr>
             </thead>
             <tbody>
@@ -109,7 +109,7 @@ const ExamSchedule: React.FC = () => {
                   subjectCode={exam.subjectCode}
                   subjectName={exam.subjectName}
                   examDate={exam.examDate}
-                  examRoom={exam.examRoom}
+                  examTime={exam.examTime} 
                 />
               ))}
             </tbody>
