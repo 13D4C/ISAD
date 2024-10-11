@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Section, SubjectData } from '../components/interface';
 import DecisionBox from './DecisionComponent';
 import axios, { AxiosError } from 'axios';
+import { useRouter } from 'next/navigation';
 
 
 
@@ -23,6 +24,8 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
   const [delSecIndex, setDelSecIndex] = useState<number| null>(null);
   const [delClassIndex, setDelClassIndex] = useState<{ sectionIndex: number; scheduleIndex: number } | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const router = useRouter();
+
   
   const roleChecker = async () => {
     const token = localStorage.getItem('token');
@@ -240,7 +243,10 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
 
   return (
     <div className="w-full max-w-7xl h-full p-6 bg-white rounded shadow-lg">
-      <button className="text-sm text-white bg-blue-500 hover:bg-blue-700 py-2 px-4 rounded mb-4 shadow-md transition duration-300 ease-in-out">
+      <button
+        className="text-sm text-white bg-blue-500 hover:bg-blue-700 py-2 px-4 rounded mb-4 shadow-md transition duration-300 ease-in-out"
+        onClick={() => router.push('/search')} // หน้าที่ต้องการจะไป
+      >
         &larr; Back
       </button>
 
