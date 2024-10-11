@@ -60,7 +60,7 @@ Frontend
    ```
 Backend
 ```bash
-   npm run dev
+   cd C:\...\...\...\GitHub\ISAD\Backend> nodemon index.js
    ```
 
 
