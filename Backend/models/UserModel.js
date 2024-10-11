@@ -10,6 +10,7 @@ const userSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Schedule'
     }],
+
 });
 
 const UserModel = mongoose.model('User', userSchema);

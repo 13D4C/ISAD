@@ -46,7 +46,6 @@ const Subject: React.FC<SubjectProps> = ({
   const roleChecker = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
-      console.error("No token found");
       return;
     }
     try {
@@ -59,8 +58,6 @@ const Subject: React.FC<SubjectProps> = ({
         setIsAdmin(true);
       }
     } catch (error) {
-      const axiosError = error as AxiosError;
-      console.error("Error checking role:", axiosError.response?.data || axiosError.message);
     }
   }
 

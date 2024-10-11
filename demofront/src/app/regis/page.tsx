@@ -59,7 +59,7 @@ const Button: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 
 const RegisPage: React.FC = () => {
-  const [name, setUsername] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState("");
@@ -71,7 +71,7 @@ const RegisPage: React.FC = () => {
 
     try {
       if (email.endsWith("@kmitl.ac.th") && email != "@kmitl.ac.th") {
-        const response = await axios.post('http://localhost:8888/api/register', { name, email, password }); // ถ้า deploy ต้องแก้ path
+        const response = await axios.post('http://localhost:8888/api/register', { username, email, password }); // ถ้า deploy ต้องแก้ path
         if (response.status === 201) {
           localStorage.setItem('token', response.data.token);
           console.log("redirect...");
@@ -95,7 +95,7 @@ const RegisPage: React.FC = () => {
         <InputContainer>
           <InputLabel label="Name" />
           <Input type="text" placeholder="Username"
-            value={name} onChange={(e) => setUsername(e.target.value)} />
+            value={username} onChange={(e) => setUsername(e.target.value)} />
           <InputLabel label="Email" />
           <Input type="text" placeholder="email"
             value={email} onChange={(e) => setEmail(e.target.value)} />

@@ -14,7 +14,6 @@ class AuthController {
         try {
             let { username, email, password } = req.body;
             email = email.toLowerCase();
-
             const existingUser = await UserModel.findOne({ email });
             if (existingUser) {
                 return res.status(400).json({ message: 'Email already exists' });
@@ -79,15 +78,12 @@ class AuthController {
             if (decoded && decoded.role) {
                 if (decoded.role === "admin") {
                     res.json({ message: "Access granted", role: decoded.role });
-                } else {
-                    res.status(403).json({ message: 'Forbidden: Not an admin' });
-                }
+                } 
             } else {
                 res.status(401).json({ message: 'Unauthorized: No role found' });
             }
         } catch (error) {
             console.error('Error verifying token:', error);
-            res.status(403).json({ message: 'Forbidden: Invalid token' });
         }
     }
 }

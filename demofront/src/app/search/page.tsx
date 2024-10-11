@@ -21,7 +21,6 @@ const SelectPage: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const router = useRouter();
   const handleNavigate = (subjectId : string) => {
-    console.log(subjectId);
     router.push(`/subject_detail/${subjectId}`);
   };
 
@@ -101,7 +100,6 @@ const SelectPage: React.FC = () => {
   const roleChecker = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
-      console.error("No token found");
       return;
     }
     try {
@@ -115,14 +113,12 @@ const SelectPage: React.FC = () => {
       }
     } catch (error) {
       const axiosError = error as AxiosError;
-      console.error("Error checking role:", axiosError.response?.data || axiosError.message);
     }
   }
   const deleteSubject = async (index: number) => {
     const subjectId = boxSubject[index].subject_id;
     try {
-      console.log(subjectId);
-      console.log(index);
+
       await axios.delete(`http://localhost:8888/api/subjects/${subjectId}`);
 
       setBoxSubject((prevBoxSubject) => {
@@ -131,7 +127,6 @@ const SelectPage: React.FC = () => {
         return updatedBoxSubject;
       });
     } catch (e) {
-      console.log(e);
     }
     
   };
