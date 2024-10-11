@@ -51,9 +51,10 @@ class SectionController {
     }
     async deleteSection(req, res) {
         try {
-            const { id } = req.params;
-            const sectionIndicesToDelete = req.body;
-            const sections = await SectionModel.find({ subject_id: id });
+            const { subjectId, sectionIndicesToDelete } = req.body;
+            console.log(sectionIndicesToDelete);
+            const sections = await SectionModel.find({ subject_id: subjectId });
+            console.log(sections);
 
             if (!sections || sections.length === 0) {
                 return res.status(404).json({ message: 'Sections not found' });
@@ -67,7 +68,7 @@ class SectionController {
                 }
             }));
 
-            const subject = await SubjectModel.findOne({ subject_id: id });
+            const subject = await SubjectModel.findOne({ subject_id: subjectId });
             if (!subject) {
                 return res.status(404).json({ message: 'Subject not found' });
             }
@@ -78,9 +79,9 @@ class SectionController {
 
             await subject.save();
 
-            const updatedSections = await SectionModel.find({ subject_id: id });
+            const updatedSections = await SectionModel.find({ subject_id: subjectId });
 
-            return res.status(200).json(updatedSections); // ส่งกลับ sections ที่อัปเดต
+            return res.status(200).json(updatedSections);
 
         } catch (error) {
             console.error(error);

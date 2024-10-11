@@ -20,7 +20,8 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
   });
   const [isDelSecBoxVisible, setDelSecBoxVisible] = useState(false);
   const [isDelClassBoxVisible, setDelClassBoxVisible] = useState(false);
-  const [delSecIndex, setDelSecIndex] = useState<number | null>(null);
+  const [delSecIndex, setDelSecIndex] = useState<number| null>(null);
+  const [sectionsToDelete, setSectionsToDelete] = useState<number[]>([]);
   const [delClassIndex, setDelClassIndex] = useState<{ sectionIndex: number; scheduleIndex: number } | null>(null);
 
   // กดเพื่อเริ่มแก้ไข
@@ -37,10 +38,20 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
 
   // กดบันทึกการแก้ไข
   const handleSaveClick = async () => {
+    if (editableCourse.sections && editableCourse.sections.length > 0) {
+      const hasEmptySections = editableCourse.sections.some(section => !section.section || section.section < 0);
+      console.log(editableCourse.sections);
+
+      if (hasEmptySections) {
+        alert('กรุณากรอกหมายเลข Section'); 
+        return; // ไม่ทำการบันทึก
+    }};
     try {
+      const professors = editableCourse.sections.map(sec => sec.professor).filter(Boolean);
       const updatedSubject = {
         style: editableCourse.style,
         credit: editableCourse.credit,
+        professors,
         midterm: editableCourse.midterm,
         final: editableCourse.final,
         midtermTime: editableCourse.midtermTime,
@@ -51,26 +62,21 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
 
       await axios.put(`http://localhost:8888/api/subjects/${editableCourse.subject_id}`, updatedSubject);
 
-      const updatedSections = editableCourse.sections.map(section => ({
-        section: section.section,
-        professor: section.professor,
-        schedule: section.schedule,
-        style: section.style,
-      }));
-      
 
-      if (updatedSections.length > 0) {
-        await axios.put(`http://localhost:8888/api/sections/${editableCourse.subject_id}`, updatedSections);
-        console.log("Sections updated:", updatedSections);
-      } else {
-        console.warn("No sections to update.");
+      if (sectionsToDelete.length > 0) {
+        await axios.delete(`http://localhost:8888/api/deleteSection/${editableCourse.subject_id}`, {
+          data: sectionsToDelete, // ส่ง array ของ sectionIndex ที่ต้องการลบ
+        });
+        console.log("Sections deleted successfully:", sectionsToDelete);
+        setSectionsToDelete([]); // เคลียร์อาร์เรย์หลังจากลบ
       }
 
       const sectionsToAdd = editableCourse.sections.filter(section => {
         const exists = originalCourse.sections.some(existingSection => existingSection.section === section.section);
         console.log("Exists for section", section.section, exists);
-        return (section.section && !exists);
+        return ((section.section || 0) && !exists);
       });
+
       for (const section of sectionsToAdd) {
         const newSection = {
           subject_id: editableCourse.subject_id,
@@ -85,7 +91,24 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
         console.log("Section added successfully:", newSection);
       }
 
+      const updatedSections = editableCourse.sections.map(section => ({
+        section: section.section,
+        professor: section.professor,
+        schedule: section.schedule,
+        style: section.style,
+      }));
+      
+      console.log(updatedSections);
+      if (updatedSections.length > 0) {
+        await axios.put(`http://localhost:8888/api/sections/${editableCourse.subject_id}`, updatedSections);
+        console.log("Sections updated:", updatedSections);
+      } else {
+        console.warn("No sections to update.");
+      }
+
+
       setIsEditing(false);
+      return window.location.reload();
     } catch (error) {
       console.error('Error updating subject or sections:', error);
     }
@@ -115,10 +138,18 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
     field: keyof Section
   ) => {
     const updatedSections = [...editableCourse.sections];
-    updatedSections[sectionIndex] = {
-      ...updatedSections[sectionIndex],
-      [field]: e.target.value,
-    };
+   if (field === 'section') {
+     updatedSections[sectionIndex] = {
+       ...updatedSections[sectionIndex],
+       [field]: Number(e.target.value), 
+     };
+   } else {
+     // สำหรับฟิลด์อื่นๆ ที่รับค่าเป็น string
+     updatedSections[sectionIndex] = {
+       ...updatedSections[sectionIndex],
+       [field]: e.target.value, 
+     };
+   }
     setEditableCourse({ ...editableCourse, sections: updatedSections });
   };
 
@@ -174,21 +205,22 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
 
   // ฟังก์ชันสำหรับลบ Section
   const handleDeleteSection = async(sectionIndex: number) => {
-    try {
-      const response = await axios.delete(`http://localhost:8888/api/sections/${editableCourse.subject_id}`, {
+     setSectionsToDelete((prev) => [...prev, sectionIndex]);
+    /* try {
+      const response = await axios.delete(`http://localhost:8888/api/deleteSection/${editableCourse.subject_id}`, {
         data: [sectionIndex] // ส่ง array ที่มีแค่ index ที่ต้องการลบ
       });
 
-      // อัปเดต sections ใน state หลังจากลบสำเร็จ
+      // อัปเดต sections ใน state หลังจากลบสำเร็จ */
       const updatedSections = editableCourse.sections.filter((_, idx) => idx !== sectionIndex);
       setEditableCourse({ ...editableCourse, sections: updatedSections });
 
-      console.log("Section deleted successfully", response.data);
+     /* console.log("Section deleted successfully", response.data);
 
     } catch (error) {
       console.log(editableCourse.sections)
       console.error("Failed to delete section:", error);
-    }
+    } */
   };
 
 
@@ -395,9 +427,9 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
 
                 <label className="block text-sm font-medium text-gray-700">Section</label>
                 <input
-                  type="number"
+                  type="text" 
                   required
-                  value={section.section ?? 0} 
+                  value={section.section ?? ''} 
                   onChange={(e) => handleSectionChange(e, sectionIndex, 'section')}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
@@ -405,7 +437,7 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
                 <label className="block text-sm font-medium text-gray-700">Instructor</label>
                 <input
                   type="text"
-                  value={section.professor}
+                  value={section.professor.trim()}
                   onChange={(e) => handleSectionChange(e, sectionIndex, 'professor')}
                   className="mt-1 block w-full px-3 py-2 border mb-4 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />

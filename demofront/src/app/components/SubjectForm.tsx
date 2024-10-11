@@ -114,7 +114,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
             type="text"
             value={subjectID}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              setSubjectID(e.target.value)
+              setSubjectID(e.target.value.trim())
             }
             }
             placeholder="06xxxx"
@@ -130,7 +130,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
             type="text"
             value={subjectName}
             onChange={(e: ChangeEvent<HTMLInputElement>) => 
-              setSubjectName(e.target.value)
+              setSubjectName(e.target.value.trim())
             }
             className="border rounded p-2 w-full text-sm"
             required
@@ -157,7 +157,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
           <input
             value={major}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setMajor(e.target.value)
+              setMajor(e.target.value.trim())
             }
             className="border rounded p-2 w-full resize-none text-sm"
           ></input>
@@ -167,7 +167,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
           <input
             value={style}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setStyle(e.target.value)
+              setStyle(e.target.value.trim())
             }
             className="border rounded p-2 w-full resize-none text-sm"
           ></input>
@@ -217,7 +217,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
             type="text"
             value={finalTime}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setFinalTime(e.target.value)
+              setFinalTime(e.target.value.trim())
             }
             className="border rounded p-2 w-full text-sm"
             required
@@ -231,7 +231,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSubmit, onClose }) => {
           <textarea
             value={description}
             onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-              setDescription(e.target.value)
+              setDescription(e.target.value.trim())
             }
             className="border rounded p-2 w-full resize-none text-sm"
             rows={4}
