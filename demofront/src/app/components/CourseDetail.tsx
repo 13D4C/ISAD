@@ -21,7 +21,6 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
   const [isDelSecBoxVisible, setDelSecBoxVisible] = useState(false);
   const [isDelClassBoxVisible, setDelClassBoxVisible] = useState(false);
   const [delSecIndex, setDelSecIndex] = useState<number| null>(null);
-  const [sectionsToDelete, setSectionsToDelete] = useState<number[]>([]);
   const [delClassIndex, setDelClassIndex] = useState<{ sectionIndex: number; scheduleIndex: number } | null>(null);
 
   // กดเพื่อเริ่มแก้ไข
@@ -40,7 +39,6 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
   const handleSaveClick = async () => {
     if (editableCourse.sections && editableCourse.sections.length > 0) {
       const hasEmptySections = editableCourse.sections.some(section => !section.section || section.section < 0);
-      console.log(editableCourse.sections);
 
       if (hasEmptySections) {
         alert('กรุณากรอกหมายเลข Section'); 
@@ -61,15 +59,6 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
       };
 
       await axios.put(`http://localhost:8888/api/subjects/${editableCourse.subject_id}`, updatedSubject);
-
-
-      if (sectionsToDelete.length > 0) {
-        await axios.delete(`http://localhost:8888/api/deleteSection/${editableCourse.subject_id}`, {
-          data: sectionsToDelete, // ส่ง array ของ sectionIndex ที่ต้องการลบ
-        });
-        console.log("Sections deleted successfully:", sectionsToDelete);
-        setSectionsToDelete([]); // เคลียร์อาร์เรย์หลังจากลบ
-      }
 
       const sectionsToAdd = editableCourse.sections.filter(section => {
         const exists = originalCourse.sections.some(existingSection => existingSection.section === section.section);
@@ -205,22 +194,21 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
 
   // ฟังก์ชันสำหรับลบ Section
   const handleDeleteSection = async(sectionIndex: number) => {
-     setSectionsToDelete((prev) => [...prev, sectionIndex]);
-    /* try {
+     try {
       const response = await axios.delete(`http://localhost:8888/api/deleteSection/${editableCourse.subject_id}`, {
-        data: [sectionIndex] // ส่ง array ที่มีแค่ index ที่ต้องการลบ
+        data: [sectionIndex] 
       });
 
-      // อัปเดต sections ใน state หลังจากลบสำเร็จ */
       const updatedSections = editableCourse.sections.filter((_, idx) => idx !== sectionIndex);
       setEditableCourse({ ...editableCourse, sections: updatedSections });
 
-     /* console.log("Section deleted successfully", response.data);
+      console.log("Section deleted successfully", response.data);
+      return window.location.reload();
 
     } catch (error) {
       console.log(editableCourse.sections)
       console.error("Failed to delete section:", error);
-    } */
+    } 
   };
 
 

@@ -1,9 +1,10 @@
 class User {
-    constructor(username, email, password, role) {
+    constructor(username, email, password, role, schedule) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.role = role;
+        this.schedule = schedule;
     }
 
     getName() {
