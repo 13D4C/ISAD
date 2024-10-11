@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Section, SubjectData } from '../components/interface';
 import DecisionBox from './DecisionComponent';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 
 
@@ -22,6 +22,32 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
   const [isDelClassBoxVisible, setDelClassBoxVisible] = useState(false);
   const [delSecIndex, setDelSecIndex] = useState<number| null>(null);
   const [delClassIndex, setDelClassIndex] = useState<{ sectionIndex: number; scheduleIndex: number } | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  
+  const roleChecker = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error("No token found");
+      return;
+    }
+    try {
+      const response = await axios.get('http://localhost:8888/api/rolechecker', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (response.status === 200) {
+        setIsAdmin(true);
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("Error checking role:", axiosError.response?.data || axiosError.message);
+    }
+  }
+
+  useEffect(() => {
+    roleChecker();
+  }, []);
 
   // กดเพื่อเริ่มแก้ไข
   const handleEditClick = (course : SubjectData) => {
@@ -298,12 +324,12 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
             ))}
           </div>
 
-          <button
+          {isAdmin && <button
             className="text-sm mt-4 text-white bg-yellow-500 hover:bg-yellow-700 py-2 px-4 rounded mb-4 shadow-md transition duration-300 ease-in-out"
             onClick={() => handleEditClick(course)}
           >
             Edit
-          </button>
+          </button>}
         </>
       ) : (
         <>
