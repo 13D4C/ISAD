@@ -192,7 +192,7 @@ const ScheduleTable: React.FC = () => {
   };
 
   const deleteSubject = async (subjectCode: string) => {
-    const updatedSubjects = subjects.filter((subject) => subject.code !== subjectCode);
+    const updatedSubjects = subjects.filter((subject) => subject.subject_id !== subjectCode);
     setSubjects(updatedSubjects);
 
     try {
@@ -203,7 +203,6 @@ const ScheduleTable: React.FC = () => {
       await updateSchedule(userId, updatedSubjects);
     } catch (error) {
       console.error('Error updating schedule:', error);
-      // Optionally, revert the change if the update fails
       setSubjects(subjects);
     }
   };
