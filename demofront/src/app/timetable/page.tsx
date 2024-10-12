@@ -197,7 +197,7 @@ const ScheduleTable: React.FC = () => {
   };
 
   const deleteSubject = async (subjectCode: string) => {
-    const updatedSubjects = subjects.filter((subject) => subject.code !== subjectCode);
+    const updatedSubjects = subjects.filter((subject) => subject.subject_id !== subjectCode);
     setSubjects(updatedSubjects);
 
     try {

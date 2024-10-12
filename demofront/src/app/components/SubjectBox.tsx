@@ -78,13 +78,20 @@ const Subject: React.FC<SubjectProps> = ({
 
 
   useEffect(() => {
-    const initialSelections: { [index: number]: number | null } = {};
-    BoxSubject.forEach((box, index) => {
-      if (box.sections.length > 0 && box.sections[0].section !== null) {
-        initialSelections[index] = box.sections[0].section;
+    setSelectedSections((prev) => {
+      if (Object.keys(prev).length > 0) {
+        return prev;
       }
+  
+      // ถ้าไม่มีค่า ให้ตั้งค่าครั้งแรก
+      const initialSelections: { [index: number]: number | null } = {};
+      BoxSubject.forEach((box, index) => {
+        if (box.sections.length > 0 && box.sections[0].section !== null) {
+          initialSelections[index] = box.sections[0].section;
+        }
+      });
+      return initialSelections;
     });
-    setSelectedSections(initialSelections);
   }, [BoxSubject]);
 
   useEffect(() => {
@@ -229,12 +236,14 @@ const Subject: React.FC<SubjectProps> = ({
                     <option value="" disabled className="text-blue-900">
                       Sec
                     </option>
-                    {box.sections.map((sec, secIndex) =>
-                      sec.section !== null ? ( // Check if sec.section is not null
+                    {box.sections
+                    .sort((a, b) => a.section - b.section) // เรียงจากมากไปน้อย
+                    .map((sec, secIndex) =>
+                      sec.section !== null ? (
                         <option key={secIndex} value={sec.section}>
                           {sec.section}
                         </option>
-                      ) : null // Skip rendering if sec.section is null
+                      ) : null
                     )}
                   </select>
 
@@ -289,12 +298,14 @@ const Subject: React.FC<SubjectProps> = ({
                   onChange={(e) => handleSectionChange(index, e)}
                   className="shadow-md rounded border gap-2 w-20 h-10 flex justify-center items-center p-2 border-blue-900 text-sm"
                 >
-                    {box.sections.map((sec, secIndex) =>
-                      sec.section !== null ? ( 
+                    {box.sections
+                    .sort((a, b) => a.section - b.section) // เรียงจากมากไปน้อย
+                    .map((sec, secIndex) =>
+                      sec.section !== null ? (
                         <option key={secIndex} value={sec.section}>
                           {sec.section}
                         </option>
-                      ) : null 
+                      ) : null
                     )}
                 </select>
 
