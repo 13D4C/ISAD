@@ -85,3 +85,4 @@ typings/
 Thumbs.db
 /Backend/node_modules
 /demofront/.next
+/demofront/node_modules
