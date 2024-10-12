@@ -103,9 +103,9 @@ const SelectSubjects: React.FC<SelectSubjectsProps> = ({
       }
 
       const selectedSubjectData = selectSubjects.map(index => {
-        const subjectData = boxSubject[index];
-        return transformSubjectDataToSubject(subjectData, 0);
+        return boxSubject[index];
       });
+      console.log("test", selectedSubjectData);
 
       const existingSchedule = await getSchedule(userId);
       if (existingSchedule) {
