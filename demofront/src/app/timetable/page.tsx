@@ -9,6 +9,7 @@ import { SubjectData, Schedule } from '../components/interface';
 import { getSchedule, updateSchedule } from '../components/scheduleAPI';
 import { getCurrentUserId } from '../components/auth';
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const ScheduleTable: React.FC = () => {
   const [subjects, setSubjects] = useState<SubjectData[]>([]);
@@ -17,6 +18,10 @@ const ScheduleTable: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const tableRef = useRef<HTMLTableElement | null>(null);
+  const router = useRouter();
+  const handleNavigate = () => {
+    router.push(`/Examination`);
+  };
 
   const colorPalette = ['#FACC15', '#F472B6', '#4ADE80', 'FB923C', '#60A5FA', '#C084FC'];
 
@@ -192,7 +197,7 @@ const ScheduleTable: React.FC = () => {
   };
 
   const deleteSubject = async (subjectCode: string) => {
-    const updatedSubjects = subjects.filter((subject) => subject.code !== subjectCode);
+    const updatedSubjects = subjects.filter((subject) => subject.subject_id !== subjectCode);
     setSubjects(updatedSubjects);
 
     try {
@@ -245,7 +250,7 @@ const ScheduleTable: React.FC = () => {
             <button className="bg-white text-black py-2 sm:py-2.5 md:py-3 px-4 sm:px-6 md:px-8 rounded-lg border border-gray-300 shadow-md hover:bg-blue-700 hover:text-white transition-all">
               ตารางเรียน
             </button>
-            <button className="bg-white text-black py-2 sm:py-2.5 md:py-3 px-4 sm:px-6 md:px-8 rounded-lg border border-gray-300 shadow-md hover:bg-blue-700 hover:text-white transition-all">
+            <button onClick={() => handleNavigate()} className="bg-white text-black py-2 sm:py-2.5 md:py-3 px-4 sm:px-6 md:px-8 rounded-lg border border-gray-300 shadow-md hover:bg-blue-700 hover:text-white transition-all">
               ตารางสอบ
             </button>
           </div>
