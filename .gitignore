@@ -83,3 +83,4 @@ typings/
 
 # Windows
 Thumbs.db
+/Backend/node_modules
