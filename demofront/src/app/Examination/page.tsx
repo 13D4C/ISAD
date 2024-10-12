@@ -5,6 +5,7 @@ import { toPng } from 'html-to-image';
 import { SubjectData } from '../components/interface';
 import { getSchedule } from '../components/scheduleAPI';
 import { getCurrentUserId } from '../components/auth';
+import { useRouter } from 'next/navigation';
 
 const ExamSchedule: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<'midterm' | 'final'>('midterm');
@@ -12,7 +13,10 @@ const ExamSchedule: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const tableRef = useRef(null);
-
+  const router = useRouter();
+  const handleNavigate = () => {
+    router.push(`/timetable`);
+  };
   const formatDateToThai = (dateString: string) => {
     const date = new Date(dateString);
     
@@ -104,6 +108,7 @@ const ExamSchedule: React.FC = () => {
     setSelectedTab(tab);
   };
 
+
   const exportToPng = () => {
     if (tableRef.current === null) {
       return;
@@ -139,7 +144,8 @@ const ExamSchedule: React.FC = () => {
           </h2>
 
           <div className="flex space-x-2 sm:space-x-3 md:space-x-4">
-            <button className="bg-white text-black py-2 sm:py-2.5 md:py-3 px-4 sm:px-6 md:px-8 rounded-lg border border-gray-300 shadow-md hover:bg-blue-700 hover:text-white transition-all">
+            <button className="bg-white text-black py-2 sm:py-2.5 md:py-3 px-4 sm:px-6 md:px-8 rounded-lg border border-gray-300 shadow-md hover:bg-blue-700 hover:text-white transition-all"
+              onClick={() => handleNavigate()}>
               ตารางเรียน
             </button>
             <button className="bg-white text-black py-2 sm:py-2.5 md:py-3 px-4 sm:px-6 md:px-8 rounded-lg border border-gray-300 shadow-md hover:bg-blue-700 hover:text-white transition-all">
