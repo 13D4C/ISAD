@@ -49,6 +49,24 @@ class SectionController {
             res.status(500).json({ message: 'Internal server error', error: error.message });
         }
     }
+
+    async getSections(req, res) {
+        try {
+            const { sectionId } = req.params;
+            const sections = await SectionModel.findById(sectionId);
+
+
+            if (!sections || sections.length === 0) {
+                return res.status(404).json({ message: 'No sections found for this subject' });
+            }
+
+            res.status(200).json(sections);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal server error', error: error.message });
+        }
+    }
+
     async deleteSection(req, res) {
         try {
             const { subjectId, sectionIndicesToDelete } = req.body;

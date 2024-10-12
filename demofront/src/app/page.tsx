@@ -107,6 +107,16 @@ const LoginPage: React.FC = () => {
         const response = await axios.post('http://localhost:8888/api/login', { email, password });
         if (response.status === 201 || response.status === 200) {
           localStorage.setItem('token', response.data.token);
+
+          if (response.data.userId) {
+            localStorage.setItem('userId', response.data.userId);
+            console.log(response.data.userId);
+          } else {
+            console.warn('userId not received from server');
+          }
+
+          console.log("Created token and stored userId");
+
           console.log("created token");
           setTimeout(() => {
             router.push('/search');

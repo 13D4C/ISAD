@@ -4,8 +4,9 @@ const Database = require('./config/dbCon');
 const subjectRoutes = require('./routes/subjectRoutes');
 const authRoutes = require('./routes/authRoutes');
 const sectionsRoutes = require('./routes/sectionsRoutes');
+const scheduleRoutes = require('./routes/scheduleRoutes');
 require('dotenv').config();
-
+ 
 const app = express();
 const port = process.env.PORT || 8888;
 
@@ -18,6 +19,7 @@ app.use(cors());
 app.use('/api', subjectRoutes);
 app.use('/api', authRoutes);
 app.use('/api', sectionsRoutes);
+app.use('/api', scheduleRoutes);
 
 (async () => {
     try {

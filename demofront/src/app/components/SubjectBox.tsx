@@ -69,7 +69,7 @@ const Subject: React.FC<SubjectProps> = ({
     index: number,
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    const value = event.target.value ? Number(event.target.value) : null; // Convert to number or null
+    const value = event.target.value ? Number(event.target.value) : null;
     setSelectedSections((prev) => ({
       ...prev,
       [index]: value,
@@ -77,12 +77,11 @@ const Subject: React.FC<SubjectProps> = ({
   };
 
 
-
   useEffect(() => {
     const initialSelections: { [index: number]: number | null } = {};
     BoxSubject.forEach((box, index) => {
       if (box.sections.length > 0 && box.sections[0].section !== null) {
-        initialSelections[index] = box.sections[0].section; // Set to first section
+        initialSelections[index] = box.sections[0].section;
       }
     });
     setSelectedSections(initialSelections);
@@ -180,7 +179,7 @@ const Subject: React.FC<SubjectProps> = ({
               <div className="space-y-2">
                 <p className="text-sm text-gray-500/50">เวลา</p>
                 <p className="text-base">
-                  {selectedSections[index] !== null && // Check against null
+                  {selectedSections[index] !== null &&
                     box.sections.find(
                       (sec) => sec.section === selectedSections[index]
                     )?.schedule.map(scheduleEntry => scheduleEntry.time).join(", ") || 'ไม่ระบุ'}

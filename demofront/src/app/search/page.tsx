@@ -19,6 +19,7 @@ const SelectPage: React.FC = () => {
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [selectedSections, setSelectedSections] = useState<number[]>([]);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const router = useRouter();
   const handleNavigate = (subjectId : string) => {
     router.push(`/subject_detail/${subjectId}`);
@@ -60,11 +61,19 @@ const SelectPage: React.FC = () => {
     setIsSMScreen(window.innerWidth <= 640); // Set threshold for small screen (640px)
   };
 
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
   const filterSubjects = () => {
     return boxSubject.filter((subject) => {
+      const searchMatch = 
+        searchTerm === "" ||
+        subject.subject_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        subject.name.toLowerCase().includes(searchTerm.toLowerCase());
+
       const sectionMatches =
         selectedSections.length === 0 || subject.sections.some((section) => {
-          // ตรวจสอบว่า section มีค่าไม่เป็น null และอยู่ใน selectedSections
           return section.section !== null && selectedSections.includes(section.section);
         });
 
@@ -73,9 +82,10 @@ const SelectPage: React.FC = () => {
           section.schedule.some((schedule) => selectedDays.includes(schedule.day))
         );
 
-      return sectionMatches && scheduleMatches;
+      return searchMatch && sectionMatches && scheduleMatches;
     });
   };
+
   const filteredSubjects = filterSubjects();
 
   const handleDayChange = (day: string) => {
@@ -192,7 +202,14 @@ const SelectPage: React.FC = () => {
         {/* Search */}
         <div className="rounded border shadow-md p-2 px-4 grow">
           <label className="text-sm" htmlFor="search"></label>
-          <input className="w-full outline-none text-black" type="search" id="search" placeholder="ค้นหารหัสวิชา / ชื่อวิชา" />
+          <input
+            className="w-full outline-none text-black"
+            type="search"
+            id="search"
+            placeholder="ค้นหารหัสวิชา / ชื่อวิชา"
+            value={searchTerm}
+            onChange={handleSearch}
+          />
         </div>
 
         {/* Filter Button */}

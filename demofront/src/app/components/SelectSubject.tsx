@@ -1,21 +1,12 @@
 'use client'
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
-import { Section, SubjectData } from '../components/interface';
+import { Subject, SubjectData, Schedule } from '../components/interface';
+import { createSchedule, getSchedule, updateSchedule } from '../components/scheduleAPI';
+import { getCurrentUserId } from './auth';
 
-interface Subject {
-  code: string;
-  subject: String;
-  credits: number;
-  section: number | null;
-  day: string;
-  startTime?: string;
-  duration: number;
-  room: string;
-  location: string;
-  hasConflict?: boolean;
-}
+
 
 interface SelectSubjectsProps {
   isVisible: boolean;
@@ -25,22 +16,37 @@ interface SelectSubjectsProps {
   removeSelectedSubject: (index: number) => void;
 }
 
-function parseTime(timeString: string): { day: string, startTime: string, duration: number } {
-  const timeMatch = timeString.match(/^([A-Z]{3})\s(.+)$/);
+function transformSubjectDataToSubject(subjectData: SubjectData, sectionIndex: number): SubjectData {
+  const section = subjectData.sections[sectionIndex];
+  const schedules = section.schedule.map((scheduleItem) => {
+    const { day, time, room } = scheduleItem;
+    const { startTime, duration } = parseTime(time);
+    return {
+      day,
+      time,
+      startTime,
+      duration,
+      room,
+    };
+  });
 
-  if (!timeMatch) {
-    console.error('Invalid time format:', timeString);
-    return { day: '', startTime: '', duration: 0 };  // return a fallback or handle error
-  }
+  return {
+    ...subjectData,
+    code: subjectData.subject_id,
+    credits: subjectData.credit,
+    schedules,
+    hasConflict: false,
+    hidden: false
+  };
+}
 
-  const dayAbbr = timeMatch[1];
-  const timeRange = timeMatch[2];
 
-  const [startTime, endTime] = timeRange.trim().split(' - ');
+function parseTime(timeString: string): { startTime: string, duration: number } {
+  const [startTime, endTime] = timeString.trim().split(" - ");
 
   if (!startTime || !endTime) {
     console.error('Invalid time format:', timeString);
-    return { day: dayAbbr, startTime: '', duration: 0 };
+    return { startTime: '', duration: 0 };
   }
 
   const start = new Date(`1970-01-01T${startTime}`);
@@ -48,27 +54,8 @@ function parseTime(timeString: string): { day: string, startTime: string, durati
   const durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
 
   return {
-    day: dayAbbr,
     startTime,
-    duration: durationHours
-  };
-}
-
-function transformSubjectDataToSubject(subjectData: SubjectData, sectionIndex: number): Subject {
-  const section = subjectData.sections[sectionIndex];
-  const { day, startTime, duration } = parseTime(section.time);
-
-  return {
-    code: subjectData.subject_id,
-    subject: subjectData.name,
-    credits: subjectData.credit,
-    section: section.section,
-    day,
-    startTime,
-    duration,
-    room: section.room,
-    location: 'IT', // You might want to add this information to your SubjectData if available
-    hasConflict: false // You can implement conflict detection logic if needed
+    duration: durationHours,
   };
 }
 
@@ -79,18 +66,63 @@ const SelectSubjects: React.FC<SelectSubjectsProps> = ({
   boxSubject,
   removeSelectedSubject,
 }) => {
-  if (!isVisible) return null;
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleScheduleCreation = () => {
-    const selectedSubjectData = selectSubjects.map(index => {
-      const subjectData = boxSubject[index];
-      return transformSubjectDataToSubject(subjectData, 0);
-    });
-    const queryString = encodeURIComponent(JSON.stringify(selectedSubjectData));
-    router.push(`/timetable?selectedSubjects=${queryString}`);
+  if (!isVisible) return null;
+
+
+  // const handleScheduleCreation = () => {
+  //   const selectedSubjectData = selectSubjects.map(index => {
+  //     const subjectData = boxSubject[index];
+  //     return transformSubjectDataToSubject(subjectData, 0);
+  //   });
+  //   const queryString = encodeURIComponent(JSON.stringify(selectedSubjectData));
+  //   router.push(`/timetable?selectedSubjects=${queryString}`);
+  // };
+
+  // const handleScheduleCreation = () => {
+  //   const selectedSubjectData = selectSubjects.map(index => {
+  //     const subjectData = boxSubject[index];
+  //     return transformSubjectDataToSubject(subjectData, 0);
+  //   });
+  //   localStorage.setItem('selectedSubjectsData', JSON.stringify(selectedSubjectData));
+  //   console.log(selectedSubjectData);
+  //   router.push(`/timetable`);
+  // };
+
+  const handleScheduleCreation = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const userId = getCurrentUserId();
+      if (!userId) {
+        throw new Error('User ID not found. Please log in again.');
+      }
+
+      const selectedSubjectData = selectSubjects.map(index => {
+        const subjectData = boxSubject[index];
+        return transformSubjectDataToSubject(subjectData, 0);
+      });
+
+      const existingSchedule = await getSchedule(userId);
+      if (existingSchedule) {
+        await updateSchedule(userId, selectedSubjectData);
+      } else {
+        await createSchedule(userId, selectedSubjectData);
+      }
+
+      router.push('/timetable');
+    } catch (error) {
+      console.error('Error creating/updating schedule:', error);
+      setError('Failed to create or update schedule. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
+ 
 
   const renderSelectSubjects = () => {
     return selectSubjects.map((index) => {
@@ -103,7 +135,7 @@ const SelectSubjects: React.FC<SelectSubjectsProps> = ({
             </p>
             <p className="text-gray-400">
               {"[ "}
-              {subject.credit} หน่วยกิต{" ]"}
+              {getTotalCredits()} หน่วยกิต{" ]"}
             </p>
           </div>
           <button
@@ -175,7 +207,7 @@ const SelectSubjects: React.FC<SelectSubjectsProps> = ({
           <p className="p-2 font-medium text-blue-900">
             รวม {getTotalCredits()} หน่วยกิต
           </p>
-          <button className="shadow-md w-full flex gap-2 justify-center items-center bg-blue-900 hover:bg-blue-950 rounded p-2 text-white" onClick={handleScheduleCreation}>
+          <button className="shadow-md w-full flex gap-2 justify-center items-center bg-blue-900 hover:bg-blue-950 rounded p-2 text-white" onClick={handleScheduleCreation} disabled={isLoading}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -188,7 +220,8 @@ const SelectSubjects: React.FC<SelectSubjectsProps> = ({
                 clip-rule="evenodd"
               />
             </svg>
-            <p>จัดตารางเรียน</p>
+            <p>{isLoading ? 'กำลังดำเนินการ...' : 'จัดตารางเรียน'}</p>
+            {error && <p className="text-red-500 mt-2">{error}</p>}
           </button>
         </div>
       </div>

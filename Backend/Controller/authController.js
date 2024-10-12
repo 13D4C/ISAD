@@ -45,7 +45,13 @@ class AuthController {
 
             const student = new Student(user.username, user.password, user.email);
             const token = jwt.sign({ userId: user._id , username: student.getName(), role: student.getRole()}, this.secretKey, { expiresIn: '1h' });
-            res.json({ token, email: student.getEmail(), message: "Login successfully!", role: student.getRole() });
+            res.json({ 
+                token, 
+                email: student.getEmail(), 
+                message: "Login successfully!", 
+                role: student.getRole(),
+                userId: user._id // Include the userId in the response
+            });
         } catch (e) {
             console.error(e);
             res.status(500).json({ message: 'Internal server error' });

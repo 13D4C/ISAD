@@ -3,40 +3,35 @@ import React from 'react';
 import chroma from 'chroma-js';
 
 // Predefined color palette from your image
-const colorPalette = ['#48A4FF', '#4CAF50', '#8B00F8', '#F27537', '#FF609B', '#FFC107'];
+const colorPalette = ['#FACC15', '#F472B6', '#4ADE80', 'FB923C', '#60A5FA', '#C084FC'];
 
 interface SubjectBoxProps {
-    subject: string;
-    day: string;
-    startTime: string;
-    duration: number;
-    room: string;
-    section: string;
-    code: string;
-    location: string;
-    onClick: () => void;
-    forceColor?: string | null;
-    hasConflict?: boolean;
+  subject: string;
+  day: string;
+  startTime: string;
+  duration: number;
+  room: string;
+  section: string;
+  code: string;
+  location: string;
+  onClick: () => void;
+  forceColor?: string | null;
+  hasConflict?: boolean;
 }
 
 
 // Function to map the subject code to a color or allow forcing a color
 const getColorFromCode = (code: string, forceColor: string | null = null, hasConflict: boolean = false): string => {
+  if (hasConflict) {
+      return '#FF0000';
+  }
 
-    if (hasConflict) {
-        return '#FF0000'; // Red color for conflicts
-    }
+  if (forceColor) {
+      return forceColor;
+  }
 
-    // If a forced color is provided and valid, use it
-    if (forceColor && colorPalette.includes(forceColor)) {
-        return forceColor;
-    }
-
-    // Hash the subject code to consistently assign a color from the palette
-    const hash = Array.from(code).reduce((acc, char) => acc + char.charCodeAt(0), 0);
-
-    // Map the hash to one of the colors in the predefined palette
-    return chroma.scale(colorPalette).mode('lab')(hash % colorPalette.length / colorPalette.length).hex();
+  const hash = Array.from(code).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return chroma.scale(colorPalette).mode('lab')(hash % colorPalette.length / colorPalette.length).hex();
 };
 
 const SubjectBox: React.FC<SubjectBoxProps> = ({
@@ -62,7 +57,7 @@ const SubjectBox: React.FC<SubjectBoxProps> = ({
 
     return (
         <td
-            className="border-b border-r p-2 border-gray-200 dark:border-black text-white text-center font-semibold rounded-lg shadow-lg"
+            className={`border-b border-r p-2 border-gray-200 dark:border-black text-white text-center font-semibold rounded-lg shadow-lg`}
             colSpan={duration}
             style={{ backgroundColor: bgColor }} // Apply dynamic background color based on subject code or forced color
             onClick={onClick}

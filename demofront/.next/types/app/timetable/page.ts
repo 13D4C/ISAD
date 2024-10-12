@@ -1,4 +1,4 @@
-// File: C:\Users\Bruhh\Documents\GitHub\ISAD\demofront\src\app\timetable\page.tsx
+// File: C:\Users\aruch\Work\ISAD\ISAD\demofront\src\app\timetable\page.tsx
 import * as entry from '../../../../src/app/timetable/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

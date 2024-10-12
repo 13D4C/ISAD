@@ -1,65 +1,138 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { useSearchParams } from 'next/navigation';
 import SubjectBox from "./SubjectBox";
 import { toPng } from "html-to-image";
-import SubjectDetailBox from "./SubjectDetailBox"; // Import the SubjectDetailBox
-
-interface Subject {
-  subject: string;
-  day: string;
-  startTime: string;
-  duration: number;
-  room: string;
-  section: string;
-  code: string;
-  location: string;
-  hidden: boolean;
-  credits: number;
-  hasConflict?: boolean;
-}
+import SubjectDetailBox from "./SubjectDetailBox";
+import chroma from 'chroma-js';
+import PopupComponent from "./PopupComponenet";
+import { SubjectData, Schedule } from '../components/interface';
+import { getSchedule, updateSchedule } from '../components/scheduleAPI';
+import { getCurrentUserId } from '../components/auth';
+import axios from "axios";
 
 const ScheduleTable: React.FC = () => {
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [popupSubject, setPopupSubject] = useState<Subject | null>(null);
+  const [subjects, setSubjects] = useState<SubjectData[]>([]);
+  const [popupSubject, setPopupSubject] = useState<SubjectData | null>(null);
+  const [subjectColors, setSubjectColors] = useState<{[key: string]: string}>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const tableRef = useRef<HTMLTableElement | null>(null);
-  const searchParams = useSearchParams();
+
+  const colorPalette = ['#FACC15', '#F472B6', '#4ADE80', 'FB923C', '#60A5FA', '#C084FC'];
+
+  const getColorFromCode = (code: any, forceColor = null) => {
+    // If a forced color is provided and valid, use it
+    if (forceColor && colorPalette.includes(forceColor)) {
+      return forceColor;
+    }
+    // Hash the subject code to consistently assign a color from the palette
+    const hash = [...code].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    // Map the hash to one of the colors in the predefined palette
+    return chroma.scale(colorPalette).mode('lab')(hash % colorPalette.length / colorPalette.length).hex();
+  };
+
+  // useEffect(() => {
+  //   const selectedSubjectsParam = searchParams.get('selectedSubjects');
+  //   if (selectedSubjectsParam) {
+  //     const selectedSubjects: Subject[] = JSON.parse(decodeURIComponent(selectedSubjectsParam));
+  //     const subjectsWithConflicts = checkForConflicts(selectedSubjects);
+  //     setSubjects(subjectsWithConflicts);
+  //   }
+  //   console.log(subjects);
+  // }, [searchParams]);
+
+  // useEffect(() => {
+  //   const storedSubjects = localStorage.getItem('selectedSubjectsData');
+  //   if (storedSubjects) {
+  //     const parsedSubjects: SubjectData[] = JSON.parse(storedSubjects);
+  //     const subjectsWithConflicts = checkForConflicts(parsedSubjects);
+  //     console.log(subjectsWithConflicts)
+  //     setSubjects(subjectsWithConflicts);
+  //   }
+  // }, []);
 
   useEffect(() => {
-    const selectedSubjectsParam = searchParams.get('selectedSubjects');
-    if (selectedSubjectsParam) {
-      const selectedSubjects: Subject[] = JSON.parse(decodeURIComponent(selectedSubjectsParam));
-      const subjectsWithConflicts = checkForConflicts(selectedSubjects);
-      setSubjects(subjectsWithConflicts);
-    }
-    console.log(subjects);
-  }, [searchParams]);
+    const fetchSchedule = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const userId = getCurrentUserId();
+        if (!userId) {
+          throw new Error('User ID not found. Please log in again.');
+        }
+        const schedule = await getSchedule(userId);
+        if (schedule && schedule.subjects) {
+          const populatedSubjects = await Promise.all(schedule.subjects.map(async (subject: SubjectData) => {
+            const populatedSections = await Promise.all(subject.sections.map(async (sectionId: any) => {
+              const response = await axios.get(`http://localhost:8888/api/getSections/${sectionId}`);
+              return response.data;
+            }));
+            return { ...subject, sections: populatedSections };
+          }));
+          setSubjects(populatedSubjects);
+        }
+      } catch (error) {
+        console.error('Error fetching schedule:', error);
+        setError('Failed to load schedule. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const checkForConflicts = (subjects: Subject[]): Subject[] => {
-    const conflictMap: { [key: string]: boolean } = {};
+    fetchSchedule();
+  }, []);
 
-    subjects.forEach((subject, index) => {
-      const subjectStart = new Date(`1970-01-01T${subject.startTime}`).getTime();
-      const subjectEnd = subjectStart + subject.duration * 60 * 60 * 1000;
-
-      subjects.forEach((otherSubject, otherIndex) => {
-        if (index !== otherIndex && subject.day === otherSubject.day) {
-          const otherStart = new Date(`1970-01-01T${otherSubject.startTime}`).getTime();
-          const otherEnd = otherStart + otherSubject.duration * 60 * 60 * 1000;
-
-          // Check for overlap
-          if (
-            (subjectStart < otherEnd && subjectEnd > otherStart) || // subject overlaps otherSubject
-            (otherStart < subjectEnd && otherEnd > subjectStart)    // otherSubject overlaps subject
-          ) {
-            subjects[index].hasConflict = true;
-            subjects[otherIndex].hasConflict = true;
-          }
+  const checkForConflicts = (subjects: SubjectData[]): SubjectData[] => {
+    return subjects.map(subject => {
+      let hasConflict = false;
+      subject.schedules?.forEach(schedule => {
+        const conflictingSubject = subjects.find(otherSubject => 
+          otherSubject !== subject &&
+          otherSubject.schedules?.some(otherSchedule => 
+            schedule.day === otherSchedule.day &&
+            checkTimeConflict(schedule, otherSchedule)
+          )
+        );
+        if (conflictingSubject) {
+          hasConflict = true;
         }
       });
+      return { ...subject, hasConflict };
     });
+  };
 
-    return subjects;
+  const checkTimeConflict = (schedule1: Schedule, schedule2: Schedule): boolean => {
+    const { startTime: startTime1, duration: duration1 } = parseTime(schedule1.time);
+    const { startTime: startTime2, duration: duration2 } = parseTime(schedule2.time);
+    const start1 = new Date(`1970-01-01T${startTime1}`).getTime();
+    const end1 = start1 + duration1 * 60 * 60 * 1000;
+    const start2 = new Date(`1970-01-01T${startTime2}`).getTime();
+    const end2 = start2 + duration2 * 60 * 60 * 1000;
+
+    return (start1 < end2 && end1 > start2) || (start2 < end1 && end2 > start1);
+  };
+
+  const parseTime = (timeString: string): { startTime: string, duration: number } => {
+    const [startTime, endTime] = timeString.split(" - ");
+    const start = new Date(`1970-01-01T${startTime}`);
+    const end = new Date(`1970-01-01T${endTime}`);
+    const durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+    return { startTime, duration: durationHours };
+  };
+
+
+  // new feature
+  const thaiToEnglishDay = (thaiDay: string) => {
+    const dayMap: { [key: string]: string } = {
+      'จันทร์': 'MON',
+      'อังคาร': 'TUE',
+      'พุธ': 'WED',
+      'พฤหัสบดี': 'THU',
+      'ศุกร์': 'FRI',
+      'เสาร์': 'SAT',
+      'อาทิตย์': 'SUN'
+    };
+    return dayMap[thaiDay] || 'Unknown';
   };
 
   const days: string[] = ['MON', 'TUE', 'WED', 'THU', 'FRI'];
@@ -77,8 +150,9 @@ const ScheduleTable: React.FC = () => {
     }
     return acc;
   }, {});
+
   const totalCredits = subjects.reduce(
-    (total, subject) => total + (subject.hidden ? 0 : subject.duration),
+    (total, subject) => total + (subject.hidden ? 0 : subject.credit),
     0
   );
 
@@ -101,36 +175,63 @@ const ScheduleTable: React.FC = () => {
 
   const getSubjectAt = (day: string, hour: string) => {
     return subjects.find(
-      (subject) => subject.day === day && subject.startTime === hour && !subject.hidden
-    );
-  };
-
-  const toggleVisibility = (subjectCode: string) => {
-    setSubjects((prevSubjects) =>
-      prevSubjects.map((subject) =>
-        subject.code === subjectCode
-          ? { ...subject, hidden: !subject.hidden }
-          : subject
+      (subject) => subject.sections[0].schedule?.some(schedule => 
+        thaiToEnglishDay(schedule.day) === day && 
+        schedule.time.startsWith(hour) && 
+        !subject.hidden
       )
     );
   };
-
-  // Function to delete a subject from the state
-  const deleteSubject = (subjectCode: string) => {
-    setSubjects((prevSubjects) =>
-      prevSubjects.filter((subject) => subject.code !== subjectCode)
+  const toggleVisibility = async (subjectCode: string) => {
+    const updatedSubjects = subjects.map((subject) =>
+      subject.subject_id === subjectCode
+        ? { ...subject, hidden: !subject.hidden }
+        : subject
     );
+    setSubjects(updatedSubjects);
   };
 
-  // Function to handle the subject click and show a pop-up
-  const handleSubjectClick = (subject: Subject) => {
-    setPopupSubject(subject); // Set the subject for the pop-up
+  const deleteSubject = async (subjectCode: string) => {
+    const updatedSubjects = subjects.filter((subject) => subject.code !== subjectCode);
+    setSubjects(updatedSubjects);
+
+    try {
+      const userId = getCurrentUserId();
+      if (!userId) {
+        throw new Error('User ID not found. Please log in again.');
+      }
+      await updateSchedule(userId, updatedSubjects);
+    } catch (error) {
+      console.error('Error updating schedule:', error);
+      // Optionally, revert the change if the update fails
+      setSubjects(subjects);
+    }
   };
 
-  // Function to close the pop-up
+  const handleSubjectClick = (subject: SubjectData) => {
+    setPopupSubject(subject);
+    console.log(subject);
+  };
+
   const closePopup = () => {
-    setPopupSubject(null); // Clear the subject to hide the pop-up
+    setPopupSubject(null);
   };
+
+  const handleColorChange = (subjectCode: string, color: string) => {
+    setSubjectColors(prevColors => ({
+      ...prevColors,
+      [subjectCode]: color
+    }));
+    closePopup();
+  };
+
+  if (isLoading) {
+    return <div>Loading schedule...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-white dark:bg-gray-900 mt-5 px-4 md:px-6 lg:px-8 xl:px-0 relative">
@@ -189,29 +290,32 @@ const ScheduleTable: React.FC = () => {
                       const columnsLeft = 11 - totalColumns;
 
                       if (subject) {
-                        const duration = Math.min(
-                          subject.duration,
-                          columnsLeft
-                        );
-
-                        if (duration > 0) {
-                          totalColumns += duration;
-                          return (
-                            <SubjectBox
-                              key={`${day}-${hour}`}
-                              subject={subject.subject}
-                              day={subject.day}
-                              startTime={subject.startTime}
-                              duration={duration}
-                              room={subject.room}
-                              section={subject.section}
-                              code={subject.code}
-                              location={subject.location}
-                              // Trigger pop-up on subject click
-                              onClick={() => handleSubjectClick(subject)}
-                              hasConflict={subject.hasConflict}
-                            />
+                        const schedule = subject.sections[0].schedule.find(s => thaiToEnglishDay(s.day) === day && parseTime(s.time).startTime === hour);
+                        if (schedule) {
+                          const duration = Math.min(
+                            parseTime(schedule.time).duration,
+                            columnsLeft
                           );
+
+                          if (duration > 0) {
+                            totalColumns += duration;
+                            return (
+                              <SubjectBox
+                                key={`${day}-${hour}`}
+                                subject={subject.name}
+                                day={schedule.day}
+                                startTime={schedule.time.split(' - ')[0]}
+                                duration={duration}
+                                room={schedule.room}
+                                section={subject.sections[0].section.toString()}
+                                code={subject.subject_id}
+                                location="IT"
+                                onClick={() => handleSubjectClick(subject)}
+                                forceColor={subjectColors[subject.subject_id] || null}
+                                hasConflict={subject.hasConflict}
+                              />
+                            );
+                          }
                         }
                       }
 
@@ -249,38 +353,29 @@ const ScheduleTable: React.FC = () => {
         </div>
 
         <div className="mt-4">
-          {subjects.map((subject, index) => (
-            <SubjectDetailBox
-              key={subject.code}
-              subject={subject}
-              onToggleVisibility={(code) => {/* implement toggle visibility */ }}
-              onDelete={(code) => {/* implement delete */ }}
-              hasConflict={subject.hasConflict}
-            />
-          ))}
+        {subjects.map((subject) => (
+          <SubjectDetailBox
+            key={subject.subject_id}
+            subject={subject}
+            onToggleVisibility={toggleVisibility}
+            onDelete={deleteSubject}
+          />
+        ))}
         </div>
       </div>
 
       {/* Pop-up for subject details */}
       {popupSubject && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg font-semibold mb-4">{popupSubject.subject}</h3>
-            <p>Code: {popupSubject.code}</p>
-            <p>Room: {popupSubject.room}</p>
-            <p>Section: {popupSubject.section}</p>
-            <p>Location: {popupSubject.location}</p>
-            <p>Time: {popupSubject.startTime}</p>
-            <p>Duration: {popupSubject.duration} hours</p>
-            <button
-              onClick={closePopup}
-              className="mt-4 bg-blue-600 text-white py-2 px-4 rounded-lg"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <PopupComponent
+            subjectId={popupSubject.subject_id}
+            onClose={closePopup}
+            onHide={() => toggleVisibility(popupSubject.subject_id)}
+            onRemove={() => deleteSubject(popupSubject.subject_id)}
+            onColorChange={(color) => handleColorChange(popupSubject.subject_id, color)}
+          />
+      </div>
+    )}
     </div>
   );
 };
