@@ -110,6 +110,7 @@ const LoginPage: React.FC = () => {
 
           if (response.data.userId) {
             localStorage.setItem('userId', response.data.userId);
+            console.log(response.data.userId);
           } else {
             console.warn('userId not received from server');
           }
