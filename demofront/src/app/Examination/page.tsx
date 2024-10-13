@@ -72,8 +72,9 @@ const ExamSchedule: React.FC = () => {
         }
         const schedule = await getSchedule(userId);
         if (schedule && schedule.subjects) {
-          const subjectIds = schedule.subjects.map((subject: SubjectData) => subject.subject_id);
+          const subjectIds = schedule.subjects.map((subject: SubjectData) => subject.subject);
           await fetchSubjectsData(subjectIds);
+          console.log(subjectData);
         } else {
           setSubjectData([]);
         }
@@ -91,7 +92,7 @@ const ExamSchedule: React.FC = () => {
   const fetchSubjectsData = async (subjectIds: string[]) => {
     try {
       const promises = subjectIds.map(async (subjectId) => {
-        const response = await fetch(`http://localhost:8888/api/fetchSubject/${subjectId}`);
+        const response = await fetch(`http://localhost:8888/api/fetchSubjectById/${subjectId}`);
         const data = await response.json();
         return data;
       });
@@ -201,9 +202,9 @@ const ExamSchedule: React.FC = () => {
             <tbody>
             {subjectData.map((subject: any, index: number) => (
                 <ExamRow
-                  key={subject.subject_id}
+                  key={subject.subject}
                   id={index + 1}
-                  subjectCode={subject.subject_id}
+                  subjectCode={subject.subject}
                   subjectName={subject.name}
                   examDate={selectedTab === 'midterm' ? formatDateToThai(subject.midterm) : formatDateToThai(subject.final)}
                   examTime={selectedTab === 'midterm' ? subject.midtermTime : subject.finalTime}
