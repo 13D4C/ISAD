@@ -477,7 +477,7 @@ const CourseDetail: React.FC<{ course: SubjectData }> = ({ course }) => {
                         {isDelClassBoxVisible && delClassIndex !== null && (
                           <DecisionBox
                             message_1="คุณแน่ใจที่จะลบ Class นี้ใช่หรือไม่?"
-                            message_2="(Class นี้จะหายไปและไม่สามารถกู้คืนได้)"
+                            message_2=""
                             onClose={(action) => {
                               if (action === 'delete') {
                                 handleDeleteClass(delClassIndex.sectionIndex, delClassIndex.scheduleIndex); 
