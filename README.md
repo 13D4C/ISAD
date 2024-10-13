@@ -1,6 +1,9 @@
 # ISAD
 Project Information System Analysis Design
 
+![isad exam1](https://github.com/user-attachments/assets/3c9a25fc-55f5-47a1-a20c-0335cc3b4b4a)
+
+![exam2](https://github.com/user-attachments/assets/4c97c94f-7ad6-4ea8-93f4-ae1d2f0a83b2)
 
 # Installation Plan
 
