@@ -16,6 +16,11 @@
       "static/chunks/main-app.js",
       "static/chunks/app/search/page.js"
     ],
+    "/subject_detail/[id]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/subject_detail/[id]/page.js"
+    ],
     "/timetable/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -26,15 +31,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/Examination/page.js"
     ],
+    "/about/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/about/page.js"
+    ],
     "/adminLogin/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/adminLogin/page.js"
-    ],
-    "/subject_detail/[id]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/subject_detail/[id]/page.js"
     ]
   }
 }

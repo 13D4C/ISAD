@@ -1,8 +1,9 @@
 {
+  "/page": "app/page.js",
   "/search/page": "app/search/page.js",
   "/timetable/page": "app/timetable/page.js",
   "/Examination/page": "app/Examination/page.js",
-  "/adminLogin/page": "app/adminLogin/page.js",
-  "/subject_detail/[id]/page": "app/subject_detail/[id]/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js"
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/about/page": "app/about/page.js",
+  "/adminLogin/page": "app/adminLogin/page.js"
 }
