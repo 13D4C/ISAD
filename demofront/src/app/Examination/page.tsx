@@ -204,7 +204,7 @@ const ExamSchedule: React.FC = () => {
                 <ExamRow
                   key={subject.subject}
                   id={index + 1}
-                  subjectCode={subject.subject}
+                  subjectCode={subject.subject_id}
                   subjectName={subject.name}
                   examDate={selectedTab === 'midterm' ? formatDateToThai(subject.midterm) : formatDateToThai(subject.final)}
                   examTime={selectedTab === 'midterm' ? subject.midtermTime : subject.finalTime}
