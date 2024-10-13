@@ -11,7 +11,7 @@ import { getCurrentUserId } from './auth';
 interface SelectSubjectsProps {
   isVisible: boolean;
   onClose: () => void;
-  selectSubjects: number[];
+  selectSubjects: { index: number; sectionIndex: number }[];
   boxSubject: SubjectData[];
   removeSelectedSubject: (index: number) => void;
 }
@@ -36,7 +36,8 @@ function transformSubjectDataToSubject(subjectData: SubjectData, sectionIndex: n
     credits: subjectData.credit,
     schedules,
     hasConflict: false,
-    hidden: false
+    hidden: false,
+    selectedSectionIndex: sectionIndex
   };
 }
 
@@ -102,10 +103,13 @@ const SelectSubjects: React.FC<SelectSubjectsProps> = ({
         throw new Error('User ID not found. Please log in again.');
       }
 
-      const selectedSubjectData = selectSubjects.map(index => {
-        return boxSubject[index];
+      const selectedSubjectData = selectSubjects.map(({ index, sectionIndex }) => {
+        const subject = boxSubject[index];
+        return {
+          ...subject,
+          selectedSectionIndex: sectionIndex
+        };
       });
-      console.log("test", selectedSubjectData);
 
       const existingSchedule = await getSchedule(userId);
       if (existingSchedule) {
@@ -125,13 +129,14 @@ const SelectSubjects: React.FC<SelectSubjectsProps> = ({
  
 
   const renderSelectSubjects = () => {
-    return selectSubjects.map((index) => {
+    return selectSubjects.map(({ index, sectionIndex }) => {
       const subject = boxSubject[index];
+      const section = subject.sections[sectionIndex];
       return (
         <div key={index} className="flex justify-between p-2 border-b">
           <div className="flex">
             <p>
-              {subject.subject_id} {subject.name}
+              {subject.subject_id} {subject.name} (Section {section.section})
             </p>
             <p className="text-gray-400">
               {"[ "}
@@ -161,7 +166,7 @@ const SelectSubjects: React.FC<SelectSubjectsProps> = ({
   };
 
   const getTotalCredits = () => {
-    return selectSubjects.reduce((total, index) => {
+    return selectSubjects.reduce((total, { index }) => {
       const subject = boxSubject[index];
       return total + Number(subject.credit);
     }, 0);

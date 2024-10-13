@@ -1,44 +1,60 @@
-import React, { useState } from "react";
-import { SubjectData, Schedule } from '../components/interface';
+import React, { useState, useEffect } from "react";
+import { SubjectData, Schedule, Section } from '../components/interface';
+import axios from 'axios';
 
 interface SubjectDetailBoxProps {
     subject: SubjectData;
     onDelete: (code: string) => void;
     onToggleVisibility: (code: string) => void;
+    onSectionChange: (subjectId: string, sectionIndex: number) => void;
 }
 
-const SubjectDetailBox: React.FC<SubjectDetailBoxProps> = ({ subject, onDelete, onToggleVisibility }) => {
+const SubjectDetailBox: React.FC<SubjectDetailBoxProps> = ({ 
+    subject, 
+    onDelete, 
+    onToggleVisibility, 
+    onSectionChange 
+}) => {
     const [isHidden, setIsHidden] = useState<boolean>(subject.hidden || false);
+    const [selectedSectionIndex, setSelectedSectionIndex] = useState<number>(subject.selectedSectionIndex || 0);
+    const [sections, setSections] = useState<Section[]>([]);
+
+    useEffect(() => {
+        if (!Array.isArray(subject.sections) || typeof subject.sections[0] === 'string') {
+            // If sections are not detailed, fetch them
+            fetchSections();
+        } else {
+            setSections(subject.sections as Section[]);
+        }
+    }, [subject]);
+
+    const fetchSections = async () => {
+        try {
+            const response = await axios.get(`http://localhost:8888/api/fetchSections/${subject.subject_id}`);
+            setSections(response.data);
+        } catch (error) {
+            console.error('Error fetching sections:', error);
+        }
+    };
 
     const toggleVisibility = () => {
         setIsHidden(!isHidden);
         onToggleVisibility(subject.subject_id);
     };
 
+    const handleSectionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const newIndex = parseInt(event.target.value);
+        setSelectedSectionIndex(newIndex);
+        onSectionChange(subject.subject_id, newIndex);
+    };
+
     const borderClass = subject.hasConflict ? 'border-red-500' : 'border-gray-200';
 
-    const calculateEndTime = (schedule: Schedule): string => {
-        const { startTime, duration } = parseTime(schedule.time);
-        if (!startTime) return "N/A";
-        const [hours, minutes] = startTime.split(":").map(Number);
-        if (isNaN(hours) || isNaN(minutes)) return "N/A";
-        
-        const endTimeDate = new Date(0, 0, 0, hours, minutes + duration * 60);
-        return endTimeDate.getHours().toString().padStart(2, "0") + ":" + 
-               endTimeDate.getMinutes().toString().padStart(2, "0");
-    };
-
-    const parseTime = (timeString: string): { startTime: string, duration: number } => {
-        const [startTime, endTime] = timeString.split(" - ");
-        const start = new Date(`1970-01-01T${startTime}`);
-        const end = new Date(`1970-01-01T${endTime}`);
-        const durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-        return { startTime, duration: durationHours };
-    };
+    const selectedSection = sections[selectedSectionIndex];
 
     return (
         <div className={`flex items-center border rounded-lg p-4 mb-4 bg-white shadow-md ${borderClass}`}>
-            {/* Left side - Toggle visibility */}
+            {/* Toggle visibility button */}
             <div
                 className="w-12 h-12 flex items-center justify-center bg-gray-200 rounded-lg mr-4 cursor-pointer"
                 onClick={toggleVisibility}
@@ -55,7 +71,7 @@ const SubjectDetailBox: React.FC<SubjectDetailBoxProps> = ({ subject, onDelete, 
                 )}
             </div>
 
-            {/* Middle section - Subject details */}
+            {/* Subject details */}
             <div className={`flex-1 ${isHidden ? "line-through opacity-50" : ""}`}>
                 <h3 className="text-lg font-semibold text-gray-900">
                     {subject.subject_id} {subject.name}
@@ -64,32 +80,52 @@ const SubjectDetailBox: React.FC<SubjectDetailBoxProps> = ({ subject, onDelete, 
                     </span>
                 </h3>
 
+                {/* Section selection */}
+                <div className="mt-2">
+                    <label htmlFor={`section-select-${subject.subject_id}`} className="text-sm font-medium text-gray-700">
+                        Select Section:
+                    </label>
+                    <select
+                        id={`section-select-${subject.subject_id}`}
+                        value={selectedSectionIndex}
+                        onChange={handleSectionChange}
+                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                    >
+                        {sections.map((section, index) => (
+                            <option key={index} value={index}>
+                                Section {section.section}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
                 {/* Class information */}
                 <div className="text-gray-600 mt-1">
-                    {subject.sections.map((section, sectionIndex) => (
-                        <div key={sectionIndex} className="mb-2">
-                            <div className="font-semibold">กลุ่มเรียน: {section.section}</div>
-                            {section.schedule.map((schedule, scheduleIndex) => (
+                    {selectedSection && (
+                        <div className="mb-2">
+                            <div className="font-semibold">กลุ่มเรียน: {selectedSection.section}</div>
+                            {selectedSection.schedule && selectedSection.schedule.map((schedule, scheduleIndex) => (
                                 <div key={scheduleIndex} className="ml-4">
                                     <span>วัน: {schedule.day} {schedule.time}</span>
                                     <span className="ml-2">ห้อง: {schedule.room}</span>
                                 </div>
                             ))}
-                            <div className="ml-4">รูปแบบ: {section.style} &nbsp;&nbsp; อาจารย์: {section.professor}</div>
+                            <div className="ml-4">
+                                รูปแบบ: {selectedSection.style} &nbsp;&nbsp; 
+                                อาจารย์: {selectedSection.professor}
+                            </div>
                         </div>
-                    ))}
+                    )}
                 </div>
             </div>
 
-            {/* Right side - Buttons */}
+            {/* Action buttons */}
             <div className="flex items-center space-x-2">
-                {/* Timetable color button */}
                 <button className="flex items-center px-4 py-1 rounded-full border bg-white text-black hover:bg-gray-50 transition-all">
                     <span className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: "#48A4FF" }}></span>
                     สีในตาราง
                 </button>
 
-                {/* Delete button */}
                 <button
                     className="text-gray-400 hover:text-red-600 transition-all"
                     onClick={() => onDelete(subject.subject_id)}

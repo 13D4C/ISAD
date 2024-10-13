@@ -6,31 +6,34 @@ const mongoose = require('mongoose');
 class ScheduleController { 
     async createSchedule(req, res) {
         try {
-            const { userId, subjects } = req.body;
-            
-            const userObjectId = new mongoose.Types.ObjectId(userId);
-            const user = await UserModel.findById(userObjectId);
-            if (!user) {
-                return res.status(404).json({ message: 'User not found' });
-            }
-            const subjectObjectIds = subjects.map(subjectId => new mongoose.Types.ObjectId(subjectId));
-            const schedule = new ScheduleModel({
-                user: userObjectId,
-                subjects: subjectObjectIds
-            });
-
-            await schedule.save();
-
-            user.schedule = user.schedule || [];
-            user.schedule.push(schedule._id);
-            await user.save();
-
-            res.status(201).json({ message: 'Schedule created successfully', schedule });
+          const { userId, subjects } = req.body;
+          
+          const userObjectId = new mongoose.Types.ObjectId(userId);
+          const user = await UserModel.findById(userObjectId);
+          if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+          }
+    
+          const schedule = new ScheduleModel({
+            user: userObjectId,
+            subjects: subjects.map(subject => ({
+              subject: subject._id,
+              selectedSectionIndex: subject.selectedSectionIndex
+            }))
+          });
+    
+          await schedule.save();
+    
+          user.schedule = user.schedule || [];
+          user.schedule.push(schedule._id);
+          await user.save();
+    
+          res.status(201).json({ message: 'Schedule created successfully', schedule });
         } catch (error) {
-            console.error('Error creating schedule:', error);
-            res.status(500).json({ message: 'Internal server error' });
+          console.error('Error creating schedule:', error);
+          res.status(500).json({ message: 'Internal server error' });
         }
-    }
+      }
 
     async getSchedule(req, res) {
         try {
@@ -60,29 +63,31 @@ class ScheduleController {
 
     async updateSchedule(req, res) {
         try {
-            const { userId } = req.params;
-            const { subjects } = req.body;
-
-            const user = await UserModel.findById(userId).populate('schedule');
-            if (!user) {
-                return res.status(404).json({ message: 'User not found' });
-            }
-
-            if (!user.schedule || user.schedule.length === 0) {
-                return res.status(404).json({ message: 'No schedule found for this user' });
-            }
-
-            // Update the latest schedule
-            const latestSchedule = user.schedule[user.schedule.length - 1];
-            latestSchedule.subjects = subjects;
-            await latestSchedule.save();
-
-            res.status(200).json({ message: 'Schedule updated successfully', schedule: latestSchedule });
+          const { userId } = req.params;
+          const { subjects } = req.body;
+    
+          const user = await UserModel.findById(userId).populate('schedule');
+          if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+          }
+    
+          if (!user.schedule || user.schedule.length === 0) {
+            return res.status(404).json({ message: 'No schedule found for this user' });
+          }
+    
+          const latestSchedule = user.schedule[user.schedule.length - 1];
+          latestSchedule.subjects = subjects.map(subject => ({
+            subject: subject._id,
+            selectedSectionIndex: subject.selectedSectionIndex
+          }));
+          await latestSchedule.save();
+    
+          res.status(200).json({ message: 'Schedule updated successfully', schedule: latestSchedule });
         } catch (error) {
-            console.error('Error updating schedule:', error);
-            res.status(500).json({ message: 'Internal server error' });
+          console.error('Error updating schedule:', error);
+          res.status(500).json({ message: 'Internal server error' });
         }
-    }
+      }
 
     async deleteSchedule(req, res) {
         try {

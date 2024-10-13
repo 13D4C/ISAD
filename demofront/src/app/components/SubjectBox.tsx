@@ -6,7 +6,7 @@ import DecisionBox from "./DecisionComponent";
 interface SubjectProps {
   BoxSubject: SubjectData[];
   DeleteSubject: (index: number) => void;
-  toggleSubjectSelection: (index: number) => void;
+  toggleSubjectSelection: (index: number, sectionIndex: number) => void;
   selectSubjects: number[];
   isSMScreen: boolean;
   onNavigate: (subjectId: string) => void;
@@ -42,9 +42,9 @@ const Subject: React.FC<SubjectProps> = ({
   onNavigate,
 }) => {
 
-  const [selectedSections, setSelectedSections] = useState<{ [index: number]: number | null }>({});
+  const [selectedSections, setSelectedSections] = useState<{ [index: number]: number }>({});
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const [delSubjectIndex, setDelSubjectIndex] = useState<number| null>(null);
+  const [delSubjectIndex, setDelSubjectIndex] = useState<number | null>(null);
   const [isDelBoxVisible, setDelBoxVisible] = useState(false);
 
   const roleChecker = async () => {
@@ -69,30 +69,23 @@ const Subject: React.FC<SubjectProps> = ({
     index: number,
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    const value = event.target.value ? Number(event.target.value) : null;
+    const sectionIndex = Number(event.target.value);
     setSelectedSections((prev) => ({
       ...prev,
-      [index]: value,
+      [index]: sectionIndex,
     }));
   };
 
 
-  useEffect(() => {
-    setSelectedSections((prev) => {
-      if (Object.keys(prev).length > 0) {
-        return prev;
-      }
-  
-      // ถ้าไม่มีค่า ให้ตั้งค่าครั้งแรก
-      const initialSelections: { [index: number]: number | null } = {};
-      BoxSubject.forEach((box, index) => {
-        if (box.sections.length > 0 && box.sections[0].section !== null) {
-          initialSelections[index] = box.sections[0].section;
-        }
-      });
-      return initialSelections;
-    });
-  }, [BoxSubject]);
+  // useEffect(() => {
+  //   setSelectedSections((prev) => {
+  //     const initialSelections: { [index: number]: number } = {};
+  //     BoxSubject.forEach((box, index) => {
+  //       initialSelections[index] = box.selectedSectionIndex || 0;
+  //     });
+  //     return initialSelections;
+  //   });
+  // }, [BoxSubject]);
 
   useEffect(() => {
     roleChecker();
@@ -167,39 +160,34 @@ const Subject: React.FC<SubjectProps> = ({
                 <p className="text-sm text-gray-500/50">วันที่เรียน</p>
                 <div className="flex space-x-2">
                   {/* แสดงวันที่เรียนของ section ที่ถูกเลือก */}
-                  {selectedSections[index] !== null && // ตรวจสอบว่าได้เลือก section
-                    box.sections
-                      .find((sec) => sec.section === selectedSections[index]) // ค้นหา section ที่ถูกเลือก
-                      ?.schedule.map((scheduleEntry, idx) => ( // แสดงวันใน schedule นั้น
-                        <p
-                          key={idx}
-                          className={`text-sm ${textColor[scheduleEntry.day] || "text-gray-500"
-                            } ${bgColor[scheduleEntry.day] || "bg-gray-100"
-                            } rounded-full max-w-fit px-3 py-1`}
-                        >
-                          {scheduleEntry.day}
-                        </p>
-                      ))}
+                  {box.sections[selectedSections[index] || 0]?.schedule.map((scheduleEntry, idx) => (
+                    <p
+                      key={idx}
+                      className={`text-sm ${textColor[scheduleEntry.day] || "text-gray-500"} 
+                        ${bgColor[scheduleEntry.day] || "bg-gray-100"} 
+                        rounded-full max-w-fit px-3 py-1`}
+                    >
+                      {scheduleEntry.day}
+                    </p>
+                  ))}
                 </div>
               </div>
 
               <div className="space-y-2">
                 <p className="text-sm text-gray-500/50">เวลา</p>
                 <p className="text-base">
-                  {selectedSections[index] !== null &&
-                    box.sections.find(
-                      (sec) => sec.section === selectedSections[index]
-                    )?.schedule.map(scheduleEntry => scheduleEntry.time).join(", ") || 'ไม่ระบุ'}
+                {box.sections[selectedSections[index] || 0]?.schedule
+                    .map(scheduleEntry => scheduleEntry.time)
+                    .join(", ") || 'ไม่ระบุ'}
                 </p>
               </div>
 
               <div className="space-y-2">
                 <p className="text-sm text-gray-500/50">ห้องเรียน</p>
                 <p className="text-base">
-                  {selectedSections[index] !== null && // Check against null
-                    box.sections.find(
-                      (sec) => sec.section === selectedSections[index]
-                    )?.schedule.map(scheduleEntry => scheduleEntry.room).join(", ") || 'ไม่ระบุ'}
+                {box.sections[selectedSections[index] || 0]?.schedule
+                    .map(scheduleEntry => scheduleEntry.room)
+                    .join(", ") || 'ไม่ระบุ'}
                 </p>
               </div>
 
@@ -207,19 +195,13 @@ const Subject: React.FC<SubjectProps> = ({
               <div className="space-y-2">
                 <p className="text-sm text-gray-500/50">ผู้สอน</p>
                 <p className="text-base">
-                  {selectedSections[index] !== null && // Check against null
-                    box.sections.find(
-                      (sec) => sec.section === selectedSections[index]
-                    )?.professor}
+                {box.sections[selectedSections[index] || 0]?.professor || 'ไม่ระบุ'}
                 </p>
               </div>
               <div className="space-y-2">
                 <p className="text-sm text-gray-500/50">รูปแบบ</p>
                 <p className="text-base">
-                  {selectedSections[index] !== null && // Check against null
-                    box.sections.find(
-                      (sec) => sec.section === selectedSections[index]
-                    )?.style}
+                {box.sections[selectedSections[index] || 0]?.style || 'ไม่ระบุ'}
                 </p>
               </div>
             </div>
@@ -229,32 +211,29 @@ const Subject: React.FC<SubjectProps> = ({
                 {/* ปุ่มเลือก sec */}
                 <div className="absolute bottom-0 right-0 flex space-x-2">
                   <select
-                    value={selectedSections[index] || 1}
+                    value={selectedSections[index] || 0}
                     onChange={(e) => handleSectionChange(index, e)}
                     className="shadow-md rounded border w-20 h-10 flex justify-center items-center p-2 border-blue-900 text-sm"
                   >
                     <option value="" disabled className="text-blue-900">
                       Sec
                     </option>
-                    {box.sections
-                    .sort((a, b) => a.section - b.section) // เรียงจากมากไปน้อย
-                    .map((sec, secIndex) =>
-                      sec.section !== null ? (
-                        <option key={secIndex} value={sec.section}>
-                          {sec.section}
-                        </option>
-                      ) : null
-                    )}
+                    {box.sections.map((sec, secIndex) => (
+                    <option key={secIndex} value={secIndex}>
+                      {sec.section}
+                    </option>
+                  ))}
                   </select>
 
                   {/* ปุ่มเลือกวิชา */}
                   <button
-                    onClick={() => toggleSubjectSelection(index)}
-                    className={`shadow-md rounded border gap-2 w-20 h-10 flex justify-center items-center ${selectSubjects.includes(index)
-                        ? "bg-white hover:bg-gray-100 text-blue-900 border-blue-900"
-                        : "bg-blue-900 hover:bg-blue-950 text-white"
+                      onClick={() => toggleSubjectSelection(index, selectedSections[index] || 0)}
+                      className={`shadow-md rounded border gap-2 w-20 h-10 flex justify-center items-center ${
+                        selectSubjects.includes(index)
+                          ? "bg-white hover:bg-gray-100 text-blue-900 border-blue-900"
+                          : "bg-blue-900 hover:bg-blue-950 text-white"
                       }`}
-                  >
+                    >
                     {selectSubjects.includes(index) ? (
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -294,28 +273,25 @@ const Subject: React.FC<SubjectProps> = ({
               <div className="flex space-x-2 pt-3">
                 {/* ปุ่มเลือก sec */}
                 <select
-                  value={selectedSections[index] || ""}
+                  value={selectedSections[index] || 0}
                   onChange={(e) => handleSectionChange(index, e)}
                   className="shadow-md rounded border gap-2 w-20 h-10 flex justify-center items-center p-2 border-blue-900 text-sm"
                 >
-                    {box.sections
-                    .sort((a, b) => a.section - b.section) // เรียงจากมากไปน้อย
-                    .map((sec, secIndex) =>
-                      sec.section !== null ? (
-                        <option key={secIndex} value={sec.section}>
-                          {sec.section}
-                        </option>
-                      ) : null
-                    )}
+                    {box.sections.map((sec, secIndex) => (
+                    <option key={secIndex} value={secIndex}>
+                      {sec.section}
+                    </option>
+                  ))}
                 </select>
 
                 {/* ปุ่มเลือกวิชา */}
                 <button
-                  onClick={() => toggleSubjectSelection(index)}
-                  className={`shadow-md rounded border gap-2 w-full h-10 flex justify-center items-center ${selectSubjects.includes(index)
+                  onClick={() => toggleSubjectSelection(index, selectedSections[index] || 0)}
+                  className={`shadow-md rounded border gap-2 w-20 h-10 flex justify-center items-center ${
+                    selectSubjects.includes(index)
                       ? "bg-white hover:bg-gray-100 text-blue-900 border-blue-900"
                       : "bg-blue-900 hover:bg-blue-950 text-white"
-                    }`}
+                  }`}
                 >
                   {selectSubjects.includes(index) ? (
                     <svg

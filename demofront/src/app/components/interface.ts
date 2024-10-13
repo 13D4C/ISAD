@@ -39,4 +39,5 @@ export interface Schedule {
     credits: number; // Changed from optional to required
     hasConflict: boolean;
     hidden: boolean;
+    selectedSectionIndex?: number;
   }

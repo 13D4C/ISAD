@@ -5,20 +5,23 @@ import { toPng } from "html-to-image";
 import SubjectDetailBox from "./SubjectDetailBox";
 import chroma from 'chroma-js';
 import PopupComponent from "./PopupComponenet";
-import { SubjectData, Schedule } from '../components/interface';
+import { SubjectData, Schedule, Section } from '../components/interface';
 import { getSchedule, updateSchedule } from '../components/scheduleAPI';
 import { getCurrentUserId } from '../components/auth';
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
 const ScheduleTable: React.FC = () => {
-  const [subjects, setSubjects] = useState<SubjectData[]>([]);
-  const [popupSubject, setPopupSubject] = useState<SubjectData | null>(null);
-  const [subjectColors, setSubjectColors] = useState<{[key: string]: string}>({});
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const tableRef = useRef<HTMLTableElement | null>(null);
-  const router = useRouter();
+    const [subjects, setSubjects] = useState<SubjectData[]>([]);
+    const [sectionData, setSectionData] = useState<{ [key: string]: any }>({});
+    const [popupSubject, setPopupSubject] = useState<SubjectData | null>(null);
+    const [subjectColors, setSubjectColors] = useState<{[key: string]: string}>({});
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const tableRef = useRef<HTMLTableElement | null>(null);
+    const router = useRouter();
+    
+
   const handleNavigate = () => {
     router.push(`/Examination`);
   };
@@ -57,7 +60,7 @@ const ScheduleTable: React.FC = () => {
   // }, []);
 
   useEffect(() => {
-    const fetchSchedule = async () => {
+    const fetchUserSchedule = async () => {
       setIsLoading(true);
       setError(null);
       try {
@@ -65,26 +68,42 @@ const ScheduleTable: React.FC = () => {
         if (!userId) {
           throw new Error('User ID not found. Please log in again.');
         }
-        const schedule = await getSchedule(userId);
-        if (schedule && schedule.subjects) {
-          const populatedSubjects = await Promise.all(schedule.subjects.map(async (subject: SubjectData) => {
-            const populatedSections = await Promise.all(subject.sections.map(async (sectionId: any) => {
-              const response = await axios.get(`http://localhost:8888/api/getSections/${sectionId}`);
-              return response.data;
-            }));
-            return { ...subject, sections: populatedSections };
-          }));
-          setSubjects(populatedSubjects);
+  
+        const userSchedule = await getSchedule(userId);
+        if (!userSchedule || !userSchedule.subjects || userSchedule.subjects.length === 0) {
+          setError('No subjects found in your schedule. Please select subjects first.');
+          setIsLoading(false);
+          return;
         }
+  
+        const fetchedSubjects = userSchedule.subjects;
+        const subjectsWithSections = await Promise.all(fetchedSubjects.map(async (subject) => {
+          // Fetch full subject details
+          const subjectResponse = await axios.get(`http://localhost:8888/api/fetchSubjectById/${subject.subject}`);
+          const subjectData = subjectResponse.data;
+  
+          // Fetch sections for the subject
+          const sectionsResponse = await axios.get(`http://localhost:8888/api/fetchSections/${subjectData.subject_id}`);
+          const sections = sectionsResponse.data;
+  
+          return {
+            ...subjectData,
+            sections: sections,
+            selectedSectionIndex: subject.selectedSectionIndex
+          };
+        }));
+  
+        const subjectsWithConflicts = checkForConflicts(subjectsWithSections);
+        setSubjects(subjectsWithConflicts);
+        setIsLoading(false);
       } catch (error) {
-        console.error('Error fetching schedule:', error);
-        setError('Failed to load schedule. Please try again.');
-      } finally {
+        console.error('Error fetching user schedule:', error);
+        setError('Failed to load your schedule. Please try again.');
         setIsLoading(false);
       }
     };
-
-    fetchSchedule();
+  
+    fetchUserSchedule();
   }, []);
 
   const checkForConflicts = (subjects: SubjectData[]): SubjectData[] => {
@@ -178,15 +197,63 @@ const ScheduleTable: React.FC = () => {
       });
   };
 
-  const getSubjectAt = (day: string, hour: string) => {
-    return subjects.find(
-      (subject) => subject.sections[0].schedule?.some(schedule => 
+  const getSubjectAt = (day: string, hour: string): SubjectData | undefined => {
+    return subjects.find((subject) => {
+      if (typeof subject.selectedSectionIndex !== 'number') {
+        return false;
+      }
+      const selectedSection = subject.sections[subject.selectedSectionIndex];
+      if (!selectedSection) {
+        return false;
+      }
+      return selectedSection.schedule.some((schedule: Schedule) => 
         thaiToEnglishDay(schedule.day) === day && 
         schedule.time.startsWith(hour) && 
         !subject.hidden
-      )
-    );
+      );
+    });
   };
+
+
+  const handleSectionChange = async (subjectId: string, sectionIndex: number) => {
+    const updatedSubjects = subjects.map(subject => 
+      subject.subject_id === subjectId 
+        ? { ...subject, selectedSectionIndex: sectionIndex }
+        : subject
+    );
+    setSubjects(updatedSubjects);
+  
+    try {
+      const userId = getCurrentUserId();
+      if (!userId) {
+        throw new Error('User ID not found. Please log in again.');
+      }
+      // Prepare the data in the format expected by the updateSchedule function
+      const scheduleData = updatedSubjects.map(subject => ({
+        subject: subject._id,
+        selectedSectionIndex: subject.selectedSectionIndex
+      }));
+      await updateSchedule(userId, scheduleData);
+    } catch (error) {
+      console.error('Error updating schedule:', error);
+      // Optionally, revert the change if the update fails
+      setSubjects(subjects);
+    }
+  };
+
+  const getSelectedSection = (subject: SubjectData): Section => {
+    // Check if there's a selectedSectionIndex property on the subject
+    if ('selectedSectionIndex' in subject && typeof subject.selectedSectionIndex === 'number') {
+      // If the selectedSectionIndex is valid, return the selected section
+      if (subject.selectedSectionIndex >= 0 && subject.selectedSectionIndex < subject.sections.length) {
+        return subject.sections[subject.selectedSectionIndex];
+      }
+    }
+  
+    // If no valid selection is found, fall back to the first section
+    return subject.sections[0];
+  };
+
   const toggleVisibility = async (subjectCode: string) => {
     const updatedSubjects = subjects.map((subject) =>
       subject.subject_id === subjectCode
@@ -215,7 +282,7 @@ const ScheduleTable: React.FC = () => {
 
   const handleSubjectClick = (subject: SubjectData) => {
     setPopupSubject(subject);
-    console.log(subject);
+    console.log("subjectclick", subject);
   };
 
   const closePopup = () => {
@@ -295,7 +362,11 @@ const ScheduleTable: React.FC = () => {
                       const columnsLeft = 11 - totalColumns;
 
                       if (subject) {
-                        const schedule = subject.sections[0].schedule.find(s => thaiToEnglishDay(s.day) === day && parseTime(s.time).startTime === hour);
+                        const selectedSection = getSelectedSection(subject);
+                        const schedule = selectedSection.schedule.find(s => 
+                          thaiToEnglishDay(s.day) === day && parseTime(s.time).startTime === hour
+                        );
+                        
                         if (schedule) {
                           const duration = Math.min(
                             parseTime(schedule.time).duration,
@@ -312,7 +383,7 @@ const ScheduleTable: React.FC = () => {
                                 startTime={schedule.time.split(' - ')[0]}
                                 duration={duration}
                                 room={schedule.room}
-                                section={subject.sections[0].section.toString()}
+                                section={selectedSection.section.toString()}
                                 code={subject.subject_id}
                                 location="IT"
                                 onClick={() => handleSubjectClick(subject)}
@@ -359,13 +430,23 @@ const ScheduleTable: React.FC = () => {
 
         <div className="mt-4">
         {subjects.map((subject) => (
-          <SubjectDetailBox
-            key={subject.subject_id}
-            subject={subject}
-            onToggleVisibility={toggleVisibility}
-            onDelete={deleteSubject}
-          />
-        ))}
+    <SubjectDetailBox
+      key={subject._id}
+      subject={{
+        ...subject,
+        subject_id: subject.subject_id,
+        name: subject.name,
+        credit: subject.credit,
+        sections: subject.sections,
+        selectedSectionIndex: subject.selectedSectionIndex,
+        hidden: subject.hidden || false,
+        hasConflict: subject.hasConflict || false
+      }}
+      onToggleVisibility={toggleVisibility}
+      onDelete={deleteSubject}
+      onSectionChange={handleSectionChange}
+    />
+  ))}
         </div>
       </div>
 

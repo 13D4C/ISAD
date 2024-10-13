@@ -61,6 +61,22 @@ class SubjectController {
         }
     }
 
+    async fetchSubjectById(req, res) {
+        try {
+            const { id } = req.params;
+            if (id) {
+                const subjects = await SubjectModel.findById(id);
+                res.status(200).json(subjects);
+            } else {
+                const subjects = await SubjectModel.find();
+                res.status(200).json(subjects);
+            }
+        } catch (e) {
+            console.error(e);
+            res.status(500).json({ message: 'Internal server error', error: e.message });
+        }
+    }
+
     async deleteSubject(req, res) {
         try {
             const { id } = req.params;

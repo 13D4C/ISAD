@@ -7,8 +7,14 @@ const scheduleSchema = new mongoose.Schema({
         required: true
     },
     subjects: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Subject'
+        subject: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Subject'
+        },
+        selectedSectionIndex: {
+            type: Number,
+            required: true
+        }
     }],
     createdAt: {
         type: Date,

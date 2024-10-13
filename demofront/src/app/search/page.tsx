@@ -11,7 +11,7 @@ import axios, { AxiosError } from "axios";
 
 const SelectPage: React.FC = () => {
   const [isFilterMenuVisible, setFilterMenuVisible] = useState<boolean>(true);
-  const [selectSubjects, setSelectSubjects] = useState<number[]>([]);
+  const [selectSubjects, setSelectSubjects] = useState<{ index: number; sectionIndex: number }[]>([]);
   const [boxSubject, setBoxSubject] = useState<SubjectData[]>([]);
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const [isSelectSubjectsVisible, setSelectSubjectsVisible] = useState<boolean>(false);
@@ -21,6 +21,7 @@ const SelectPage: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const router = useRouter();
+
   const handleNavigate = (subjectId : string) => {
     router.push(`/subject_detail/${subjectId}`);
   };
@@ -142,12 +143,15 @@ const SelectPage: React.FC = () => {
   };
   
   // Function to toggle subject selection
-  const toggleSubjectSelection = (index: number) => {
+  const toggleSubjectSelection = (index: number, sectionIndex: number) => {
     setSelectSubjects((prevSelectSubjects) => {
-      if (prevSelectSubjects.includes(index)) {
-        return prevSelectSubjects.filter((i) => i !== index);
+      const existingIndex = prevSelectSubjects.findIndex(item => item.index === index);
+      if (existingIndex !== -1) {
+        // If the subject is already selected, remove it (deselect)
+        return prevSelectSubjects.filter(item => item.index !== index);
       } else {
-        return [...prevSelectSubjects, index];
+        // If the subject is not selected, add it
+        return [...prevSelectSubjects, { index, sectionIndex }];
       }
     });
   };
@@ -189,7 +193,7 @@ const SelectPage: React.FC = () => {
   // Remove selected subject
   const removeSelectedSubject = (index: number) => {
     setSelectSubjects((prevSelectSubjects) =>
-      prevSelectSubjects.filter((i) => i !== index)
+      prevSelectSubjects.filter((item) => item.index !== index)
     );
   };
 
@@ -256,14 +260,14 @@ const SelectPage: React.FC = () => {
                   </div>
                 )}
 
-                <SubjectBox
-                  BoxSubject={filteredSubjects}
-                  DeleteSubject={deleteSubject}
-                  toggleSubjectSelection={toggleSubjectSelection}
-                  selectSubjects={selectSubjects}
-                  isSMScreen={isSMScreen}
-                  onNavigate={handleNavigate}
-                />
+        <SubjectBox
+          BoxSubject={filteredSubjects}
+          DeleteSubject={deleteSubject}
+          toggleSubjectSelection={toggleSubjectSelection}
+          selectSubjects={selectSubjects.map(item => item.index)}
+          isSMScreen={isSMScreen}
+          onNavigate={handleNavigate}
+        />
               </div>
             </div>
       
@@ -306,12 +310,12 @@ const SelectPage: React.FC = () => {
 
       {/* Show Selected Subjects */}
       <SelectSubjects
-        isVisible={isSelectSubjectsVisible}
-        onClose={handleToggleSelectSubjects}
-        selectSubjects={selectSubjects}
-        boxSubject={boxSubject}
-        removeSelectedSubject={removeSelectedSubject}
-      />
+          isVisible={isSelectSubjectsVisible}
+          onClose={handleToggleSelectSubjects}
+          selectSubjects={selectSubjects}
+          boxSubject={boxSubject}
+          removeSelectedSubject={removeSelectedSubject}
+        />
     </div>
     </div>
   );
