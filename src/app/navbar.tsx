@@ -47,7 +47,7 @@ export default function Navbar() {
                     <li>
                         <button
                             onClick={() => handleNavigation('/search')}
-                            className="block py-2 px-3 text-white rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-500 md:p-0"
+                            className="block py-2 px-3 text-black rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-500 md:p-0"
                         >
                             ค้นหาวิชาเรียน
                         </button>
@@ -55,7 +55,7 @@ export default function Navbar() {
                     <li>
                         <button
                             onClick={() => handleNavigation('/timetable')}
-                            className="block py-2 px-3 text-white rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-500 md:p-0"
+                            className="block py-2 px-3 text-black rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-500 md:p-0"
                         >
                             จัดตารางเรียน
                         </button>
@@ -63,7 +63,7 @@ export default function Navbar() {
                     <li>
                         <button
                             onClick={() => handleNavigation('/about')}
-                            className="block py-2 px-3 text-white rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-500 md:p-0"
+                            className="block py-2 px-3 text-black rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-500 md:p-0"
                         >
                             เกี่ยวกับเรา
                         </button>
