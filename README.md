@@ -5,6 +5,17 @@ Project Information System Analysis Design
 
 ![exam2](https://github.com/user-attachments/assets/4c97c94f-7ad6-4ea8-93f4-ae1d2f0a83b2)
 
+Development by
+-Project Manager
+Atibodee Kuiprasert
+-Frontend Developer
+1.Atibodee kuiprasert
+2.Anchita
+3.Silikul khammung
+-Backend Developer
+1.Piyapol Intaladchum
+2.Arucha Khematharonon
+
 # Installation Plan
 
 ## 1. Introduction
