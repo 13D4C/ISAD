@@ -14,7 +14,7 @@ Atibodee Kuiprasert\
 3.Silikul khammung\
 -Backend Developer\
 1.Piyapol Intaladchum\
-2.Arucha Khematharonon\
+2.Arucha Khematharonon
 
 # Installation Plan
 
