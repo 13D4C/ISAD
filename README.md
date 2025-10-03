@@ -10,7 +10,7 @@ Development by\
 Atibodee Kuiprasert\
 -Frontend Developer\
 1.Atibodee kuiprasert\
-2.Anchita\
+2.Aunchista Keawrodfa\
 3.Silikul khammung\
 -Backend Developer\
 1.Piyapol Intaladchum\
